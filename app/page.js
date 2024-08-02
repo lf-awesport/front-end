@@ -48,11 +48,11 @@ export default function Home() {
       </div>
 
       <div>
-        { data[0].copy.map((e, index) => {
+        { data[1].copy.map((e, index) => {
           const headline = e.headline 
           const content = e.content
           const key = `${e.id} + ${index}` 
-         return <Carousel key={key} headline={headline} content={content} />
+         return <Carousel key={key} defaultHeadline={headline} defaultContent={content} />
        })}
       </div>
     </main>

@@ -105,3 +105,18 @@ a {
     color-scheme: dark;
   }
 }
+
+textarea {
+    border: none;
+    overflow: auto;
+    outline: none;
+    background-color: #e8e7ed;
+    height: 250px;
+    width: 100%;
+    -webkit-box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
+
+    resize: none; /*remove the resize handle on the bottom right*/
+}
+
