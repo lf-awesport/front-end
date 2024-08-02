@@ -1,10 +1,27 @@
+'use client'
+
+import axios from "axios"
 import Image from "next/image";
 import styles from "./page.module.css";
 import { Carousel } from "@/components/carousel";
-import data from "../public/db.json"
+import { useState, useEffect } from 'react'
 
 
 export default function Home() {
+  const [data, setData] = useState(null)
+  const [isLoading, setLoading] = useState(true)
+ 
+  useEffect(() => {
+    axios.get("http://localhost:8000/calciofinanza")
+      .then((res) => {
+        setData(res.data)
+        setLoading(false)
+      })
+  }, [])
+ 
+  if (isLoading) return <p>Loading...</p>
+  if (!data) return <p>No profile data</p>
+
   return (
     <main className={styles.main}>
       <div className={styles.description}>
@@ -31,10 +48,11 @@ export default function Home() {
       </div>
 
       <div>
-        { data.calciofinanza[0].copy.map(i => {
-          const headline = i.headline 
-          const content = i.content 
-         return <Carousel key={i} headline={headline} content={content} />
+        { data[0].copy.map((e, index) => {
+          const headline = e.headline 
+          const content = e.content
+          const key = `${e.id} + ${index}` 
+         return <Carousel key={key} headline={headline} content={content} />
        })}
       </div>
     </main>

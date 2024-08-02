@@ -252,12 +252,14 @@
 .carouselHeadline {
   color: #0f1c3f;
   font-weight: 700;
-  font-size: 64px;
+  font-size: 72px;
+  padding: 20px;
 }
 
 .carouselContent {
   color: #0f1c3f;
-  font-size: 32px;
+  font-size: 36px;
+  padding: 10px;
   display: flex;
   justify-content: flex-end;
 }
