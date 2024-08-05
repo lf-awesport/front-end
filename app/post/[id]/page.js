@@ -1,16 +1,17 @@
-'use client'
+"use client"
 
 import axios from "axios"
-import { usePathname } from 'next/navigation'
-import styles from "./post.module.css";
-import { Carousel } from "@/components/carousel";
-import { useState, useEffect } from 'react'
+import { usePathname } from "next/navigation"
+import styles from "./post.module.css"
+import { Carousel } from "@/components/carousel"
+import { useState, useEffect } from "react"
+import Box from "@mui/joy/Box"
+import Divider from "@mui/joy/Divider"
 
-
-export default function Post({params}) {
+export default function Post({ params }) {
   const [data, setData] = useState(null)
   const [isLoading, setLoading] = useState(true)
-  let postId; 
+  let postId
 
   if (!params.id) {
     const pathname = usePathname()
@@ -19,15 +20,13 @@ export default function Post({params}) {
     postId = params.id
   }
 
- 
   useEffect(() => {
-    axios.get(`http://localhost:8000/calciofinanza/${postId}`)
-      .then((res) => {
-        setData(res.data)
-        setLoading(false)
-      })
+    axios.get(`http://localhost:8000/calciofinanza/${postId}`).then((res) => {
+      setData(res.data)
+      setLoading(false)
+    })
   }, [])
- 
+
   if (isLoading) return <p>Loading...</p>
   if (!data) return <p>No profile data</p>
 
@@ -37,17 +36,23 @@ export default function Post({params}) {
         <p>
           <code className={styles.code}>Editor</code>
         </p>
-        <a href={data.url}> <code className={styles.code}>{data.title}</code></a>
+        <a href={data.url}>
+          {" "}
+          <code className={styles.code}>{data.title}</code>
+        </a>
       </div>
 
-      <div>
-        { data.copy.map((e, index) => {
-          const headline = e.headline 
-          const content = e.content
-          const key = `${e.id} + ${index}` 
-         return <Carousel key={key} defaultHeadline={headline} defaultContent={content} />
-       })}
-      </div>
+      {data.copy.map((e, index) => {
+        const headline = e.headline
+        const content = e.content
+        const key = `${e.id} + ${index}`
+        return (
+          <Box key={key}>
+            <Carousel defaultHeadline={headline} defaultContent={content} />
+            <Divider />
+          </Box>
+        )
+      })}
     </main>
-  );
+  )
 }
