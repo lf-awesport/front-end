@@ -33,11 +33,10 @@ export default function Post({ params }) {
   return (
     <main className={styles.main}>
       <div className={styles.description}>
-        <p>
-          <code className={styles.code}>Editor</code>
-        </p>
-        <a href={data.url}>
-          {" "}
+        <a href="/posts">
+          <code className={styles.code}>Back</code>
+        </a>
+        <a href={data.url} target="_blank">
           <code className={styles.code}>{data.title}</code>
         </a>
       </div>
