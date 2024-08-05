@@ -7,14 +7,18 @@ import { Carousel } from "@/components/carousel"
 import { useState, useEffect } from "react"
 import Box from "@mui/joy/Box"
 import Divider from "@mui/joy/Divider"
+import Button from "@mui/joy/Button"
 
 export default function Post({ params }) {
   const [data, setData] = useState(null)
+  const [pathname, setPathname] = useState(null)
   const [isLoading, setLoading] = useState(true)
+  const [ids, setIds] = useState(null)
+
   let postId
 
   if (!params.id) {
-    const pathname = usePathname()
+    setPathname(usePathname())
     postId = pathname.split("/post/")
   } else {
     postId = params.id
@@ -23,6 +27,7 @@ export default function Post({ params }) {
   useEffect(() => {
     axios.get(`http://localhost:8000/calciofinanza/${postId}`).then((res) => {
       setData(res.data)
+      setIds(res.data.copy.map((e, index) => `slide${index}`))
       setLoading(false)
     })
   }, [])
@@ -41,13 +46,30 @@ export default function Post({ params }) {
         </a>
       </div>
 
+      <Button
+        onClick={() =>
+          axios.get(`http://localhost:4000/screenshot`, {
+            params: {
+              url: `http://localhost:3000/post/${data.id}`,
+              ids: ids
+            }
+          })
+        }
+      >
+        Save PDF
+      </Button>
+
       {data.copy.map((e, index) => {
         const headline = e.headline
         const content = e.content
-        const key = `${e.id} + ${index}`
+        const key = ids[index]
         return (
-          <Box key={key}>
-            <Carousel defaultHeadline={headline} defaultContent={content} />
+          <Box key={key} id="carousel">
+            <Carousel
+              uniqueId={key}
+              defaultHeadline={headline}
+              defaultContent={content}
+            />
             <Divider />
           </Box>
         )

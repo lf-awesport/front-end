@@ -2,12 +2,12 @@
 
 import Image from "next/image"
 import styles from "./carousel.module.css"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useRef } from "react"
 import Box from "@mui/joy/Box"
 import Button from "@mui/joy/Button"
 import ButtonGroup from "@mui/joy/ButtonGroup"
 
-export const Carousel = ({ defaultHeadline, defaultContent }) => {
+export const Carousel = ({ defaultHeadline, defaultContent, uniqueId }) => {
   const [headline, setHeadline] = useState(null)
   const [content, setContent] = useState(null)
   const [isLoading, setLoading] = useState(true)
@@ -25,7 +25,7 @@ export const Carousel = ({ defaultHeadline, defaultContent }) => {
   return (
     <Box>
       <div className={styles.carouselContainer}>
-        <div className={styles.carousel}>
+        <div id={uniqueId} className={styles.carousel}>
           <Image
             src="/LOGO-POS.png"
             alt="awe Logo"
