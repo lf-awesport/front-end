@@ -229,65 +229,8 @@
   }
 }
 
-.carousel {
-  height: 1080px;
-  width: 1080px;
-  background-color: #ffffff;
-  padding: 50px;
-  margin: 50px;
-  display: flex;
-  flex-direction: column;
-}
-
-.carouselText {
-  padding: 20px;
-  text-align: center;
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-evenly;
-}
-
-.carouselHeadline {
-  color: #0f1c3f;
-  font-weight: 700;
-  font-size: 72px;
-  padding: 20px;
-}
-
-.carouselContent {
-  color: #0f1c3f;
-  font-size: 36px;
-  padding: 10px;
-  display: flex;
-  justify-content: flex-end;
-}
-
 .aweLogo {
   display: block;
   margin-left: auto;
   margin-right: auto;
-}
-
-.carouselButton {
-  padding: 10px;
-  background-color: #00ccff;
-  width: 150px;
-  height: 50px;
-  margin-bottom: 50px;
-}
-
-.carouselContainer{
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  border: 1px dashed white;
-  margin-bottom: 50px;
-}
-
-.buttonContainer {
-  display: flex;
-  justify-content: space-around;
 }
