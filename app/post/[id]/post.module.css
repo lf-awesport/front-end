@@ -13,8 +13,9 @@
   justify-content: inherit;
   align-items: inherit;
   font-size: 0.85rem;
+  margin: 0 100px 0;
   max-width: var(--max-width);
-  width: 100%;
+  width: 1080px;
   z-index: 2;
   font-family: var(--font-mono);
 }

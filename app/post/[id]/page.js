@@ -8,12 +8,14 @@ import { useState, useEffect } from "react"
 import Box from "@mui/joy/Box"
 import Divider from "@mui/joy/Divider"
 import Button from "@mui/joy/Button"
+import fileDownload from "js-file-download"
 
 export default function Post({ params }) {
   const [data, setData] = useState(null)
   const [pathname, setPathname] = useState(null)
   const [isLoading, setLoading] = useState(true)
   const [ids, setIds] = useState(null)
+  const [isDownloading, setIsDownloading] = useState(false)
 
   let postId
 
@@ -44,20 +46,28 @@ export default function Post({ params }) {
         <a href={data.url} target="_blank">
           <code className={styles.code}>{data.title}</code>
         </a>
+        <Button
+          disabled={isDownloading}
+          onClick={() => {
+            setIsDownloading(true)
+            axios
+              .get(`http://localhost:4000/screenshot`, {
+                responseType: "blob",
+                params: {
+                  url: `http://localhost:3000/post/${data.id}`,
+                  ids: ids,
+                  title: data.id
+                }
+              })
+              .then((res) => {
+                fileDownload(res.data, `${data.id}.pdf`)
+                setIsDownloading(false)
+              })
+          }}
+        >
+          Save PDF
+        </Button>
       </div>
-
-      <Button
-        onClick={() =>
-          axios.get(`http://localhost:4000/screenshot`, {
-            params: {
-              url: `http://localhost:3000/post/${data.id}`,
-              ids: ids
-            }
-          })
-        }
-      >
-        Save PDF
-      </Button>
 
       {data.copy.map((e, index) => {
         const headline = e.headline

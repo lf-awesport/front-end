@@ -19,7 +19,7 @@ export default function Posts() {
 
   const sortPosts = (newValue) => {
     setSortOrder(newValue)
-    setData(_.sortBy(data, [newValue]))
+    setData(_.orderBy(data, [newValue], ["desc"]))
   }
 
   useEffect(() => {
@@ -60,7 +60,7 @@ export default function Posts() {
           <thead>
             <tr>
               <th style={{ width: "35%" }}>Title</th>
-              <th style={{ width: "25%" }}>Excerpt</th>
+              <th style={{ width: "35%" }}>Excerpt</th>
               <th>Date</th>
               <th>Author</th>
             </tr>
@@ -72,7 +72,7 @@ export default function Posts() {
                   <a href={`/post/${post.id}`}>{post.title}</a>
                 </td>
                 <td>{post.excerpt}</td>
-                <td>{post.date}</td>
+                <td>{post.date.split("T")[0]}</td>
                 <td>{post.author}</td>
               </tr>
             ))}
