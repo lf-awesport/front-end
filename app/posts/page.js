@@ -11,6 +11,7 @@ import Select from "@mui/joy/Select"
 import Option from "@mui/joy/Option"
 import FormLabel from "@mui/joy/FormLabel"
 import _ from "lodash"
+import CircularProgress from "@mui/joy/CircularProgress"
 
 export default function Posts() {
   const [data, setData] = useState(null)
@@ -29,7 +30,7 @@ export default function Posts() {
     })
   }, [])
 
-  if (isLoading) return <p>Loading...</p>
+  if (isLoading) return <CircularProgress variant="solid" size="lg" />
   if (!data) return <p>No profile data</p>
 
   return (
@@ -41,7 +42,7 @@ export default function Posts() {
         <FormControl
           orientation="horizontal"
           sx={{ mb: 2, ml: 1, mt: 2 }}
-          style={{ "justify-content": "center" }}
+          style={{ justifyContent: "center" }}
         >
           <FormLabel>Sort by:</FormLabel>
           <Select

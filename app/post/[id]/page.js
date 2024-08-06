@@ -9,6 +9,7 @@ import Box from "@mui/joy/Box"
 import Divider from "@mui/joy/Divider"
 import Button from "@mui/joy/Button"
 import fileDownload from "js-file-download"
+import CircularProgress from "@mui/joy/CircularProgress"
 
 export default function Post({ params }) {
   const [data, setData] = useState(null)
@@ -17,24 +18,31 @@ export default function Post({ params }) {
   const [ids, setIds] = useState(null)
   const [isDownloading, setIsDownloading] = useState(false)
 
-  let postId
-
-  if (!params.id) {
-    setPathname(usePathname())
-    postId = pathname.split("/post/")
-  } else {
-    postId = params.id
-  }
-
   useEffect(() => {
-    axios.get(`http://localhost:8000/calciofinanza/${postId}`).then((res) => {
-      setData(res.data)
-      setIds(res.data.copy.map((e, index) => `slide${index}`))
-      setLoading(false)
-    })
+    let postId
+
+    if (!params.id) {
+      setPathname(usePathname())
+      postId = pathname.split("/post/")
+    } else {
+      postId = params.id
+    }
+
+    axios
+      .get(`http://localhost:4000/getCarousel`, {
+        params: {
+          id: postId
+        }
+      })
+      .then((res) => {
+        console.log(res)
+        setData(res.data)
+        setIds(res.data.carousel.map((e, index) => `slide${index}`))
+        setLoading(false)
+      })
   }, [])
 
-  if (isLoading) return <p>Loading...</p>
+  if (isLoading) return <CircularProgress variant="solid" size="lg" />
   if (!data) return <p>No profile data</p>
 
   return (
@@ -69,7 +77,7 @@ export default function Post({ params }) {
         </Button>
       </div>
 
-      {data.copy.map((e, index) => {
+      {data.carousel.map((e, index) => {
         const headline = e.headline
         const content = e.content
         const key = ids[index]
