@@ -25,7 +25,7 @@ export default function Posts() {
 
   useEffect(() => {
     axios.get(`http://localhost:8000/calciofinanza/`).then((res) => {
-      setData(res.data)
+      setData(_.orderBy(res.data, [sortOrder], ["desc"]))
       setLoading(false)
     })
   }, [])
