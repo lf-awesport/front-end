@@ -49,7 +49,6 @@ export default function Post({ params }) {
       carousel: updatedCarousel
     }
 
-    console.log(updatedCarousel)
     axios
       .patch(`http://localhost:8000/carousels/${data.id}`, updatedPost, {
         headers: {
@@ -62,7 +61,12 @@ export default function Post({ params }) {
       })
   }
 
-  if (isLoading) return <CircularProgress variant="solid" size="lg" />
+  if (isLoading)
+    return (
+      <main className={styles.loading}>
+        <CircularProgress variant="solid" size="lg" />
+      </main>
+    )
   if (!data) return <p>No profile data</p>
 
   return (

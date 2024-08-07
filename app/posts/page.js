@@ -30,7 +30,12 @@ export default function Posts() {
     })
   }, [])
 
-  if (isLoading) return <CircularProgress variant="solid" size="lg" />
+  if (isLoading)
+    return (
+      <main className={styles.loading}>
+        <CircularProgress variant="solid" size="lg" />
+      </main>
+    )
   if (!data) return <p>No profile data</p>
 
   return (
