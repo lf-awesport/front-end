@@ -35,12 +35,32 @@ export default function Post({ params }) {
         }
       })
       .then((res) => {
-        console.log(res)
         setData(res.data)
         setIds(res.data.carousel.map((e, index) => `slide${index}`))
         setLoading(false)
       })
   }, [])
+
+  const updateCopy = (headline, content, slideNumber) => {
+    let updatedCarousel = data.carousel
+    updatedCarousel[slideNumber] = { headline, content }
+    const updatedPost = {
+      id: data.id,
+      carousel: updatedCarousel
+    }
+
+    console.log(updatedCarousel)
+    axios
+      .patch(`http://localhost:8000/carousels/${data.id}`, updatedPost, {
+        headers: {
+          "Content-Type": "application/json"
+        }
+      })
+      .then((res) => {
+        setData(res.data)
+        setLoading(false)
+      })
+  }
 
   if (isLoading) return <CircularProgress variant="solid" size="lg" />
   if (!data) return <p>No profile data</p>
@@ -54,27 +74,28 @@ export default function Post({ params }) {
         <a href={data.url} target="_blank">
           <code className={styles.code}>{data.title}</code>
         </a>
-        <Button
-          disabled={isDownloading}
-          onClick={() => {
-            setIsDownloading(true)
-            axios
-              .get(`http://localhost:4000/screenshot`, {
-                responseType: "blob",
-                params: {
-                  url: `http://localhost:3000/post/${data.id}`,
-                  ids: ids,
-                  title: data.id
-                }
-              })
-              .then((res) => {
-                fileDownload(res.data, `${data.id}.pdf`)
-                setIsDownloading(false)
-              })
-          }}
-        >
-          Save PDF
-        </Button>
+        <div>
+          <Button
+            disabled={isDownloading}
+            onClick={() => {
+              setIsDownloading(true)
+              axios
+                .get(`http://localhost:4000/screenshot`, {
+                  responseType: "blob",
+                  params: {
+                    ids: ids,
+                    id: data.id
+                  }
+                })
+                .then((res) => {
+                  fileDownload(res.data, `${data.id}.pdf`)
+                  setIsDownloading(false)
+                })
+            }}
+          >
+            Save PDF
+          </Button>
+        </div>
       </div>
 
       {data.carousel.map((e, index) => {
@@ -84,9 +105,11 @@ export default function Post({ params }) {
         return (
           <Box key={key} id="carousel">
             <Carousel
+              slideNumber={index}
               uniqueId={key}
               defaultHeadline={headline}
               defaultContent={content}
+              updateCopy={updateCopy}
             />
             <Divider />
           </Box>

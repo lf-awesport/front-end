@@ -2,12 +2,18 @@
 
 import Image from "next/image"
 import styles from "./carousel.module.css"
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect } from "react"
 import Box from "@mui/joy/Box"
 import Button from "@mui/joy/Button"
 import ButtonGroup from "@mui/joy/ButtonGroup"
 
-export const Carousel = ({ defaultHeadline, defaultContent, uniqueId }) => {
+export const Carousel = ({
+  defaultHeadline,
+  defaultContent,
+  uniqueId,
+  updateCopy,
+  slideNumber
+}) => {
   const [headline, setHeadline] = useState(null)
   const [content, setContent] = useState(null)
   const [isLoading, setLoading] = useState(true)
@@ -55,12 +61,24 @@ export const Carousel = ({ defaultHeadline, defaultContent, uniqueId }) => {
         </div>
         <div className={styles.buttonContainer}>
           <ButtonGroup variant="solid" color="primary">
-            <Button
-              className={styles.carouselButton}
-              onClick={() => setEditing(!isEditing)}
-            >
-              {isEditing ? "Save" : "Edit"}
-            </Button>
+            {!isEditing ? (
+              <Button
+                className={styles.carouselButton}
+                onClick={() => setEditing(!isEditing)}
+              >
+                Edit
+              </Button>
+            ) : (
+              <Button
+                className={styles.carouselButton}
+                onClick={() => {
+                  setEditing(!isEditing)
+                  updateCopy(headline, content, slideNumber)
+                }}
+              >
+                Save
+              </Button>
+            )}
             <Button
               disabled={
                 defaultHeadline === headline && defaultContent === content
