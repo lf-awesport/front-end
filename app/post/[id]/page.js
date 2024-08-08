@@ -61,6 +61,53 @@ export default function Post({ params }) {
       })
   }
 
+  const addSlide = (slideNumber) => {
+    let updatedCarousel = data.carousel
+    updatedCarousel.splice(slideNumber + 1, 0, {
+      headline: "headline",
+      content: "content"
+    })
+    const updatedPost = {
+      id: data.id,
+      carousel: updatedCarousel
+    }
+
+    setLoading(true)
+    axios
+      .patch(`http://localhost:8000/carousels/${data.id}`, updatedPost, {
+        headers: {
+          "Content-Type": "application/json"
+        }
+      })
+      .then((res) => {
+        setData(res.data)
+        setIds(res.data.carousel.map((e, index) => `slide${index}`))
+        setLoading(false)
+      })
+  }
+
+  const removeSlide = (slideNumber) => {
+    let updatedCarousel = data.carousel
+    updatedCarousel.splice(slideNumber, 1)
+    const updatedPost = {
+      id: data.id,
+      carousel: updatedCarousel
+    }
+
+    setLoading(true)
+    axios
+      .patch(`http://localhost:8000/carousels/${data.id}`, updatedPost, {
+        headers: {
+          "Content-Type": "application/json"
+        }
+      })
+      .then((res) => {
+        setData(res.data)
+        setIds(res.data.carousel.map((e, index) => `slide${index}`))
+        setLoading(false)
+      })
+  }
+
   if (isLoading)
     return (
       <main className={styles.loading}>
@@ -114,6 +161,9 @@ export default function Post({ params }) {
               defaultHeadline={headline}
               defaultContent={content}
               updateCopy={updateCopy}
+              addSlide={addSlide}
+              removeSlide={removeSlide}
+              totalSlides={data.carousel.length}
             />
             <Divider />
           </Box>

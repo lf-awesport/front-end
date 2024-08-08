@@ -12,7 +12,10 @@ export const Carousel = ({
   defaultContent,
   uniqueId,
   updateCopy,
-  slideNumber
+  slideNumber,
+  addSlide,
+  removeSlide,
+  totalSlides
 }) => {
   const [headline, setHeadline] = useState(null)
   const [content, setContent] = useState(null)
@@ -38,6 +41,7 @@ export const Carousel = ({
             className={styles.aweLogo}
             width={778}
             height={221}
+            priority
           />
           {isEditing ? (
             <div className={styles.carouselText}>
@@ -89,6 +93,24 @@ export const Carousel = ({
               }}
             >
               Undo
+            </Button>
+          </ButtonGroup>
+          <ButtonGroup variant="solid" color="primary">
+            <Button
+              disabled={isEditing}
+              onClick={() => {
+                addSlide(slideNumber)
+              }}
+            >
+              Add Slide
+            </Button>
+            <Button
+              disabled={isEditing || totalSlides === 1}
+              onClick={() => {
+                removeSlide(slideNumber)
+              }}
+            >
+              Remove Slide
             </Button>
           </ButtonGroup>
         </div>
