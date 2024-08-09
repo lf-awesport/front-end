@@ -258,3 +258,9 @@
 .container > h1 {
   margin-bottom: 50px;
 }
+
+.formControl {
+  display: flex;
+  justify-content: space-between;
+  margin: 0 50px 0;
+}

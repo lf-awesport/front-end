@@ -9,14 +9,34 @@ import { useState, useEffect } from "react"
 import FormControl from "@mui/joy/FormControl"
 import Select from "@mui/joy/Select"
 import Option from "@mui/joy/Option"
-import FormLabel from "@mui/joy/FormLabel"
 import _ from "lodash"
 import CircularProgress from "@mui/joy/CircularProgress"
+import FormLabel from "@mui/joy/FormLabel"
+import Input from "@mui/joy/Input"
 
 export default function Posts() {
+  const [defaultData, setDefaultData] = useState(null)
   const [data, setData] = useState(null)
   const [isLoading, setLoading] = useState(true)
   const [sortOrder, setSortOrder] = useState("date")
+  const [searchFilter, setSearchFilter] = useState("")
+
+  const filterPosts = (newFilter) => {
+    setSearchFilter(newFilter)
+    if (newFilter) {
+      setData(
+        _.orderBy(
+          defaultData.filter(
+            (e) => e.title.includes(newFilter) || e.excerpt.includes(newFilter)
+          ),
+          [sortOrder],
+          ["desc"]
+        )
+      )
+    } else {
+      setData(_.orderBy(defaultData, [sortOrder], ["desc"]))
+    }
+  }
 
   const sortPosts = (newValue) => {
     setSortOrder(newValue)
@@ -25,6 +45,7 @@ export default function Posts() {
 
   useEffect(() => {
     axios.get(`http://localhost:8000/calciofinanza/`).then((res) => {
+      setDefaultData(_.orderBy(res.data, [sortOrder], ["desc"]))
       setData(_.orderBy(res.data, [sortOrder], ["desc"]))
       setLoading(false)
     })
@@ -44,24 +65,30 @@ export default function Posts() {
         Posts
       </Typography>
       <Sheet>
-        <FormControl
-          orientation="horizontal"
-          sx={{ mb: 2, ml: 1, mt: 2 }}
-          style={{ justifyContent: "center" }}
-        >
-          <FormLabel>Sort by:</FormLabel>
-          <Select
-            size="sm"
-            value={sortOrder}
-            onChange={(event, newValue) => sortPosts(newValue)}
-          >
-            {["date", "title", "author"].map((axis) => (
-              <Option key={axis} value={axis}>
-                {axis}
-              </Option>
-            ))}
-          </Select>
-        </FormControl>
+        <div className={styles.formControl}>
+          <FormControl orientation="horizontal" sx={{ mb: 2, ml: 1, mt: 2 }}>
+            <FormLabel>Sort by:</FormLabel>
+            <Select
+              size="sm"
+              value={sortOrder}
+              onChange={(event, newValue) => sortPosts(newValue)}
+            >
+              {["date", "title", "author"].map((axis) => (
+                <Option key={axis} value={axis}>
+                  {axis}
+                </Option>
+              ))}
+            </Select>
+          </FormControl>
+          <FormControl orientation="horizontal" sx={{ mb: 2, ml: 1, mt: 2 }}>
+            <FormLabel>Search</FormLabel>
+            <Input
+              placeholder="Type anything"
+              value={searchFilter}
+              onChange={(e) => filterPosts(e.target.value)}
+            />
+          </FormControl>
+        </div>
         <Table>
           <thead>
             <tr>
