@@ -1,6 +1,5 @@
 "use client"
 
-import axios from "axios"
 import { usePathname } from "next/navigation"
 import styles from "./post.module.css"
 import { Carousel } from "@/components/carousel"
@@ -10,6 +9,7 @@ import Divider from "@mui/joy/Divider"
 import Button from "@mui/joy/Button"
 import fileDownload from "js-file-download"
 import CircularProgress from "@mui/joy/CircularProgress"
+import { getCarousel, updateCarousel, downloadPDF } from "@/utils/api"
 
 export default function Post({ params }) {
   const [data, setData] = useState(null)
@@ -28,17 +28,11 @@ export default function Post({ params }) {
       postId = params.id
     }
 
-    axios
-      .get(`http://localhost:4000/getCarousel`, {
-        params: {
-          id: postId
-        }
-      })
-      .then((res) => {
-        setData(res.data)
-        setIds(res.data.carousel.map((e, index) => `slide${index}`))
-        setLoading(false)
-      })
+    getCarousel(postId, (res) => {
+      setData(res.data)
+      setIds(res.data.carousel.map((e, index) => `slide${index}`))
+      setLoading(false)
+    })
   }, [])
 
   const updateCopy = (headline, content, slideNumber) => {
@@ -48,20 +42,14 @@ export default function Post({ params }) {
       id: data.id,
       carousel: updatedCarousel
     }
-
-    axios
-      .patch(`http://localhost:8000/carousels/${data.id}`, updatedPost, {
-        headers: {
-          "Content-Type": "application/json"
-        }
-      })
-      .then((res) => {
-        setData(res.data)
-        setLoading(false)
-      })
+    setLoading(true)
+    updateCarousel(updatedPost, (res) => {
+      setData(res.data)
+      setLoading(false)
+    })
   }
 
-  const addSlide = (slideNumber) => {
+  const addNewSlide = (slideNumber) => {
     let updatedCarousel = data.carousel
     updatedCarousel.splice(slideNumber + 1, 0, {
       headline: "headline",
@@ -71,19 +59,12 @@ export default function Post({ params }) {
       id: data.id,
       carousel: updatedCarousel
     }
-
     setLoading(true)
-    axios
-      .patch(`http://localhost:8000/carousels/${data.id}`, updatedPost, {
-        headers: {
-          "Content-Type": "application/json"
-        }
-      })
-      .then((res) => {
-        setData(res.data)
-        setIds(res.data.carousel.map((e, index) => `slide${index}`))
-        setLoading(false)
-      })
+    updateCarousel(updatedPost, (res) => {
+      setData(res.data)
+      setIds(res.data.carousel.map((e, index) => `slide${index}`))
+      setLoading(false)
+    })
   }
 
   const removeSlide = (slideNumber) => {
@@ -95,17 +76,11 @@ export default function Post({ params }) {
     }
 
     setLoading(true)
-    axios
-      .patch(`http://localhost:8000/carousels/${data.id}`, updatedPost, {
-        headers: {
-          "Content-Type": "application/json"
-        }
-      })
-      .then((res) => {
-        setData(res.data)
-        setIds(res.data.carousel.map((e, index) => `slide${index}`))
-        setLoading(false)
-      })
+    updateCarousel(updatedPost, (res) => {
+      setData(res.data)
+      setIds(res.data.carousel.map((e, index) => `slide${index}`))
+      setLoading(false)
+    })
   }
 
   if (isLoading)
@@ -119,7 +94,7 @@ export default function Post({ params }) {
   return (
     <main className={styles.main}>
       <div className={styles.description}>
-        <a href="/posts">
+        <a href="/calciofinanza">
           <code className={styles.code}>Back</code>
         </a>
         <a href={data.url} target="_blank">
@@ -130,18 +105,10 @@ export default function Post({ params }) {
             disabled={isDownloading}
             onClick={() => {
               setIsDownloading(true)
-              axios
-                .get(`http://localhost:4000/screenshot`, {
-                  responseType: "blob",
-                  params: {
-                    ids: ids,
-                    id: data.id
-                  }
-                })
-                .then((res) => {
-                  fileDownload(res.data, `${data.id}.pdf`)
-                  setIsDownloading(false)
-                })
+              downloadPDF(ids, data.id, (res) => {
+                fileDownload(res.data, `${data.id}.pdf`)
+                setIsDownloading(false)
+              })
             }}
           >
             Save PDF
@@ -161,7 +128,7 @@ export default function Post({ params }) {
               defaultHeadline={headline}
               defaultContent={content}
               updateCopy={updateCopy}
-              addSlide={addSlide}
+              addNewSlide={addNewSlide}
               removeSlide={removeSlide}
               totalSlides={data.carousel.length}
             />

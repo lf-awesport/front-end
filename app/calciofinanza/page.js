@@ -12,8 +12,7 @@ import _ from "lodash"
 import CircularProgress from "@mui/joy/CircularProgress"
 import FormLabel from "@mui/joy/FormLabel"
 import Input from "@mui/joy/Input"
-import { collection, doc, setDoc, getDocs } from "firebase/firestore"
-import db from "../../utils/firestore"
+import { getPosts } from "@/utils/api"
 
 export default function Posts() {
   const [defaultData, setDefaultData] = useState(null)
@@ -45,11 +44,7 @@ export default function Posts() {
   }
 
   useEffect(() => {
-    getDocs(collection(db, "calciofinanza")).then((snapshot) => {
-      let posts = []
-      snapshot.forEach((doc) => {
-        posts.push(doc.data())
-      })
+    getPosts((posts) => {
       setDefaultData(_.orderBy(posts, [sortOrder], ["desc"]))
       setData(_.orderBy(posts, [sortOrder], ["desc"]))
       setLoading(false)
@@ -67,7 +62,7 @@ export default function Posts() {
   return (
     <div className={styles.container}>
       <Typography color="#fff" level="h1">
-        Posts
+        Calcio & Finanza
       </Typography>
       <Sheet>
         <div className={styles.formControl}>

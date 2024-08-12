@@ -13,7 +13,7 @@ export const Carousel = ({
   uniqueId,
   updateCopy,
   slideNumber,
-  addSlide,
+  addNewSlide,
   removeSlide,
   totalSlides
 }) => {
@@ -99,7 +99,7 @@ export const Carousel = ({
             <Button
               disabled={isEditing}
               onClick={() => {
-                addSlide(slideNumber)
+                addNewSlide(slideNumber)
               }}
             >
               Add Slide
