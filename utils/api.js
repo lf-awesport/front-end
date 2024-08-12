@@ -2,9 +2,9 @@ import { collection, getDocs, setDoc, doc } from "firebase/firestore"
 import db from "./firestore"
 import axios from "axios"
 
-export const getPosts = (callback) => {
+export const getPosts = (callback, route) => {
   let posts = []
-  getDocs(collection(db, "calciofinanza")).then((snapshot) => {
+  getDocs(collection(db, route)).then((snapshot) => {
     snapshot.forEach((doc) => {
       posts.push(doc.data())
     })

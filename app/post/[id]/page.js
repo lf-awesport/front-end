@@ -94,7 +94,7 @@ export default function Post({ params }) {
   return (
     <main className={styles.main}>
       <div className={styles.description}>
-        <a href="/calciofinanza">
+        <a href="/posts">
           <code className={styles.code}>Back</code>
         </a>
         <a href={data.url} target="_blank">

@@ -48,7 +48,7 @@ export default function Posts() {
       setDefaultData(_.orderBy(posts, [sortOrder], ["desc"]))
       setData(_.orderBy(posts, [sortOrder], ["desc"]))
       setLoading(false)
-    })
+    }, "posts")
   }, [])
 
   if (isLoading)
@@ -62,7 +62,7 @@ export default function Posts() {
   return (
     <div className={styles.container}>
       <Typography color="#fff" level="h1">
-        Calcio & Finanza
+        Posts
       </Typography>
       <Sheet>
         <div className={styles.formControl}>
