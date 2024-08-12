@@ -1,6 +1,5 @@
 "use client"
 
-import axios from "axios"
 import styles from "./posts.module.css"
 import Typography from "@mui/joy/Typography"
 import Table from "@mui/joy/Table"
@@ -13,6 +12,8 @@ import _ from "lodash"
 import CircularProgress from "@mui/joy/CircularProgress"
 import FormLabel from "@mui/joy/FormLabel"
 import Input from "@mui/joy/Input"
+import { collection, doc, setDoc, getDocs } from "firebase/firestore"
+import db from "../../utils/firestore"
 
 export default function Posts() {
   const [defaultData, setDefaultData] = useState(null)
@@ -44,9 +45,13 @@ export default function Posts() {
   }
 
   useEffect(() => {
-    axios.get(`http://localhost:8000/calciofinanza/`).then((res) => {
-      setDefaultData(_.orderBy(res.data, [sortOrder], ["desc"]))
-      setData(_.orderBy(res.data, [sortOrder], ["desc"]))
+    getDocs(collection(db, "calciofinanza")).then((snapshot) => {
+      let posts = []
+      snapshot.forEach((doc) => {
+        posts.push(doc.data())
+      })
+      setDefaultData(_.orderBy(posts, [sortOrder], ["desc"]))
+      setData(_.orderBy(posts, [sortOrder], ["desc"]))
       setLoading(false)
     })
   }, [])
