@@ -12,7 +12,8 @@ import _ from "lodash"
 import CircularProgress from "@mui/joy/CircularProgress"
 import FormLabel from "@mui/joy/FormLabel"
 import Input from "@mui/joy/Input"
-import { getPosts } from "@/utils/api"
+import { getPosts, scrapePosts } from "@/utils/api"
+import Button from "@mui/joy/Button"
 
 export default function Posts() {
   const [defaultData, setDefaultData] = useState(null)
@@ -61,9 +62,27 @@ export default function Posts() {
 
   return (
     <div className={styles.container}>
-      <Typography color="#fff" level="h1">
-        Posts
-      </Typography>
+      <div>
+        <Typography color="#fff" level="h1">
+          Posts
+        </Typography>
+        <Button
+          disabled={isLoading}
+          onClick={() => {
+            setLoading(true)
+            scrapePosts(() => {
+              setLoading(false)
+              getPosts((posts) => {
+                setDefaultData(_.orderBy(posts, [sortOrder], ["desc"]))
+                setData(_.orderBy(posts, [sortOrder], ["desc"]))
+                setLoading(false)
+              }, "posts")
+            })
+          }}
+        >
+          Update
+        </Button>
+      </div>
       <Sheet>
         <div className={styles.formControl}>
           <FormControl orientation="horizontal" sx={{ mb: 2, ml: 1, mt: 2 }}>
@@ -105,7 +124,7 @@ export default function Posts() {
                   <a href={`/post/${post.id}`}>{post.title}</a>
                 </td>
                 <td>{post.excerpt}</td>
-                <td>{post.date.split("T")[0]}</td>
+                <td>{post.date}</td>
                 <td>{post.author}</td>
               </tr>
             ))}

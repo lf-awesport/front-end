@@ -41,3 +41,17 @@ export const downloadPDF = (ids, id, callback) => {
       callback(res)
     })
 }
+
+export const getDailySummary = (date, callback) => {
+  axios
+    .get(`http://localhost:4000/getDailySummary`, {
+      params: {
+        date
+      }
+    })
+    .then((res) => callback(res))
+}
+
+export const scrapePosts = (callback) => {
+  axios.get(`http://localhost:4000/scrapePosts`).then((res) => callback(res))
+}
