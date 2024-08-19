@@ -68,6 +68,7 @@ export default function Posts() {
         </Typography>
         <Button
           disabled={isLoading}
+          style={{ margin: 10 }}
           onClick={() => {
             setLoading(true)
             scrapePosts(() => {
