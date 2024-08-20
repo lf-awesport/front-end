@@ -42,9 +42,6 @@ textarea {
 
 th,
 td {
-  padding: 10px !important;
-}
-
-table {
-  padding: 20px !important;
+  padding: 5px !important;
+  text-align: center;
 }

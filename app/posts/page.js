@@ -61,7 +61,7 @@ export default function Posts() {
   if (!data) return <p>No profile data</p>
 
   return (
-    <div className={styles.container}>
+    <main className={styles.main}>
       <div>
         <Typography color="#fff" level="h1">
           Posts
@@ -84,38 +84,44 @@ export default function Posts() {
           Update
         </Button>
       </div>
-      <Sheet>
-        <div className={styles.formControl}>
-          <FormControl orientation="horizontal" sx={{ mb: 2, ml: 1, mt: 2 }}>
-            <FormLabel>Sort by:</FormLabel>
-            <Select
-              size="sm"
-              value={sortOrder}
-              onChange={(event, newValue) => sortPosts(newValue)}
-            >
-              {["date", "title", "author"].map((axis) => (
-                <Option key={axis} value={axis}>
-                  {axis}
-                </Option>
-              ))}
-            </Select>
-          </FormControl>
-          <FormControl orientation="horizontal" sx={{ mb: 2, ml: 1, mt: 2 }}>
-            <FormLabel>Search</FormLabel>
-            <Input
-              placeholder="Type anything"
-              value={searchFilter}
-              onChange={(e) => filterPosts(e.target.value)}
-            />
-          </FormControl>
-        </div>
+      <Sheet
+        variant="outlined"
+        sx={{
+          width: "100%",
+          boxShadow: "sm",
+          borderRadius: "sm",
+          padding: "20px"
+        }}
+      >
+        <FormControl orientation="horizontal" sx={{ mb: 2, ml: 1, mt: 2 }}>
+          <FormLabel>Sort by:</FormLabel>
+          <Select
+            size="sm"
+            value={sortOrder}
+            onChange={(event, newValue) => sortPosts(newValue)}
+          >
+            {["date", "title", "author"].map((axis) => (
+              <Option key={axis} value={axis}>
+                {axis}
+              </Option>
+            ))}
+          </Select>
+        </FormControl>
+        <FormControl orientation="horizontal" sx={{ mb: 2, ml: 1, mt: 2 }}>
+          <FormLabel>Search</FormLabel>
+          <Input
+            placeholder="Type anything"
+            value={searchFilter}
+            onChange={(e) => filterPosts(e.target.value)}
+          />
+        </FormControl>
         <Table>
           <thead>
             <tr>
               <th style={{ width: "35%" }}>Title</th>
               <th style={{ width: "35%" }}>Excerpt</th>
-              <th>Date</th>
-              <th>Author</th>
+              <th style={{ width: "15%" }}>Date</th>
+              <th style={{ width: "15%" }}>Author</th>
             </tr>
           </thead>
           <tbody>
@@ -132,6 +138,6 @@ export default function Posts() {
           </tbody>
         </Table>
       </Sheet>
-    </div>
+    </main>
   )
 }
