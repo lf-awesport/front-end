@@ -28,6 +28,14 @@ export const updateCarousel = (updatedPost, callback) => {
   })
 }
 
+export const updateDailySummary = (updatedDailySummary, callback) => {
+  setDoc(doc(db, "daily", updatedDailySummary.id), updatedDailySummary).then(
+    () => {
+      getDailySummary(updatedDailySummary.id, callback)
+    }
+  )
+}
+
 export const downloadPDF = (ids, id, callback) => {
   axios
     .get(`http://localhost:4000/screenshot`, {

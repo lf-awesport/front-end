@@ -1,11 +1,9 @@
 .main {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
   align-items: center;
   padding: 4rem;
   min-height: 100vh;
-  text-align: center;
 }
 
 .loading {
@@ -247,4 +245,39 @@
   display: block;
   margin-left: auto;
   margin-right: auto;
+}
+
+.dailyTitle {
+  color: #0f1c3f;
+  padding: 10px;
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 20px;
+}
+
+.dailyContent {
+  color: #0f1c3f;
+  padding: 10px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.carouselButton {
+  padding: 10px;
+  width: 150px;
+  height: 50px;
+}
+
+.textContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 50px;
+}
+
+.buttonContainer {
+  display: flex;
+  justify-content: space-between;
+  width: 1080px;
 }
