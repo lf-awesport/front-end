@@ -3,8 +3,7 @@
 import { usePathname } from "next/navigation"
 import styles from "./daily.module.css"
 import { useState, useEffect } from "react"
-import { Typography, Button, ButtonGroup } from "@mui/joy"
-import CircularProgress from "@mui/joy/CircularProgress"
+import { Typography, Button, ButtonGroup, CircularProgress } from "@mui/joy"
 import { getDailySummary, updateDailySummary } from "@/utils/api"
 
 export default function Post({ params }) {
@@ -29,8 +28,10 @@ export default function Post({ params }) {
 
     getDailySummary(date, (res) => {
       setData(res.data)
-      setTitle(res.data.body.title)
-      setContent(res.data.body.content)
+      if (res.data) {
+        setTitle(res.data.body.title)
+        setContent(res.data.body.content)
+      }
       setLoading(false)
     })
   }, [])
@@ -52,7 +53,14 @@ export default function Post({ params }) {
         <CircularProgress variant="solid" size="lg" />
       </main>
     )
-  if (!data) return <p>No profile data</p>
+  if (!data)
+    return (
+      <main className={styles.loading}>
+        <Typography level="h1" color="fff" style={{ marginBottom: 20 }}>
+          NOT FOUND
+        </Typography>
+      </main>
+    )
 
   return (
     <main className={styles.main}>
@@ -113,6 +121,16 @@ export default function Post({ params }) {
           Undo
         </Button>
       </ButtonGroup>
+      <div className={styles.sources}>
+        <Typography level="h2" color="fff" style={{ marginBottom: 20 }}>
+          Fonti
+        </Typography>
+        {data.urls.map((e, index) => (
+          <a className={styles.link} href={e} key={index} target="_blank">
+            {e}
+          </a>
+        ))}
+      </div>
     </main>
   )
 }

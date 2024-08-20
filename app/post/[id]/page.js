@@ -4,11 +4,8 @@ import { usePathname } from "next/navigation"
 import styles from "./post.module.css"
 import { Carousel } from "@/components/carousel"
 import { useState, useEffect } from "react"
-import Box from "@mui/joy/Box"
-import Divider from "@mui/joy/Divider"
-import Button from "@mui/joy/Button"
+import { Box, Divider, Button, CircularProgress, Typography } from "@mui/joy"
 import fileDownload from "js-file-download"
-import CircularProgress from "@mui/joy/CircularProgress"
 import { getCarousel, updateCarousel, downloadPDF } from "@/utils/api"
 
 export default function Post({ params }) {
@@ -89,7 +86,14 @@ export default function Post({ params }) {
         <CircularProgress variant="solid" size="lg" />
       </main>
     )
-  if (!data) return <p>No profile data</p>
+  if (!data)
+    return (
+      <main className={styles.loading}>
+        <Typography level="h1" color="fff" style={{ marginBottom: 20 }}>
+          NOT FOUND
+        </Typography>
+      </main>
+    )
 
   return (
     <main className={styles.main}>

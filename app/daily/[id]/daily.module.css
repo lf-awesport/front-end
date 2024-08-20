@@ -2,8 +2,10 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 4rem;
+  padding: 2rem;
   min-height: 100vh;
+  max-width: 100vh;
+  margin: auto;
 }
 
 .loading {
@@ -274,10 +276,22 @@
   align-items: center;
   justify-content: center;
   margin-bottom: 50px;
+  padding: 20px;
 }
 
-.buttonContainer {
+.sources {
+  margin-top: 50px;
+  padding: 20px;
   display: flex;
-  justify-content: space-between;
-  width: 1080px;
+  flex-direction: column;
+  width: 100%;
+}
+
+.link {
+  margin-bottom: 20px;
+  display: block;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  width: 100%;
 }
