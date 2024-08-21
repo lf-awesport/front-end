@@ -81,3 +81,13 @@ export const getSentimentAnalysis = (id, callback) => {
     })
     .then((res) => callback(res))
 }
+
+export const getWordCloud = (id, callback) => {
+  axios
+    .get(`http://localhost:4000/getWordCloud`, {
+      params: {
+        id
+      }
+    })
+    .then((res) => callback(res))
+}

@@ -3,7 +3,7 @@
 import Image from "next/image"
 import styles from "./carousel.module.css"
 import { useState, useEffect } from "react"
-import { Typography, Box, Button, ButtonGroup } from "@mui/joy"
+import { Box, Button, ButtonGroup } from "@mui/joy"
 
 export const Carousel = ({
   defaultHeadline,
@@ -32,9 +32,6 @@ export const Carousel = ({
   return (
     <Box>
       <div className={styles.carouselContainer}>
-        <Typography level="h2" color="fff" style={{ marginBottom: 20 }}>
-          Carosello
-        </Typography>
         <div id={uniqueId} className={styles.carousel}>
           <Image
             src="/LOGO-POS.png"
