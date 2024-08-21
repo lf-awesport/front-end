@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation"
 import styles from "./post.module.css"
 import { Carousel } from "@/components/carousel"
+import { Sentiment } from "@/components/sentiment"
 import { useState, useEffect } from "react"
 import { Box, Divider, Button, CircularProgress, Typography } from "@mui/joy"
 import fileDownload from "js-file-download"
@@ -119,7 +120,7 @@ export default function Post({ params }) {
           </Button>
         </div>
       </div>
-
+      <Sentiment postId={data.id} />
       {data.carousel.map((e, index) => {
         const headline = e.headline
         const content = e.content

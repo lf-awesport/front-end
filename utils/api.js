@@ -1,10 +1,18 @@
-import { collection, getDocs, setDoc, doc } from "firebase/firestore"
+import {
+  collection,
+  getDocs,
+  setDoc,
+  doc,
+  query,
+  limit
+} from "firebase/firestore"
 import db from "./firestore"
 import axios from "axios"
 
 export const getPosts = (callback, route) => {
   let posts = []
-  getDocs(collection(db, route)).then((snapshot) => {
+  const q = query(collection(db, route), limit(50))
+  getDocs(q).then((snapshot) => {
     snapshot.forEach((doc) => {
       posts.push(doc.data())
     })
@@ -62,4 +70,14 @@ export const getDailySummary = (date, callback) => {
 
 export const scrapePosts = (callback) => {
   axios.get(`http://localhost:4000/scrapePosts`).then((res) => callback(res))
+}
+
+export const getSentimentAnalysis = (id, callback) => {
+  axios
+    .get(`http://localhost:4000/getSentimentAnalysis`, {
+      params: {
+        id
+      }
+    })
+    .then((res) => callback(res))
 }

@@ -14,6 +14,7 @@
     "@firebase/firestore": "^4.6.5",
     "@fontsource/inter": "^5.0.20",
     "@mui/joy": "^5.0.0-beta.48",
+    "@visx/visx": "^3.11.0",
     "axios": "^1.7.3",
     "dotenv": "^16.4.5",
     "firebase": "^10.12.5",
