@@ -4,8 +4,9 @@
   justify-content: space-between;
   align-items: center;
   padding: 4rem;
-  min-height: 100vh;
   text-align: center;
+  width: 1080px;
+  margin: auto;
 }
 
 .loading {
@@ -14,20 +15,14 @@
   justify-content: center;
   align-items: center;
   padding: 4rem;
-  min-height: 100vh;
   text-align: center;
 }
 
 .description {
-  display: inherit;
-  justify-content: inherit;
-  align-items: inherit;
+  display: flex;
+  justify-content: space-between;
   font-size: 0.85rem;
-  margin: 0 100px 0;
-  max-width: var(--max-width);
-  width: 1080px;
-  z-index: 2;
-  font-family: var(--font-mono);
+  width: 100%;
 }
 
 .description a {

@@ -17,7 +17,6 @@ export function WordCloud({ postId }) {
   useEffect(() => {
     getWordCloud(postId, (res) => {
       setData(res.data)
-      console.log(res.data)
       setLoading(false)
     })
   }, [])

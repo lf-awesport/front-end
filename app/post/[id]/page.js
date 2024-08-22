@@ -6,16 +6,13 @@ import { Carousel } from "@/components/carousel"
 import { Sentiment } from "@/components/sentiment"
 import { WordCloud } from "@/components/wordcloud"
 import { useState, useEffect } from "react"
-import { Box, Divider, Button, CircularProgress, Typography } from "@mui/joy"
-import fileDownload from "js-file-download"
-import { getCarousel, updateCarousel, downloadPDF } from "@/utils/api"
+import { Divider, CircularProgress, Typography } from "@mui/joy"
+import { getPost } from "@/utils/api"
 
 export default function Post({ params }) {
   const [data, setData] = useState(null)
   const [pathname, setPathname] = useState(null)
   const [isLoading, setLoading] = useState(true)
-  const [ids, setIds] = useState(null)
-  const [isDownloading, setIsDownloading] = useState(false)
 
   useEffect(() => {
     let postId
@@ -27,60 +24,11 @@ export default function Post({ params }) {
       postId = params.id
     }
 
-    getCarousel(postId, (res) => {
-      setData(res.data)
-      setIds(res.data.carousel.map((e, index) => `slide${index}`))
+    getPost(postId, (res) => {
+      setData(res)
       setLoading(false)
     })
   }, [])
-
-  const updateCopy = (headline, content, slideNumber) => {
-    let updatedCarousel = data.carousel
-    updatedCarousel[slideNumber] = { headline, content }
-    const updatedPost = {
-      id: data.id,
-      carousel: updatedCarousel
-    }
-    setLoading(true)
-    updateCarousel(updatedPost, (res) => {
-      setData(res.data)
-      setLoading(false)
-    })
-  }
-
-  const addNewSlide = (slideNumber) => {
-    let updatedCarousel = data.carousel
-    updatedCarousel.splice(slideNumber + 1, 0, {
-      headline: "headline",
-      content: "content"
-    })
-    const updatedPost = {
-      id: data.id,
-      carousel: updatedCarousel
-    }
-    setLoading(true)
-    updateCarousel(updatedPost, (res) => {
-      setData(res.data)
-      setIds(res.data.carousel.map((e, index) => `slide${index}`))
-      setLoading(false)
-    })
-  }
-
-  const removeSlide = (slideNumber) => {
-    let updatedCarousel = data.carousel
-    updatedCarousel.splice(slideNumber, 1)
-    const updatedPost = {
-      id: data.id,
-      carousel: updatedCarousel
-    }
-
-    setLoading(true)
-    updateCarousel(updatedPost, (res) => {
-      setData(res.data)
-      setIds(res.data.carousel.map((e, index) => `slide${index}`))
-      setLoading(false)
-    })
-  }
 
   if (isLoading)
     return (
@@ -106,46 +54,11 @@ export default function Post({ params }) {
         <a href={data.url} target="_blank">
           <code className={styles.code}>{data.title}</code>
         </a>
-        <div>
-          <Button
-            disabled={isDownloading}
-            onClick={() => {
-              setIsDownloading(true)
-              downloadPDF(ids, data.id, (res) => {
-                fileDownload(res.data, `${data.id}.pdf`)
-                setIsDownloading(false)
-              })
-            }}
-          >
-            Save PDF
-          </Button>
-        </div>
       </div>
       <WordCloud postId={data.id} />
       <Sentiment postId={data.id} />
-      <Typography level="h2" color="fff" style={{ marginBottom: 20 }}>
-        Carosello
-      </Typography>
-      {data.carousel.map((e, index) => {
-        const headline = e.headline
-        const content = e.content
-        const key = ids[index]
-        return (
-          <Box key={key} id="carousel">
-            <Carousel
-              slideNumber={index}
-              uniqueId={key}
-              defaultHeadline={headline}
-              defaultContent={content}
-              updateCopy={updateCopy}
-              addNewSlide={addNewSlide}
-              removeSlide={removeSlide}
-              totalSlides={data.carousel.length}
-            />
-            <Divider />
-          </Box>
-        )
-      })}
+      <Carousel postId={data.id} />
+      <Divider />
     </main>
   )
 }

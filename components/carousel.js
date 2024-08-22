@@ -1,118 +1,128 @@
 "use client"
 
-import Image from "next/image"
 import styles from "./carousel.module.css"
+import { Slide } from "@/components/slide"
 import { useState, useEffect } from "react"
-import { Box, Button, ButtonGroup } from "@mui/joy"
+import { Box, Divider, Button, CircularProgress, Typography } from "@mui/joy"
+import fileDownload from "js-file-download"
+import { getCarousel, updateCarousel, downloadPDF } from "@/utils/api"
 
-export const Carousel = ({
-  defaultHeadline,
-  defaultContent,
-  uniqueId,
-  updateCopy,
-  slideNumber,
-  addNewSlide,
-  removeSlide,
-  totalSlides
-}) => {
-  const [headline, setHeadline] = useState(null)
-  const [content, setContent] = useState(null)
+export function Carousel({ postId }) {
+  const [data, setData] = useState(null)
   const [isLoading, setLoading] = useState(true)
-  const [isEditing, setEditing] = useState(false)
+  const [ids, setIds] = useState(null)
+  const [isDownloading, setIsDownloading] = useState(false)
 
   useEffect(() => {
-    setHeadline(defaultHeadline)
-    setContent(defaultContent)
-    setLoading(false)
+    getCarousel(postId, (res) => {
+      setData(res.data)
+      setIds(res.data.carousel.map((e, index) => `slide${index}`))
+      setLoading(false)
+    })
   }, [])
 
-  if (isLoading) return <p>Loading...</p>
-  if (!headline) return <p>No profile data</p>
+  const updateCopy = (headline, content, slideNumber) => {
+    let updatedCarousel = data.carousel
+    updatedCarousel[slideNumber] = { headline, content }
+    const updatedPost = {
+      id: data.id,
+      carousel: updatedCarousel
+    }
+    setLoading(true)
+    updateCarousel(updatedPost, (res) => {
+      setData(res.data)
+      setLoading(false)
+    })
+  }
+
+  const addNewSlide = (slideNumber) => {
+    let updatedCarousel = data.carousel
+    updatedCarousel.splice(slideNumber + 1, 0, {
+      headline: "headline",
+      content: "content"
+    })
+    const updatedPost = {
+      id: data.id,
+      carousel: updatedCarousel
+    }
+    setLoading(true)
+    updateCarousel(updatedPost, (res) => {
+      setData(res.data)
+      setIds(res.data.carousel.map((e, index) => `slide${index}`))
+      setLoading(false)
+    })
+  }
+
+  const removeSlide = (slideNumber) => {
+    let updatedCarousel = data.carousel
+    updatedCarousel.splice(slideNumber, 1)
+    const updatedPost = {
+      id: data.id,
+      carousel: updatedCarousel
+    }
+
+    setLoading(true)
+    updateCarousel(updatedPost, (res) => {
+      setData(res.data)
+      setIds(res.data.carousel.map((e, index) => `slide${index}`))
+      setLoading(false)
+    })
+  }
+
+  if (isLoading)
+    return (
+      <main className={styles.loading}>
+        <CircularProgress variant="solid" size="lg" />
+      </main>
+    )
+  if (!data)
+    return (
+      <main className={styles.loading}>
+        <Typography level="h1" color="fff" style={{ marginBottom: 20 }}>
+          NOT FOUND
+        </Typography>
+      </main>
+    )
 
   return (
-    <Box>
-      <div className={styles.carouselContainer}>
-        <div id={uniqueId} className={styles.carousel}>
-          <Image
-            src="/LOGO-POS.png"
-            alt="awe Logo"
-            className={styles.aweLogo}
-            width={778}
-            height={221}
-            priority
-          />
-          {isEditing ? (
-            <div className={styles.carouselText}>
-              <textarea
-                className={styles.carouselHeadline}
-                value={headline}
-                onChange={(e) => setHeadline(e.target.value)}
-              />
-              <textarea
-                className={styles.carouselContent}
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-              />
-            </div>
-          ) : (
-            <div className={styles.carouselText}>
-              <p className={styles.carouselHeadline}>{headline}</p>
-              <p className={styles.carouselContent}>{content}</p>
-            </div>
-          )}
-        </div>
-        <div className={styles.buttonContainer}>
-          <ButtonGroup variant="solid" color="primary">
-            {!isEditing ? (
-              <Button
-                className={styles.carouselButton}
-                onClick={() => setEditing(!isEditing)}
-              >
-                Edit
-              </Button>
-            ) : (
-              <Button
-                className={styles.carouselButton}
-                onClick={() => {
-                  setEditing(!isEditing)
-                  updateCopy(headline, content, slideNumber)
-                }}
-              >
-                Save
-              </Button>
-            )}
-            <Button
-              disabled={
-                defaultHeadline === headline && defaultContent === content
-              }
-              onClick={() => {
-                setHeadline(defaultHeadline)
-                setContent(defaultContent)
-              }}
-            >
-              Undo
-            </Button>
-          </ButtonGroup>
-          <ButtonGroup variant="solid" color="primary">
-            <Button
-              disabled={isEditing}
-              onClick={() => {
-                addNewSlide(slideNumber)
-              }}
-            >
-              Add Slide
-            </Button>
-            <Button
-              disabled={isEditing || totalSlides === 1}
-              onClick={() => {
-                removeSlide(slideNumber)
-              }}
-            >
-              Remove Slide
-            </Button>
-          </ButtonGroup>
-        </div>
+    <main className={styles.main} id="carousel">
+      <Typography level="h2" color="fff" style={{ marginBottom: 20 }}>
+        Carosello Linkedin
+      </Typography>
+      <div>
+        <Button
+          disabled={isDownloading}
+          onClick={() => {
+            setIsDownloading(true)
+            downloadPDF(ids, data.id, (res) => {
+              fileDownload(res.data, `${data.id}.pdf`)
+              setIsDownloading(false)
+            })
+          }}
+        >
+          Save PDF
+        </Button>
       </div>
-    </Box>
+      {data.carousel.map((e, index) => {
+        const headline = e.headline
+        const content = e.content
+        const key = ids[index]
+        return (
+          <Box key={key}>
+            <Slide
+              slideNumber={index}
+              uniqueId={key}
+              defaultHeadline={headline}
+              defaultContent={content}
+              updateCopy={updateCopy}
+              addNewSlide={addNewSlide}
+              removeSlide={removeSlide}
+              totalSlides={data.carousel.length}
+            />
+            <Divider />
+          </Box>
+        )
+      })}
+    </main>
   )
 }

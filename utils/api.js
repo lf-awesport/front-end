@@ -1,5 +1,6 @@
 import {
   collection,
+  getDoc,
   getDocs,
   setDoc,
   doc,
@@ -17,6 +18,15 @@ export const getPosts = (callback, route) => {
       posts.push(doc.data())
     })
     callback(posts)
+  })
+}
+
+export const getPost = (id, callback) => {
+  let post
+  const docRef = doc(db, "posts", id)
+  getDoc(docRef).then((res) => {
+    post = res.data()
+    callback(post)
   })
 }
 

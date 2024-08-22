@@ -63,7 +63,7 @@ export function Sentiment({ postId }) {
   return (
     <div className={styles.sentiment}>
       <Typography level="h2" color="fff" style={{ marginBottom: 20 }}>
-        Sentimento
+        Analisi del Sentimento
       </Typography>
       <div className={styles.chart}>
         <svg width={width} height={height}>
