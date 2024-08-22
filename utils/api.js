@@ -5,19 +5,32 @@ import {
   setDoc,
   doc,
   query,
-  limit
+  limit,
+  orderBy,
+  startAfter
 } from "firebase/firestore"
 import db from "./firestore"
 import axios from "axios"
 
-export const getPosts = (callback, route) => {
+export const getPosts = (route, cursor, callback) => {
   let posts = []
-  const q = query(collection(db, route), limit(50))
+  let q
+  if (!cursor) {
+    q = query(collection(db, route), orderBy("date", "desc"), limit(50))
+  } else if (cursor) {
+    q = query(
+      collection(db, route),
+      orderBy("date", "desc"),
+      startAfter(cursor),
+      limit(50)
+    )
+  }
   getDocs(q).then((snapshot) => {
     snapshot.forEach((doc) => {
       posts.push(doc.data())
     })
-    callback(posts)
+    const lastVisible = snapshot.docs[snapshot.docs.length - 1]
+    return callback(posts, lastVisible)
   })
 }
 

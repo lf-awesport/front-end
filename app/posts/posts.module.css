@@ -265,3 +265,7 @@
   justify-content: space-between;
   margin: 0 50px 0;
 }
+
+.MuiButtonBase-root {
+  color: "#fff" !important;
+}

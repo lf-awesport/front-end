@@ -21,6 +21,7 @@ export default function Posts() {
   const [isLoading, setLoading] = useState(true)
   const [sortOrder, setSortOrder] = useState("date")
   const [searchFilter, setSearchFilter] = useState("")
+  const [cursor, setCursor] = useState(null)
 
   const filterPosts = (newFilter) => {
     setSearchFilter(newFilter)
@@ -45,12 +46,24 @@ export default function Posts() {
   }
 
   useEffect(() => {
-    getPosts((posts) => {
-      setDefaultData(_.orderBy(posts, [sortOrder], ["desc"]))
+    getPosts("posts", null, (posts, lastVisible) => {
+      setDefaultData(posts)
       setData(_.orderBy(posts, [sortOrder], ["desc"]))
+      setCursor(lastVisible)
       setLoading(false)
-    }, "posts")
+    })
   }, [])
+
+  const nextPage = async () => {
+    getPosts("posts", cursor, (posts, lastVisible) => {
+      let newPosts = defaultData.concat(posts)
+      setDefaultData(newPosts)
+      setData(_.orderBy(newPosts, [sortOrder], ["desc"]))
+      filterPosts(searchFilter)
+      setCursor(lastVisible)
+      setLoading(false)
+    })
+  }
 
   if (isLoading)
     return (
@@ -62,28 +75,26 @@ export default function Posts() {
 
   return (
     <main className={styles.main}>
-      <div>
-        <Typography color="#fff" level="h1">
-          Posts
-        </Typography>
-        <Button
-          disabled={isLoading}
-          style={{ margin: 10 }}
-          onClick={() => {
-            setLoading(true)
-            scrapePosts(() => {
+      <Typography color="#fff" level="h1">
+        Posts
+      </Typography>
+      <Button
+        disabled={isLoading}
+        style={{ margin: 25 }}
+        onClick={() => {
+          setLoading(true)
+          scrapePosts(() => {
+            setLoading(false)
+            getPosts((posts) => {
+              setDefaultData(_.orderBy(posts, [sortOrder], ["desc"]))
+              setData(_.orderBy(posts, [sortOrder], ["desc"]))
               setLoading(false)
-              getPosts((posts) => {
-                setDefaultData(_.orderBy(posts, [sortOrder], ["desc"]))
-                setData(_.orderBy(posts, [sortOrder], ["desc"]))
-                setLoading(false)
-              }, "posts")
-            })
-          }}
-        >
-          Update
-        </Button>
-      </div>
+            }, "posts")
+          })
+        }}
+      >
+        Update
+      </Button>
       <Sheet
         variant="outlined"
         sx={{
@@ -138,6 +149,15 @@ export default function Posts() {
           </tbody>
         </Table>
       </Sheet>
+      <Button
+        style={{ margin: 25 }}
+        disabled={isLoading}
+        onClick={() => {
+          nextPage()
+        }}
+      >
+        Load More
+      </Button>
     </main>
   )
 }
