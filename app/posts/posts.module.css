@@ -3,10 +3,9 @@
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem;
-  min-height: 100vh;
-  max-width: 100vh;
+  width: 1080px;
   margin: auto;
+  padding: 4rem 0;
 }
 
 .loading {

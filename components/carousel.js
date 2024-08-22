@@ -85,7 +85,7 @@ export function Carousel({ postId }) {
     )
 
   return (
-    <main className={styles.main} id="carousel">
+    <div className={styles.sentiment} id="carousel">
       <Typography level="h2" color="fff" style={{ marginBottom: 20 }}>
         Carosello Linkedin
       </Typography>
@@ -123,6 +123,6 @@ export function Carousel({ postId }) {
           </Box>
         )
       })}
-    </main>
+    </div>
   )
 }

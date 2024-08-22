@@ -36,7 +36,7 @@ export function WordCloud({ postId }) {
       </main>
     )
 
-  const width = 800
+  const width = 1080
   const height = 450
   const words = wordFreq(data.text.text)
   const colors = ["#0D47A1", "#1976D2", "#2196F3", "#BBDEFB", "#FFFFFF"]

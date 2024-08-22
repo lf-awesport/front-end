@@ -55,10 +55,45 @@ export default function Post({ params }) {
           <code className={styles.code}>{data.title}</code>
         </a>
       </div>
-      <WordCloud postId={data.id} />
-      <Sentiment postId={data.id} />
-      <Carousel postId={data.id} />
+      <div className={styles.summary}>
+        <Typography level="h1" color="fff" style={{ marginBottom: 20 }}>
+          {data.title}
+        </Typography>
+        <div className={styles.subSummary}>
+          <img className={styles.img} src={data.imgLink} />
+          <div className={styles.summaryText}>
+            <Typography
+              level="body-sm"
+              color="fff"
+              style={{ marginBottom: 20 }}
+            >
+              {data.date}
+            </Typography>
+            <Divider />
+            <Typography
+              level="body-sm"
+              color="fff"
+              style={{ marginBottom: 20 }}
+            >
+              {data.author}
+            </Typography>
+            <Divider />
+            <Typography
+              level="body-sm"
+              color="fff"
+              style={{ marginBottom: 20 }}
+            >
+              {data.excerpt}
+            </Typography>
+          </div>
+        </div>
+      </div>
       <Divider />
+      <WordCloud postId={data.id} />
+      <Divider />
+      <Sentiment postId={data.id} />
+      <Divider />
+      <Carousel postId={data.id} />
     </main>
   )
 }
