@@ -29,7 +29,9 @@ export default function Posts() {
       setData(
         _.orderBy(
           defaultData.filter(
-            (e) => e.title.includes(newFilter) || e.excerpt.includes(newFilter)
+            (e) =>
+              e.title.toLowerCase().includes(newFilter.toLowerCase()) ||
+              e.excerpt.toLowerCase().includes(newFilter.toLowerCase())
           ),
           [sortOrder],
           ["desc"]
