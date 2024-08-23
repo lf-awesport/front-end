@@ -89,3 +89,11 @@
   width: 40%;
   text-align: left;
 }
+
+.leftColumn {
+  display: flex;
+  flex-direction: column;
+  width: 50%;
+  align-items: center;
+  justify-content: center;
+}

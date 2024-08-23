@@ -3,7 +3,7 @@
 import styles from "./carousel.module.css"
 import { BarChart } from "@mui/x-charts/BarChart"
 import { axisClasses } from "@mui/x-charts/ChartsAxis"
-import { Divider, Typography } from "@mui/joy"
+import { Typography } from "@mui/joy"
 
 const chartSetting = {
   width: 500,
@@ -43,16 +43,6 @@ const chartSetting = {
 
 const valueFormatter = (value) => value
 
-export const dataset = [
-  {
-    london: 59,
-    paris: 57,
-    newYork: 86,
-    seoul: 21,
-    label: "Emot"
-  }
-]
-
 export function Sentiment({ data }) {
   if (!data)
     return (
@@ -66,12 +56,10 @@ export function Sentiment({ data }) {
   data.emozioni.label = "Emozione"
   const dataset = [data.emozioni]
 
-  console.log(dataset)
-
   return (
     <div className={styles.sentiment}>
       <Typography level="h2" color="fff" style={{ marginBottom: 20 }}>
-        Analisi del Sentimento
+        Analisi del Testo
       </Typography>
       <div className={styles.chart}>
         <BarChart
@@ -79,8 +67,7 @@ export function Sentiment({ data }) {
           xAxis={[
             {
               scaleType: "band",
-              dataKey: "label",
-              tickInterval: [0, 10, 20]
+              dataKey: "label"
             }
           ]}
           series={[
