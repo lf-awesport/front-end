@@ -1,29 +1,59 @@
 "use client"
 
 import styles from "./carousel.module.css"
-import { useState, useEffect } from "react"
-import { CircularProgress, Typography } from "@mui/joy"
-import { getSentimentAnalysis } from "@/utils/api"
-import { Pie } from "@visx/shape"
-import { Group } from "@visx/group"
+import { BarChart } from "@mui/x-charts/BarChart"
+import { axisClasses } from "@mui/x-charts/ChartsAxis"
+import { Divider, Typography } from "@mui/joy"
 
-export function Sentiment({ postId }) {
-  const [data, setData] = useState(null)
-  const [isLoading, setLoading] = useState(true)
+const chartSetting = {
+  width: 500,
+  height: 350,
+  sx: {
+    [`.${axisClasses.left} .${axisClasses.label}`]: {
+      transform: "translate(-20px, 0)",
+      fill: "#fff",
+      stroke: "#fff"
+    },
+    //change left yAxis label styles
+    "& .MuiChartsAxis-left .MuiChartsAxis-tickLabel": {
+      strokeWidth: "0.4",
+      fill: "#fff"
+    },
+    // change bottom label styles
+    "& .MuiChartsAxis-bottom .MuiChartsAxis-tickLabel": {
+      strokeWidth: "0.5",
+      fill: "#fff"
+    },
+    // bottomAxis Line Styles
+    "& .MuiChartsAxis-bottom .MuiChartsAxis-line": {
+      stroke: "#fff",
+      strokeWidth: 0.4
+    },
+    // leftAxis Line Styles
+    "& .MuiChartsAxis-left .MuiChartsAxis-line": {
+      stroke: "#fff",
+      strokeWidth: 0.4
+    },
+    ".MuiChartsLegend-mark + text > tspan": {
+      fill: "#fff",
+      strokeWidth: 0.4
+    }
+  }
+}
 
-  useEffect(() => {
-    getSentimentAnalysis(postId, (res) => {
-      setData(res.data)
-      setLoading(false)
-    })
-  }, [])
+const valueFormatter = (value) => value
 
-  if (isLoading)
-    return (
-      <main className={styles.loading}>
-        <CircularProgress variant="solid" size="lg" />
-      </main>
-    )
+export const dataset = [
+  {
+    london: 59,
+    paris: 57,
+    newYork: 86,
+    seoul: 21,
+    label: "Emot"
+  }
+]
+
+export function Sentiment({ data }) {
   if (!data)
     return (
       <main className={styles.loading}>
@@ -33,32 +63,10 @@ export function Sentiment({ postId }) {
       </main>
     )
 
-  const values = Object.keys(data.analysis).map((e) => ({
-    sentiment: e,
-    frequency: data.analysis[e].percentuale,
-    explanation: data.analysis[e].spiegazione
-  }))
-  const getFrequency = (e) => e.frequency
-  const width = 350
-  const height = 350
-  const margin = { top: 20, right: 20, bottom: 20, left: 20 }
-  const innerWidth = width - margin.left - margin.right
-  const innerHeight = height - margin.top - margin.bottom
-  const radius = Math.min(innerWidth, innerHeight) / 2
-  const centerY = innerHeight / 2
-  const centerX = innerWidth / 2
-  const top = centerY + margin.top
-  const left = centerX + margin.left
-  const pieSortValues = (a, b) => b - a
-  function getEmotionColor(emotion) {
-    const emotionColors = {
-      gioia: "#FFD700", // Gold for Joy (Gioia)
-      tristezza: "#1E90FF", // DodgerBlue for Sadness (Tristezza)
-      rabbia: "#FF4500", // OrangeRed for Anger (Rabbia)
-      paura: "#8B008B" // DarkMagenta for Fear (Paura)
-    }
-    return emotionColors[emotion.toLowerCase()] || "#000000" // Default to black if emotion is not found
-  }
+  data.emozioni.label = "Emozione"
+  const dataset = [data.emozioni]
+
+  console.log(dataset)
 
   return (
     <div className={styles.sentiment}>
@@ -66,61 +74,53 @@ export function Sentiment({ postId }) {
         Analisi del Sentimento
       </Typography>
       <div className={styles.chart}>
-        <svg width={width} height={height}>
-          <Group top={top} left={left}>
-            <Pie
-              data={values}
-              pieValue={getFrequency}
-              pieSortValues={pieSortValues}
-              outerRadius={radius}
-              padAngle="0.05"
-              stroke="#fff"
-            >
-              {(pie) => {
-                return pie.arcs.map((arc, index) => {
-                  const { sentiment } = arc.data
-                  const [centroidX, centroidY] = pie.path.centroid(arc)
-                  const hasSpaceForLabel = arc.endAngle - arc.startAngle >= 0.1
-                  const arcPath = pie.path(arc)
-                  const arcFill = getEmotionColor(sentiment)
-                  return (
-                    <g key={`arc-${sentiment}-${index}`}>
-                      <path d={arcPath} fill={arcFill} />
-                      {hasSpaceForLabel && (
-                        <text
-                          x={centroidX}
-                          y={centroidY}
-                          dy=".13em"
-                          fill="#000"
-                          fontSize={11}
-                          textAnchor="middle"
-                          pointerEvents="none"
-                        >
-                          {sentiment}
-                        </text>
-                      )}
-                    </g>
-                  )
-                })
-              }}
-            </Pie>
-          </Group>
-        </svg>
+        <BarChart
+          dataset={dataset}
+          xAxis={[
+            {
+              scaleType: "band",
+              dataKey: "label",
+              tickInterval: [0, 10, 20]
+            }
+          ]}
+          series={[
+            {
+              dataKey: "gioia",
+              label: "Gioia",
+              valueFormatter,
+              color: ["yellow"]
+            },
+            {
+              dataKey: "paura",
+              label: "Paura",
+              valueFormatter,
+              color: ["violet"]
+            },
+            {
+              dataKey: "rabbia",
+              label: "Rabbia",
+              valueFormatter,
+              color: ["red"]
+            },
+            {
+              dataKey: "sorpresa",
+              label: "Sorpresa",
+              valueFormatter,
+              color: ["green"]
+            },
+            {
+              dataKey: "tristezza",
+              label: "Tristezza",
+              valueFormatter,
+              color: ["blue"]
+            }
+          ]}
+          {...chartSetting}
+        />
         <div className={styles.explanationContainer}>
-          {values.map((e) => (
-            <div className={styles.emotion} key={e.sentiment}>
-              <p className={styles.explanation}>
-                <span
-                  style={{ color: getEmotionColor(e.sentiment) }}
-                  className={styles.sentimentLabel}
-                >
-                  {e.sentiment}
-                </span>
-                : {e.frequency}%
-              </p>
-              <p className={styles.explanation}>{e.explanation}</p>
-            </div>
-          ))}
+          <Typography level="body-sm" color="fff" style={{ marginBottom: 20 }}>
+            {data.spiegazione}
+          </Typography>
         </div>
       </div>
     </div>

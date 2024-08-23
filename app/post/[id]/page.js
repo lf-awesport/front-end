@@ -3,7 +3,7 @@
 import { usePathname } from "next/navigation"
 import styles from "./post.module.css"
 import { Carousel } from "@/components/carousel"
-import { Sentiment } from "@/components/sentiment"
+import { TextAnalysis } from "@/components/textAnalysis"
 import { WordCloud } from "@/components/wordcloud"
 import { useState, useEffect } from "react"
 import { Divider, CircularProgress, Typography } from "@mui/joy"
@@ -91,7 +91,7 @@ export default function Post({ params }) {
       <Divider />
       <WordCloud postId={data.id} />
       <Divider />
-      <Sentiment postId={data.id} />
+      <TextAnalysis postId={data.id} />
       <Divider />
       <Carousel postId={data.id} />
     </main>
