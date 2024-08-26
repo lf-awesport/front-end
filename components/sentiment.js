@@ -10,32 +10,25 @@ const chartSetting = {
   height: 350,
   sx: {
     [`.${axisClasses.left} .${axisClasses.label}`]: {
-      transform: "translate(-20px, 0)",
-      fill: "#fff",
-      stroke: "#fff"
+      transform: "translate(-20px, 0)"
     },
     //change left yAxis label styles
     "& .MuiChartsAxis-left .MuiChartsAxis-tickLabel": {
-      strokeWidth: "0.4",
-      fill: "#fff"
+      strokeWidth: "0.4"
     },
     // change bottom label styles
     "& .MuiChartsAxis-bottom .MuiChartsAxis-tickLabel": {
-      strokeWidth: "0.5",
-      fill: "#fff"
+      strokeWidth: "0.5"
     },
     // bottomAxis Line Styles
     "& .MuiChartsAxis-bottom .MuiChartsAxis-line": {
-      stroke: "#fff",
       strokeWidth: 0.4
     },
     // leftAxis Line Styles
     "& .MuiChartsAxis-left .MuiChartsAxis-line": {
-      stroke: "#fff",
       strokeWidth: 0.4
     },
     ".MuiChartsLegend-mark + text > tspan": {
-      fill: "#fff",
       strokeWidth: 0.4
     }
   }

@@ -6,7 +6,15 @@ import { Carousel } from "@/components/carousel"
 import { TextAnalysis } from "@/components/textAnalysis"
 import { WordCloud } from "@/components/wordcloud"
 import { useState, useEffect } from "react"
-import { Divider, CircularProgress, Typography } from "@mui/joy"
+import {
+  Divider,
+  CircularProgress,
+  Typography,
+  Tab,
+  Tabs,
+  TabList,
+  TabPanel
+} from "@mui/joy"
 import { getPost } from "@/utils/api"
 
 export default function Post({ params }) {
@@ -55,45 +63,67 @@ export default function Post({ params }) {
           <code className={styles.code}>{data.title}</code>
         </a>
       </div>
-      <div className={styles.summary}>
-        <Typography level="h1" color="fff" style={{ marginBottom: 20 }}>
-          {data.title}
-        </Typography>
-        <div className={styles.subSummary}>
-          <img className={styles.img} src={data.imgLink} />
-          <div className={styles.summaryText}>
-            <Typography
-              level="body-sm"
-              color="fff"
-              style={{ marginBottom: 20 }}
-            >
-              {data.date}
+      <Tabs aria-label="Basic tabs" defaultValue={0}>
+        <TabList>
+          <Tab>Info</Tab>
+          <Tab>LinkedIn</Tab>
+        </TabList>
+        <TabPanel
+          sx={{
+            width: "1180px",
+            padding: " 0 50px"
+          }}
+          value={0}
+        >
+          <div className={styles.summary}>
+            <Typography level="h1" color="fff" style={{ marginBottom: 20 }}>
+              {data.title}
             </Typography>
-            <Divider />
-            <Typography
-              level="body-sm"
-              color="fff"
-              style={{ marginBottom: 20 }}
-            >
-              {data.author}
-            </Typography>
-            <Divider />
-            <Typography
-              level="body-sm"
-              color="fff"
-              style={{ marginBottom: 20 }}
-            >
-              {data.excerpt}
-            </Typography>
+            <div className={styles.subSummary}>
+              <img className={styles.img} src={data.imgLink} />
+              <div className={styles.summaryText}>
+                <Typography
+                  level="body-sm"
+                  color="fff"
+                  style={{ marginBottom: 20 }}
+                >
+                  {data.date}
+                </Typography>
+                <Divider />
+                <Typography
+                  level="body-sm"
+                  color="fff"
+                  style={{ marginBottom: 20 }}
+                >
+                  {data.author}
+                </Typography>
+                <Divider />
+                <Typography
+                  level="body-sm"
+                  color="fff"
+                  style={{ marginBottom: 20 }}
+                >
+                  {data.excerpt}
+                </Typography>
+              </div>
+            </div>
           </div>
-        </div>
-      </div>
-      <Divider />
-      <WordCloud postId={data.id} />
-      <Divider />
-      <TextAnalysis postId={data.id} />
-      <Divider />
-      <Carousel postId={data.id} />
+          <Divider />
+          <WordCloud postId={data.id} />
+          <Divider />
+          <TextAnalysis postId={data.id} />
+        </TabPanel>
+        <TabPanel
+          sx={{
+            width: "1180px",
+            background: "#e0e0e0",
+            padding: "0 50px"
+          }}
+          value={1}
+        >
+          <Carousel postId={data.id} />
+        </TabPanel>
+      </Tabs>
     </main>
   )
 }

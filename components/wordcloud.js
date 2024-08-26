@@ -39,7 +39,7 @@ export function WordCloud({ postId }) {
   const width = 1080
   const height = 450
   const words = wordFreq(data.text.text)
-  const colors = ["#0D47A1", "#1976D2", "#2196F3", "#BBDEFB", "#FFFFFF"]
+  const colors = ["#0D47A1", "#1976D2", "#2196F3", "#BBDEFB", "#000"]
   function wordFreq(text) {
     const words = text.replace(/\./g, "").split(/\s/)
     const freqMap = {}

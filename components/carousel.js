@@ -86,9 +86,6 @@ export function Carousel({ postId }) {
 
   return (
     <div className={styles.sentiment} id="carousel">
-      <Typography level="h2" color="fff" style={{ marginBottom: 20 }}>
-        Carosello Linkedin
-      </Typography>
       <div>
         <Button
           disabled={isDownloading}
