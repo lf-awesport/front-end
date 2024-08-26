@@ -33,10 +33,11 @@ textarea {
   outline: none;
   background-color: #e8e7ed;
   width: 100%;
+  min-height: 350px;
   -webkit-box-shadow: none;
   -moz-box-shadow: none;
   box-shadow: none;
-
+  white-space: pre-line;
   resize: none; /*remove the resize handle on the bottom right*/
 }
 

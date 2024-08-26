@@ -1,36 +1,20 @@
-.carousel {
-  height: 1080px;
-  width: 1080px;
-  background-color: #ffffff;
-  padding: 50px;
-  margin: 0 50px 50px 50px;
-  display: flex;
-  flex-direction: column;
-}
-
 .carouselText {
-  padding: 20px;
   text-align: center;
-  display: flex;
-  flex: 1;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-evenly;
+  white-space: pre-line;
 }
 
 .carouselHeadline {
-  color: #0f1c3f;
-  font-weight: 700;
-  font-size: 72px;
-  padding: 20px;
+  color: #fff;
+  font-weight: 900;
+  font-size: 120px;
+  line-height: 120px;
+  white-space: pre-line;
 }
 
 .carouselContent {
-  color: #0f1c3f;
-  font-size: 36px;
-  padding: 10px;
-  display: flex;
-  justify-content: flex-end;
+  color: #fff;
+  font-size: 55px;
+  line-height: 55px;
 }
 
 .aweLogo {
@@ -45,13 +29,24 @@
   height: 50px;
 }
 
+.carousel {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  width: 100%;
+  height: 100%;
+}
+
 .carouselContainer {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
   margin: 50px 0;
   text-align: left;
+  padding: 130px;
+  width: 1080px;
+  height: 1350px;
+  background-color: #ffffff;
+  background-image: url("../public/slide_bg.jpg");
 }
 
 .buttonContainer {

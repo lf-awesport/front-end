@@ -115,6 +115,7 @@ export function Carousel({ postId }) {
               addNewSlide={addNewSlide}
               removeSlide={removeSlide}
               totalSlides={data.carousel.length}
+              highlights={e.highlights}
             />
             <Divider />
           </Box>
