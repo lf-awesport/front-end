@@ -68,31 +68,31 @@ export function Sentiment({ data }) {
               dataKey: "gioia",
               label: "Gioia",
               valueFormatter,
-              color: ["yellow"]
+              color: ["#ffeb3b"]
             },
             {
               dataKey: "paura",
               label: "Paura",
               valueFormatter,
-              color: ["violet"]
+              color: ["#212121"]
             },
             {
               dataKey: "rabbia",
               label: "Rabbia",
               valueFormatter,
-              color: ["red"]
+              color: ["#dd2c00"]
             },
             {
               dataKey: "sorpresa",
               label: "Sorpresa",
               valueFormatter,
-              color: ["green"]
+              color: ["#00c853"]
             },
             {
               dataKey: "tristezza",
               label: "Tristezza",
               valueFormatter,
-              color: ["blue"]
+              color: ["#1a237e"]
             }
           ]}
           {...chartSetting}

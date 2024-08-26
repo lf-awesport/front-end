@@ -98,3 +98,33 @@
   align-items: center;
   justify-content: center;
 }
+
+.textContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 25px;
+  text-align: left;
+}
+
+.sources {
+  margin-top: 50px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.link {
+  margin-bottom: 20px;
+  display: block;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  width: 100%;
+}
+
+.paragraph {
+  margin-bottom: 25px;
+}
