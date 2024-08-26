@@ -1,7 +1,7 @@
 "use client"
 
 import styles from "./carousel.module.css"
-import { Typography } from "@mui/joy"
+import { Typography, Avatar } from "@mui/joy"
 
 export function Prejudice({ data }) {
   if (!data)
@@ -13,6 +13,20 @@ export function Prejudice({ data }) {
       </main>
     )
 
+  const grado = (punteggio) => {
+    if (punteggio === 0) return "Nessuno"
+    if (punteggio === 1) return "Basso"
+    if (punteggio === 2) return "Moderato"
+    if (punteggio === 3) return "Alto"
+  }
+
+  const color = (punteggio) => {
+    if (punteggio === 0) return "success"
+    if (punteggio === 1) return "neutral"
+    if (punteggio === 2) return "warning"
+    if (punteggio === 3) return "danger"
+  }
+
   return (
     <div>
       <div className={styles.sentiment}>
@@ -23,10 +37,9 @@ export function Prejudice({ data }) {
             </Typography>
             <Typography
               level="body-sm"
-              color="fff"
-              style={{ marginBottom: 20 }}
+              color={color(data.grado_di_pregiudizio)}
             >
-              {data.grado_di_pregiudizio}
+              {grado(data.grado_di_pregiudizio)}
             </Typography>
           </div>
           <div className={styles.explanationContainer}>

@@ -13,6 +13,12 @@ export function Readability({ data }) {
       </main>
     )
 
+  const color = (punteggio) => {
+    if (punteggio < 50) return "danger"
+    if (punteggio > 70) return "success"
+    return "warning"
+  }
+
   return (
     <div>
       <div className={styles.sentiment}>
@@ -21,7 +27,9 @@ export function Readability({ data }) {
             <Typography level="h4" color="fff" style={{ marginBottom: 20 }}>
               Leggibilità
             </Typography>
-            <Avatar size="lg">{data.punteggio_flesch_kincaid}</Avatar>
+            <Avatar color={color(data.punteggio_flesch_kincaid)} size="lg">
+              {data.punteggio_flesch_kincaid}
+            </Avatar>
           </div>
           <div className={styles.explanationContainer}>
             <Typography
@@ -30,13 +38,6 @@ export function Readability({ data }) {
               style={{ marginBottom: 20 }}
             >
               {data.spiegazione}
-            </Typography>
-            <Typography
-              level="body-sm"
-              color="fff"
-              style={{ marginBottom: 20 }}
-            >
-              Tempo di lettura: {data.tempo_di_lettura_minuti} min.
             </Typography>
           </div>
         </div>

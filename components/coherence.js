@@ -13,6 +13,12 @@ export function Coherence({ data }) {
       </main>
     )
 
+  const color = (punteggio) => {
+    if (punteggio < 5) return "danger"
+    if (punteggio > 7) return "success"
+    return "warning"
+  }
+
   return (
     <div>
       <div className={styles.sentiment}>
@@ -21,7 +27,9 @@ export function Coherence({ data }) {
             <Typography level="h4" color="fff" style={{ marginBottom: 20 }}>
               Coerenza
             </Typography>
-            <Avatar size="lg">{data.punteggio_coerenza}</Avatar>
+            <Avatar color={color(data.punteggio_coerenza)} size="lg">
+              {data.punteggio_coerenza}
+            </Avatar>
           </div>
           <div className={styles.explanationContainer}>
             <Typography

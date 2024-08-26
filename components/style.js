@@ -1,7 +1,7 @@
 "use client"
 
 import styles from "./carousel.module.css"
-import { Typography, Avatar } from "@mui/joy"
+import { Typography } from "@mui/joy"
 
 export function Style({ data }) {
   if (!data)
@@ -12,6 +12,18 @@ export function Style({ data }) {
         </Typography>
       </main>
     )
+
+  const tono = (punteggio) => {
+    if (punteggio === 1) return "Formale"
+    if (punteggio === 2) return "Informale"
+    return "Neutrale"
+  }
+
+  const stile = (punteggio) => {
+    if (punteggio === 1) return "Descrittivo"
+    if (punteggio === 2) return "Narrativo"
+    return "Espositivo"
+  }
 
   return (
     <div>
@@ -26,7 +38,7 @@ export function Style({ data }) {
               color="fff"
               style={{ marginBottom: 20 }}
             >
-              {data.tono}
+              {tono(data.tono)}
             </Typography>
             <Typography level="h4" color="fff" style={{ marginBottom: 20 }}>
               Stile
@@ -36,7 +48,7 @@ export function Style({ data }) {
               color="fff"
               style={{ marginBottom: 20 }}
             >
-              {data.stile}
+              {stile(data.stile)}
             </Typography>
           </div>
           <div className={styles.explanationContainer}>
