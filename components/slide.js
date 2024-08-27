@@ -51,8 +51,8 @@ export const Slide = ({
           src="/icon_logo_white.png"
           alt="awe Logo"
           className={styles.aweLogo}
-          width={500}
-          height={500}
+          width={450}
+          height={450}
           style={{ marginBottom: "130px" }}
           priority
         />

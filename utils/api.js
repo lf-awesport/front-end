@@ -8,7 +8,7 @@ import {
   limit,
   orderBy,
   startAfter,
-  update
+  updateDoc
 } from "firebase/firestore"
 import db from "./firestore"
 import axios from "axios"
@@ -54,9 +54,11 @@ export const getCarousel = (id, callback) => {
     .then((res) => callback(res))
 }
 
-export const updateCarousel = (updatedPost, callback) => {
-  setDoc(doc(db, "carousels", updatedPost.id), updatedPost).then(() => {
-    getCarousel(updatedPost.id, callback)
+export const updateCarousel = (id, updatedPost, callback) => {
+  updateDoc(doc(db, "carousels", id), {
+    carousel: updatedPost
+  }).then(() => {
+    getCarousel(id, callback)
   })
 }
 

@@ -29,12 +29,8 @@ export function Carousel({ postId }) {
   const updateCopy = (content, slideNumber) => {
     let updatedCarousel = data.carousel
     updatedCarousel[slideNumber] = { content }
-    const updatedPost = {
-      id: data.id,
-      carousel: updatedCarousel
-    }
     setLoading(true)
-    updateCarousel(updatedPost, () => {
+    updateCarousel(data.id, updatedCarousel, (res) => {
       setData(res.data)
       setLoading(false)
       // updateHighlights(updatedPost.id, (res) => {}) TODO fix this
