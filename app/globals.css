@@ -31,9 +31,11 @@ textarea {
   border: none;
   overflow: auto;
   outline: none;
-  background-color: #e8e7ed;
+  background-color: #fff;
+  border: 5px solid rgb(15, 27, 69);
+  color: rgb(15, 27, 69) !important;
   width: 100%;
-  min-height: 350px;
+  min-height: 450px;
   -webkit-box-shadow: none;
   -moz-box-shadow: none;
   box-shadow: none;

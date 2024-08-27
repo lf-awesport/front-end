@@ -51,8 +51,8 @@ export const Slide = ({
           src="/icon_logo_white.png"
           alt="awe Logo"
           className={styles.aweLogo}
-          width={450}
-          height={450}
+          width={400}
+          height={400}
           style={{ marginBottom: "130px" }}
           priority
         />
@@ -62,11 +62,10 @@ export const Slide = ({
 
   return (
     <Box>
-      <div className={styles.carouselContainer}>
+      <div id={uniqueId} className={styles.carouselContainer}>
         <div
-          id={uniqueId}
           className={
-            slideNumber === 0 || slideNumber === totalSlides
+            slideNumber === 0 || slideNumber === totalSlides - 1
               ? styles.firstSlide
               : styles.contentSlide
           }

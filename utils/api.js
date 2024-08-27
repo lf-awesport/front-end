@@ -2,13 +2,13 @@ import {
   collection,
   getDoc,
   getDocs,
-  setDoc,
   doc,
   query,
   limit,
   orderBy,
   startAfter,
-  updateDoc
+  updateDoc,
+  deleteDoc
 } from "firebase/firestore"
 import db from "./firestore"
 import axios from "axios"
@@ -55,9 +55,7 @@ export const getCarousel = (id, callback) => {
 }
 
 export const updateCarousel = (id, updatedPost, callback) => {
-  updateDoc(doc(db, "carousels", id), {
-    carousel: updatedPost
-  }).then(() => {
+  updateDoc(doc(db, "carousels", id), updatedPost).then(() => {
     getCarousel(id, callback)
   })
 }
@@ -110,12 +108,20 @@ export const getWordCloud = (id, callback) => {
     .then((res) => callback(res))
 }
 
-export const updateHighlights = (id, callback) => {
+export const generateHighlights = (id, callback) => {
   axios
-    .get(`http://localhost:4000/updateHighlights`, {
+    .get(`http://localhost:4000/generateHighlights`, {
       params: {
         id
       }
     })
     .then((res) => callback(res))
+}
+
+export const deleteHighlights = (id, callback) => {
+  deleteDoc(doc(db, "highlights", id)).then((res) => callback(res))
+}
+
+export const getHighlights = (id, callback) => {
+  getDoc(doc(db, "highlights", id)).then((res) => callback(res))
 }

@@ -3,26 +3,40 @@
 import styles from "./carousel.module.css"
 import { Slide } from "@/components/slide"
 import { useState, useEffect } from "react"
-import { Box, Divider, Button, CircularProgress, Typography } from "@mui/joy"
+import {
+  Box,
+  Divider,
+  Button,
+  CircularProgress,
+  Typography,
+  ButtonGroup
+} from "@mui/joy"
 import fileDownload from "js-file-download"
 import {
   getCarousel,
   updateCarousel,
   downloadPDF,
-  updateHighlights
+  generateHighlights,
+  deleteHighlights,
+  getHighlights
 } from "@/utils/api"
 
 export function Carousel({ postId }) {
   const [data, setData] = useState(null)
   const [isLoading, setLoading] = useState(true)
   const [ids, setIds] = useState(null)
+  const [highlights, setHighlights] = useState([])
   const [isDownloading, setIsDownloading] = useState(false)
 
   useEffect(() => {
     getCarousel(postId, (res) => {
       setData(res.data)
       setIds(res.data.carousel.map((e, index) => `slide${index}`))
-      setLoading(false)
+      getHighlights(res.data.id, (res) => {
+        console.log(res.data)
+        setHighlights(res.data().highlights || [])
+        setLoading(false)
+      })
     })
   }, [])
 
@@ -30,24 +44,39 @@ export function Carousel({ postId }) {
     let updatedCarousel = data.carousel
     updatedCarousel[slideNumber] = { content }
     setLoading(true)
-    updateCarousel(data.id, updatedCarousel, (res) => {
+    updateCarousel(data.id, { carousel: updatedCarousel }, (res) => {
       setData(res.data)
       setLoading(false)
-      // updateHighlights(updatedPost.id, (res) => {}) TODO fix this
+    })
+  }
+
+  const createHighlights = () => {
+    setLoading(true)
+    generateHighlights(data.id, (res) => {
+      console.log(res.data)
+      setHighlights(res.data.highlights)
+      setLoading(false)
+    })
+  }
+
+  const removeHighlights = () => {
+    setLoading(true)
+    deleteHighlights(data.id, (res) => {
+      setHighlights([])
+      setLoading(false)
     })
   }
 
   const addNewSlide = (slideNumber) => {
     let updatedCarousel = data.carousel
     updatedCarousel.splice(slideNumber + 1, 0, {
-      content: "content"
+      content: "Write here..."
     })
     const updatedPost = {
-      id: data.id,
       carousel: updatedCarousel
     }
     setLoading(true)
-    updateCarousel(updatedPost, (res) => {
+    updateCarousel(data.id, updatedPost, (res) => {
       setData(res.data)
       setIds(res.data.carousel.map((e, index) => `slide${index}`))
       setLoading(false)
@@ -58,12 +87,11 @@ export function Carousel({ postId }) {
     let updatedCarousel = data.carousel
     updatedCarousel.splice(slideNumber, 1)
     const updatedPost = {
-      id: data.id,
       carousel: updatedCarousel
     }
 
     setLoading(true)
-    updateCarousel(updatedPost, (res) => {
+    updateCarousel(data.id, updatedPost, (res) => {
       setData(res.data)
       setIds(res.data.carousel.map((e, index) => `slide${index}`))
       setLoading(false)
@@ -87,7 +115,7 @@ export function Carousel({ postId }) {
 
   return (
     <div className={styles.sentiment} id="carousel">
-      <div>
+      <ButtonGroup variant="solid" color="primary">
         <Button
           disabled={isDownloading}
           onClick={() => {
@@ -100,7 +128,17 @@ export function Carousel({ postId }) {
         >
           Save PDF
         </Button>
-      </div>
+        {highlights.length === 0 && (
+          <Button disabled={isDownloading} onClick={createHighlights}>
+            Add Highlights
+          </Button>
+        )}
+        {highlights.length > 0 && (
+          <Button disabled={isDownloading} onClick={removeHighlights}>
+            Remove Highlights
+          </Button>
+        )}
+      </ButtonGroup>
       {data.carousel.map((e, index) => {
         const content = e.content
         const key = ids[index]
@@ -114,7 +152,7 @@ export function Carousel({ postId }) {
               addNewSlide={addNewSlide}
               removeSlide={removeSlide}
               totalSlides={data.carousel.length}
-              highlights={data?.highlights[index]?.highlights || []}
+              highlights={highlights}
             />
             <Divider />
           </Box>
