@@ -7,14 +7,14 @@
   color: #fff;
   font-weight: 900;
   font-size: 120px;
-  line-height: 120px;
+  line-height: 146px;
   white-space: pre-line;
 }
 
 .carouselContent {
   color: #fff;
-  font-size: 55px;
-  line-height: 55px;
+  font-size: 50px;
+  line-height: 60px;
 }
 
 .aweLogo {
@@ -29,10 +29,18 @@
   height: 50px;
 }
 
-.carousel {
+.firstSlide {
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
+  width: 100%;
+  height: 100%;
+}
+
+.contentSlide {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   width: 100%;
   height: 100%;
 }

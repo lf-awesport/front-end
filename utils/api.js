@@ -7,7 +7,8 @@ import {
   query,
   limit,
   orderBy,
-  startAfter
+  startAfter,
+  update
 } from "firebase/firestore"
 import db from "./firestore"
 import axios from "axios"
@@ -100,6 +101,16 @@ export const getSentimentAnalysis = (id, callback) => {
 export const getWordCloud = (id, callback) => {
   axios
     .get(`http://localhost:4000/getWordCloud`, {
+      params: {
+        id
+      }
+    })
+    .then((res) => callback(res))
+}
+
+export const updateHighlights = (id, callback) => {
+  axios
+    .get(`http://localhost:4000/updateHighlights`, {
       params: {
         id
       }

@@ -68,7 +68,7 @@ export default function Post({ params }) {
         <TabList>
           <Tab>Info</Tab>
           <Tab id="linkedin">LinkedIn</Tab>
-          <Tab>Daily</Tab>
+          <Tab>On this day</Tab>
         </TabList>
         <TabPanel
           sx={{

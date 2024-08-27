@@ -39,25 +39,21 @@ export function Daily({ date }) {
         {data.id}
       </Typography>
       <div className={styles.textContainer}>
-        {data.body.map((p) => (
-          <div className={styles.paragraph}>
+        {data.body.map((p, index) => (
+          <div className={styles.paragraph} key={index}>
             <Typography level="h4" color="fff">
-              {p.title}
+              <a
+                className={styles.link}
+                href={data.urls[index]}
+                target="_blank"
+              >
+                {p.title}
+              </a>
             </Typography>
             <Typography level="body-sm" color="fff">
               {p.content}
             </Typography>
           </div>
-        ))}
-      </div>
-      <div className={styles.sources}>
-        <Typography level="h2" color="fff" style={{ marginBottom: 20 }}>
-          Fonti
-        </Typography>
-        {data.urls.map((e, index) => (
-          <a className={styles.link} href={e} key={index} target="_blank">
-            {e}
-          </a>
         ))}
       </div>
     </main>

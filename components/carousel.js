@@ -5,7 +5,12 @@ import { Slide } from "@/components/slide"
 import { useState, useEffect } from "react"
 import { Box, Divider, Button, CircularProgress, Typography } from "@mui/joy"
 import fileDownload from "js-file-download"
-import { getCarousel, updateCarousel, downloadPDF } from "@/utils/api"
+import {
+  getCarousel,
+  updateCarousel,
+  downloadPDF,
+  updateHighlights
+} from "@/utils/api"
 
 export function Carousel({ postId }) {
   const [data, setData] = useState(null)
@@ -21,24 +26,24 @@ export function Carousel({ postId }) {
     })
   }, [])
 
-  const updateCopy = (headline, content, slideNumber) => {
+  const updateCopy = (content, slideNumber) => {
     let updatedCarousel = data.carousel
-    updatedCarousel[slideNumber] = { headline, content }
+    updatedCarousel[slideNumber] = { content }
     const updatedPost = {
       id: data.id,
       carousel: updatedCarousel
     }
     setLoading(true)
-    updateCarousel(updatedPost, (res) => {
+    updateCarousel(updatedPost, () => {
       setData(res.data)
       setLoading(false)
+      // updateHighlights(updatedPost.id, (res) => {}) TODO fix this
     })
   }
 
   const addNewSlide = (slideNumber) => {
     let updatedCarousel = data.carousel
     updatedCarousel.splice(slideNumber + 1, 0, {
-      headline: "headline",
       content: "content"
     })
     const updatedPost = {
@@ -101,7 +106,6 @@ export function Carousel({ postId }) {
         </Button>
       </div>
       {data.carousel.map((e, index) => {
-        const headline = e.headline
         const content = e.content
         const key = ids[index]
         return (
@@ -109,13 +113,12 @@ export function Carousel({ postId }) {
             <Slide
               slideNumber={index}
               uniqueId={key}
-              defaultHeadline={headline}
               defaultContent={content}
               updateCopy={updateCopy}
               addNewSlide={addNewSlide}
               removeSlide={removeSlide}
               totalSlides={data.carousel.length}
-              highlights={e.highlights}
+              highlights={data?.highlights[index]?.highlights || []}
             />
             <Divider />
           </Box>
