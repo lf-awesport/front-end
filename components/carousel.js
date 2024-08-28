@@ -34,7 +34,7 @@ export function Carousel({ postId }) {
       setIds(res.data.carousel.map((e, index) => `slide${index}`))
       getHighlights(res.data.id, (res) => {
         console.log(res.data)
-        setHighlights(res.data().highlights || [])
+        setHighlights(res.data()?.highlights || [])
         setLoading(false)
       })
     })
