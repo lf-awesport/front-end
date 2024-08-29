@@ -108,6 +108,16 @@ export const getWordCloud = (id, callback) => {
     .then((res) => callback(res))
 }
 
+export const getTakeaways = (id, callback) => {
+  axios
+    .get(`http://localhost:4000/getTakeaways`, {
+      params: {
+        id
+      }
+    })
+    .then((res) => callback(res))
+}
+
 export const generateHighlights = (id, callback) => {
   axios
     .get(`http://localhost:4000/generateHighlights`, {

@@ -2,18 +2,18 @@
 
 import styles from "./carousel.module.css"
 import { useState, useEffect } from "react"
-import { Typography, CircularProgress } from "@mui/joy"
-import { getDailySummary } from "@/utils/api"
+import { Typography, CircularProgress, Avatar } from "@mui/joy"
+import { getTakeaways } from "@/utils/api"
 
-export function Daily({ date }) {
-  const [data, setData] = useState(null)
+export function Takeaways({ postId }) {
+  const [data, setData] = useState([])
   const [isLoading, setLoading] = useState(true)
 
   useEffect(() => {
     setLoading(true)
 
-    getDailySummary(date, (res) => {
-      setData(res.data)
+    getTakeaways(postId, (res) => {
+      setData(res.data?.takeaways?.takeaways)
       setLoading(false)
     })
   }, [])
@@ -36,22 +36,18 @@ export function Daily({ date }) {
   return (
     <main className={styles.main}>
       <Typography level="h1" color="fff" style={{ margin: "50px 0" }}>
-        {data.id}
+        Key Takeways
       </Typography>
       <div className={styles.textContainer}>
-        {data.body.map((p, index) => (
-          <div className={styles.paragraph} key={index}>
-            <Typography level="h4" color="fff">
-              <a
-                className={styles.link}
-                href={data.urls[index]}
-                target="_blank"
-              >
-                {p.title}
-              </a>
-            </Typography>
+        {data.map((p, index) => (
+          <div
+            className={styles.paragraph}
+            style={{ display: "flex" }}
+            key={index}
+          >
+            <Avatar sx={{ marginRight: "25px" }}>{index + 1}</Avatar>
             <Typography level="body-sm" color="fff">
-              {p.content}
+              {p}
             </Typography>
           </div>
         ))}

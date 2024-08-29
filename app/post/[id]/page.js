@@ -6,6 +6,7 @@ import { Carousel } from "@/components/carousel"
 import { TextAnalysis } from "@/components/textAnalysis"
 import { WordCloud } from "@/components/wordcloud"
 import { Daily } from "@/components/daily"
+import { Takeaways } from "@/components/takeaways"
 import { useState, useEffect } from "react"
 import {
   Divider,
@@ -67,7 +68,8 @@ export default function Post({ params }) {
       <Tabs aria-label="Basic tabs" defaultValue={0}>
         <TabList>
           <Tab>Info</Tab>
-          <Tab id="linkedin">LinkedIn</Tab>
+          <Tab>Key Takeaways</Tab>
+          <Tab id="linkedin">LinkedIn PDF</Tab>
           <Tab>On this day</Tab>
         </TabList>
         <TabPanel
@@ -118,10 +120,19 @@ export default function Post({ params }) {
         <TabPanel
           sx={{
             width: "1180px",
-            background: "#e0e0e0",
             padding: "0 50px"
           }}
           value={1}
+        >
+          <Takeaways postId={data.id} />
+        </TabPanel>
+        <TabPanel
+          sx={{
+            width: "1180px",
+            background: "#e0e0e0",
+            padding: "0 50px"
+          }}
+          value={2}
         >
           <Carousel postId={data.id} />
         </TabPanel>
@@ -130,7 +141,7 @@ export default function Post({ params }) {
             width: "1180px",
             padding: "0 50px"
           }}
-          value={2}
+          value={3}
         >
           <Daily date={data.date} />
         </TabPanel>
