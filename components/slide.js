@@ -125,6 +125,10 @@ export const Slide = ({
             <Button
               className={styles.carouselButton}
               onClick={() => setEditing(!isEditing)}
+              sx={{
+                color: "#fff",
+                background: "#003399"
+              }}
             >
               Edit
             </Button>
@@ -135,6 +139,10 @@ export const Slide = ({
                 setEditing(!isEditing)
                 updateCopy(content, slideNumber)
               }}
+              sx={{
+                color: "#fff",
+                background: "#003399"
+              }}
             >
               Save
             </Button>
@@ -143,6 +151,10 @@ export const Slide = ({
             disabled={defaultContent === content}
             onClick={() => {
               setContent(defaultContent)
+            }}
+            sx={{
+              color: "#fff",
+              background: "#003399"
             }}
           >
             Undo
@@ -154,6 +166,10 @@ export const Slide = ({
             onClick={() => {
               addNewSlide(slideNumber)
             }}
+            sx={{
+              color: "#fff",
+              background: "#003399"
+            }}
           >
             Add Slide
           </Button>
@@ -161,6 +177,10 @@ export const Slide = ({
             disabled={isEditing || totalSlides === 1 || slideNumber === 0}
             onClick={() => {
               removeSlide(slideNumber)
+            }}
+            sx={{
+              color: "#fff",
+              background: "#003399"
             }}
           >
             Remove Slide

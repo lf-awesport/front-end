@@ -131,3 +131,32 @@
 .paragraph {
   margin-bottom: 25px;
 }
+
+.header {
+  display: flex;
+  width: 1180px;
+  height: 50px;
+  margin: 25px 0px;
+  padding: 10px 0;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.leftColumn {
+  width: 33.33%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.centerColumn {
+  width: 33.33%;
+  display: flex;
+  justify-content: center;
+}
+
+.rightColumn {
+  width: 33.33%;
+  display: flex;
+  justify-content: flex-end;
+}

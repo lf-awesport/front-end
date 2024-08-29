@@ -1,7 +1,6 @@
 "use client"
 
 import styles from "./posts.module.css"
-import Typography from "@mui/joy/Typography"
 import Table from "@mui/joy/Table"
 import Sheet from "@mui/joy/Sheet"
 import { useState, useEffect } from "react"
@@ -14,6 +13,7 @@ import FormLabel from "@mui/joy/FormLabel"
 import Input from "@mui/joy/Input"
 import { getPosts, scrapePosts } from "@/utils/api"
 import Button from "@mui/joy/Button"
+import { Header } from "@/components/header"
 
 export default function Posts() {
   const [defaultData, setDefaultData] = useState(null)
@@ -77,26 +77,7 @@ export default function Posts() {
 
   return (
     <main className={styles.main}>
-      <Typography color="#fff" level="h1">
-        Posts
-      </Typography>
-      <Button
-        disabled={isLoading}
-        style={{ margin: 25 }}
-        onClick={() => {
-          setLoading(true)
-          scrapePosts(() => {
-            setLoading(false)
-            getPosts((posts) => {
-              setDefaultData(_.orderBy(posts, [sortOrder], ["desc"]))
-              setData(_.orderBy(posts, [sortOrder], ["desc"]))
-              setLoading(false)
-            }, "posts")
-          })
-        }}
-      >
-        Update
-      </Button>
+      <Header></Header>
       <Sheet
         variant="outlined"
         sx={{
@@ -106,27 +87,60 @@ export default function Posts() {
           padding: "20px"
         }}
       >
-        <FormControl orientation="horizontal" sx={{ mb: 2, ml: 1, mt: 2 }}>
-          <FormLabel>Sort by:</FormLabel>
-          <Select
-            size="sm"
-            value={sortOrder}
-            onChange={(event, newValue) => sortPosts(newValue)}
+        <FormControl
+          orientation="horizontal"
+          sx={{
+            mb: 2,
+            ml: 1,
+            mt: 2,
+            display: "flex",
+            justifyContent: "space-between",
+            height: "50px",
+            alignItems: "center"
+          }}
+        >
+          <div>
+            <FormLabel>Sort by:</FormLabel>
+            <Select
+              size="sm"
+              value={sortOrder}
+              onChange={(event, newValue) => sortPosts(newValue)}
+            >
+              {["date", "title", "author"].map((axis) => (
+                <Option key={axis} value={axis}>
+                  {axis}
+                </Option>
+              ))}
+            </Select>
+          </div>
+          <div>
+            <FormLabel>Search</FormLabel>
+            <Input
+              placeholder="Type anything"
+              value={searchFilter}
+              onChange={(e) => filterPosts(e.target.value)}
+            />
+          </div>
+          <Button
+            disabled={isLoading}
+            sx={{
+              color: "#fff",
+              background: "#003399"
+            }}
+            onClick={() => {
+              setLoading(true)
+              scrapePosts(() => {
+                setLoading(false)
+                getPosts((posts) => {
+                  setDefaultData(_.orderBy(posts, [sortOrder], ["desc"]))
+                  setData(_.orderBy(posts, [sortOrder], ["desc"]))
+                  setLoading(false)
+                }, "posts")
+              })
+            }}
           >
-            {["date", "title", "author"].map((axis) => (
-              <Option key={axis} value={axis}>
-                {axis}
-              </Option>
-            ))}
-          </Select>
-        </FormControl>
-        <FormControl orientation="horizontal" sx={{ mb: 2, ml: 1, mt: 2 }}>
-          <FormLabel>Search</FormLabel>
-          <Input
-            placeholder="Type anything"
-            value={searchFilter}
-            onChange={(e) => filterPosts(e.target.value)}
-          />
+            Update
+          </Button>
         </FormControl>
         <Table>
           <thead>
@@ -156,6 +170,10 @@ export default function Posts() {
         disabled={isLoading}
         onClick={() => {
           nextPage()
+        }}
+        sx={{
+          color: "#fff",
+          background: "#003399"
         }}
       >
         Load More

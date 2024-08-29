@@ -33,7 +33,6 @@ export function Carousel({ postId }) {
       setData(res.data)
       setIds(res.data.carousel.map((e, index) => `slide${index}`))
       getHighlights(res.data.id, (res) => {
-        console.log(res.data)
         setHighlights(res.data()?.highlights || [])
         setLoading(false)
       })
@@ -118,6 +117,10 @@ export function Carousel({ postId }) {
       <ButtonGroup variant="solid" color="primary">
         <Button
           disabled={isDownloading}
+          sx={{
+            color: "#fff",
+            background: "#003399"
+          }}
           onClick={() => {
             setIsDownloading(true)
             downloadPDF(ids, data.id, (res) => {
@@ -129,12 +132,26 @@ export function Carousel({ postId }) {
           Save PDF
         </Button>
         {highlights.length === 0 && (
-          <Button disabled={isDownloading} onClick={createHighlights}>
+          <Button
+            disabled={isDownloading}
+            onClick={createHighlights}
+            sx={{
+              color: "#fff",
+              background: "#003399"
+            }}
+          >
             Add Highlights
           </Button>
         )}
         {highlights.length > 0 && (
-          <Button disabled={isDownloading} onClick={removeHighlights}>
+          <Button
+            disabled={isDownloading}
+            onClick={removeHighlights}
+            sx={{
+              color: "#fff",
+              background: "#003399"
+            }}
+          >
             Remove Highlights
           </Button>
         )}

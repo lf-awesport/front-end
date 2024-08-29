@@ -7,6 +7,7 @@ import { TextAnalysis } from "@/components/textAnalysis"
 import { WordCloud } from "@/components/wordcloud"
 import { Daily } from "@/components/daily"
 import { Takeaways } from "@/components/takeaways"
+import { Header } from "@/components/header"
 import { useState, useEffect } from "react"
 import {
   Divider,
@@ -29,7 +30,7 @@ export default function Post({ params }) {
 
     if (!params.id) {
       setPathname(usePathname())
-      postId = pathname.split("/post/")
+      postId = pathname.split("/")
     } else {
       postId = params.id
     }
@@ -57,14 +58,11 @@ export default function Post({ params }) {
 
   return (
     <main className={styles.main}>
-      <div className={styles.description}>
-        <a href="/posts">
-          <code className={styles.code}>Back</code>
+      <Header>
+        <a href="/">
+          <code className={styles.code}>Home</code>
         </a>
-        <a href={data.url} target="_blank">
-          <code className={styles.code}>{data.title}</code>
-        </a>
-      </div>
+      </Header>
       <Tabs aria-label="Basic tabs" defaultValue={0}>
         <TabList>
           <Tab>Info</Tab>
@@ -80,9 +78,11 @@ export default function Post({ params }) {
           value={0}
         >
           <div className={styles.summary}>
-            <Typography level="h1" color="fff" style={{ marginBottom: 20 }}>
-              {data.title}
-            </Typography>
+            <a href={data.url} target="_blank">
+              <Typography level="h1" color="fff" style={{ marginBottom: 20 }}>
+                {data.title}
+              </Typography>
+            </a>
             <div className={styles.subSummary}>
               <img className={styles.img} src={data.imgLink} />
               <div className={styles.summaryText}>
