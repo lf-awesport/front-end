@@ -14,6 +14,7 @@ import Input from "@mui/joy/Input"
 import { getPosts, scrapePosts } from "@/utils/api"
 import Button from "@mui/joy/Button"
 import { Header } from "@/components/header"
+import { Avatar } from "@mui/joy"
 
 export default function Posts() {
   const [defaultData, setDefaultData] = useState(null)
@@ -48,7 +49,7 @@ export default function Posts() {
   }
 
   useEffect(() => {
-    getPosts("posts", null, (posts, lastVisible) => {
+    getPosts("sentiment", null, (posts, lastVisible) => {
       setDefaultData(posts)
       setData(_.orderBy(posts, [sortOrder], ["desc"]))
       setCursor(lastVisible)
@@ -57,7 +58,7 @@ export default function Posts() {
   }, [])
 
   const nextPage = async () => {
-    getPosts("posts", cursor, (posts, lastVisible) => {
+    getPosts("sentiment", cursor, (posts, lastVisible) => {
       let newPosts = defaultData.concat(posts)
       setDefaultData(newPosts)
       setData(_.orderBy(newPosts, [sortOrder], ["desc"]))
@@ -65,6 +66,19 @@ export default function Posts() {
       setCursor(lastVisible)
       setLoading(false)
     })
+  }
+
+  const colorP = (punteggio) => {
+    if (punteggio === 0) return "neutral"
+    if (punteggio < 25) return "success"
+    if (punteggio > 59) return "danger"
+    if (punteggio > 25) return "warning"
+  }
+
+  const color = (punteggio) => {
+    if (punteggio > 64) return "success"
+    if (punteggio > 33) return "warning"
+    if (punteggio > 0) return "danger"
   }
 
   if (isLoading)
@@ -145,19 +159,65 @@ export default function Posts() {
         <Table>
           <thead>
             <tr>
-              <th style={{ width: "35%" }}>Title</th>
-              <th style={{ width: "35%" }}>Excerpt</th>
-              <th style={{ width: "15%" }}>Date</th>
-              <th style={{ width: "15%" }}>Author</th>
+              <th style={{ width: "45%" }}>Titolo</th>
+              <th style={{ width: "10%", textAlign: "center" }}>Leggibilità</th>
+              <th style={{ width: "10%", textAlign: "center" }}>Coerenza</th>
+              <th style={{ width: "10%", textAlign: "center" }}>Pregiudizio</th>
+              <th style={{ width: "10%", textAlign: "center" }}>Data</th>
+              <th style={{ width: "15%", textAlign: "center" }}>Autore</th>
             </tr>
           </thead>
           <tbody>
             {data.map((post) => (
               <tr key={post.id}>
-                <td>
+                <td style={{ textAlign: "left" }}>
                   <a href={`/post/${post.id}`}>{post.title}</a>
                 </td>
-                <td>{post.excerpt}</td>
+                <td>
+                  <Avatar
+                    color={color(
+                      post.analysis?.analisi_leggibilità
+                        ?.punteggio_flesch_kincaid
+                    )}
+                    sx={{ margin: "auto" }}
+                    size="md"
+                  >
+                    {
+                      post.analysis?.analisi_leggibilità
+                        ?.punteggio_flesch_kincaid
+                    }
+                  </Avatar>
+                </td>
+                <td>
+                  <Avatar
+                    color={color(
+                      post.analysis?.analisi_coesione_coerenza
+                        ?.punteggio_coerenza
+                    )}
+                    sx={{ margin: "auto" }}
+                    size="md"
+                  >
+                    {
+                      post.analysis?.analisi_coesione_coerenza
+                        ?.punteggio_coerenza
+                    }
+                  </Avatar>
+                </td>
+                <td>
+                  <Avatar
+                    color={colorP(
+                      post.analysis?.rilevazione_di_pregiudizio
+                        ?.grado_di_pregiudizio
+                    )}
+                    sx={{ margin: "auto" }}
+                    size="md"
+                  >
+                    {
+                      post.analysis?.rilevazione_di_pregiudizio
+                        ?.grado_di_pregiudizio
+                    }
+                  </Avatar>
+                </td>
                 <td>{post.date}</td>
                 <td>{post.author}</td>
               </tr>

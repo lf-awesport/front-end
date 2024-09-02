@@ -46,7 +46,11 @@ export function Takeaways({ postId }) {
             key={index}
           >
             <Avatar sx={{ marginRight: "25px" }}>{index + 1}</Avatar>
-            <Typography level="body-sm" color="fff">
+            <Typography
+              level="body-sm"
+              color="fff"
+              style={{ margin: "auto 0" }}
+            >
               {p}
             </Typography>
           </div>

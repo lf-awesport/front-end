@@ -14,9 +14,9 @@ export function Coherence({ data }) {
     )
 
   const color = (punteggio) => {
-    if (punteggio < 5) return "danger"
-    if (punteggio > 7) return "success"
-    return "warning"
+    if (punteggio > 64) return "success"
+    if (punteggio > 33) return "warning"
+    if (punteggio > 0) return "danger"
   }
 
   return (

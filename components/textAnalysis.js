@@ -7,7 +7,6 @@ import { getSentimentAnalysis } from "@/utils/api"
 import { Sentiment } from "./sentiment"
 import { Coherence } from "./coherence"
 import { Readability } from "./readability"
-import { Style } from "./style"
 import { Prejudice } from "./prejudice"
 
 export function TextAnalysis({ postId }) {
@@ -41,8 +40,6 @@ export function TextAnalysis({ postId }) {
       <Sentiment data={data.analysis.rilevazione_emozioni} />
       <Divider />
       <Readability data={data.analysis.analisi_leggibilità} />
-      <Divider />
-      <Style data={data.analysis.analisi_tono_stile} />
       <Divider />
       <Coherence data={data.analysis.analisi_coesione_coerenza} />
       <Divider />

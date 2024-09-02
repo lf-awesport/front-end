@@ -13,18 +13,11 @@ export function Prejudice({ data }) {
       </main>
     )
 
-  const grado = (punteggio) => {
-    if (punteggio === 0) return "Nessuno"
-    if (punteggio === 1) return "Basso"
-    if (punteggio === 2) return "Moderato"
-    if (punteggio === 3) return "Alto"
-  }
-
   const color = (punteggio) => {
-    if (punteggio === 0) return "success"
-    if (punteggio === 1) return "neutral"
-    if (punteggio === 2) return "warning"
-    if (punteggio === 3) return "danger"
+    if (punteggio === 0) return "neutral"
+    if (punteggio < 25) return "success"
+    if (punteggio > 59) return "danger"
+    if (punteggio > 25) return "warning"
   }
 
   return (
@@ -35,12 +28,9 @@ export function Prejudice({ data }) {
             <Typography level="h4" color="fff" style={{ marginBottom: 20 }}>
               Pregiudizio
             </Typography>
-            <Typography
-              level="body-sm"
-              color={color(data.grado_di_pregiudizio)}
-            >
-              {grado(data.grado_di_pregiudizio)}
-            </Typography>
+            <Avatar color={color(data.grado_di_pregiudizio)} size="lg">
+              {data.grado_di_pregiudizio}
+            </Avatar>
           </div>
           <div className={styles.explanationContainer}>
             <Typography

@@ -14,9 +14,9 @@ export function Readability({ data }) {
     )
 
   const color = (punteggio) => {
-    if (punteggio < 50) return "danger"
-    if (punteggio > 70) return "success"
-    return "warning"
+    if (punteggio > 64) return "success"
+    if (punteggio > 33) return "warning"
+    if (punteggio > 0) return "danger"
   }
 
   return (
