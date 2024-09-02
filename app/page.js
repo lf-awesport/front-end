@@ -49,7 +49,7 @@ export default function Posts() {
   }
 
   useEffect(() => {
-    getPosts("sentiment", null, (posts, lastVisible) => {
+    getPosts("preview", null, (posts, lastVisible) => {
       setDefaultData(posts)
       setData(_.orderBy(posts, [sortOrder], ["desc"]))
       setCursor(lastVisible)
@@ -58,7 +58,7 @@ export default function Posts() {
   }, [])
 
   const nextPage = async () => {
-    getPosts("sentiment", cursor, (posts, lastVisible) => {
+    getPosts("preview", cursor, (posts, lastVisible) => {
       let newPosts = defaultData.concat(posts)
       setDefaultData(newPosts)
       setData(_.orderBy(newPosts, [sortOrder], ["desc"]))
@@ -120,7 +120,14 @@ export default function Posts() {
               value={sortOrder}
               onChange={(event, newValue) => sortPosts(newValue)}
             >
-              {["date", "title", "author"].map((axis) => (
+              {[
+                "date",
+                "title",
+                "author",
+                "readability",
+                "coherence",
+                "prejudice"
+              ].map((axis) => (
                 <Option key={axis} value={axis}>
                   {axis}
                 </Option>
@@ -175,47 +182,29 @@ export default function Posts() {
                 </td>
                 <td>
                   <Avatar
-                    color={color(
-                      post.analysis?.analisi_leggibilità
-                        ?.punteggio_flesch_kincaid
-                    )}
+                    color={color(post.readability)}
                     sx={{ margin: "auto" }}
                     size="md"
                   >
-                    {
-                      post.analysis?.analisi_leggibilità
-                        ?.punteggio_flesch_kincaid
-                    }
+                    {post.readability}
                   </Avatar>
                 </td>
                 <td>
                   <Avatar
-                    color={color(
-                      post.analysis?.analisi_coesione_coerenza
-                        ?.punteggio_coerenza
-                    )}
+                    color={color(post.coherence)}
                     sx={{ margin: "auto" }}
                     size="md"
                   >
-                    {
-                      post.analysis?.analisi_coesione_coerenza
-                        ?.punteggio_coerenza
-                    }
+                    {post.coherence}
                   </Avatar>
                 </td>
                 <td>
                   <Avatar
-                    color={colorP(
-                      post.analysis?.rilevazione_di_pregiudizio
-                        ?.grado_di_pregiudizio
-                    )}
+                    color={colorP(post.prejudice)}
                     sx={{ margin: "auto" }}
                     size="md"
                   >
-                    {
-                      post.analysis?.rilevazione_di_pregiudizio
-                        ?.grado_di_pregiudizio
-                    }
+                    {post.prejudice}
                   </Avatar>
                 </td>
                 <td>{post.date}</td>
