@@ -58,6 +58,7 @@ export default function Posts() {
   }, [])
 
   const nextPage = async () => {
+    setLoading(true) //todo find a more elegant solution
     getPosts("preview", cursor, (posts, lastVisible) => {
       let newPosts = defaultData.concat(posts)
       setDefaultData(newPosts)
@@ -134,6 +135,19 @@ export default function Posts() {
               ))}
             </Select>
           </div>
+        </FormControl>
+        <FormControl
+          orientation="horizontal"
+          sx={{
+            mb: 2,
+            ml: 1,
+            mt: 2,
+            display: "flex",
+            justifyContent: "space-between",
+            height: "50px",
+            alignItems: "center"
+          }}
+        >
           <div>
             <FormLabel>Search</FormLabel>
             <Input
