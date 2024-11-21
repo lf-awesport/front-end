@@ -13,26 +13,34 @@ import {
 import db from "./firestore"
 import axios from "axios"
 
-export const getPosts = (route, cursor, callback) => {
+export const getPosts = async (route, cursor) => {
   let posts = []
+  let res = { posts: [], lastVisible: null }
   let q
+
   if (!cursor) {
-    q = query(collection(db, route), orderBy("date", "desc"), limit(50))
-  } else if (cursor) {
+    q = query(collection(db, route), orderBy("date", "desc"), limit(25))
+  } else {
     q = query(
       collection(db, route),
       orderBy("date", "desc"),
       startAfter(cursor),
-      limit(50)
+      limit(25)
     )
   }
-  getDocs(q).then((snapshot) => {
-    snapshot.forEach((doc) => {
-      posts.push(doc.data())
-    })
-    const lastVisible = snapshot.docs[snapshot.docs.length - 1]
-    return callback(posts, lastVisible)
+
+  const snapshot = await getDocs(q)
+
+  snapshot.forEach((doc) => {
+    posts.push({ id: doc.id, ...doc.data() }) // Ensure document ID is included
   })
+
+  const lastVisible =
+    snapshot.docs.length > 0 ? snapshot.docs[snapshot.docs.length - 1] : null
+
+  res = { posts, lastVisible }
+
+  return res
 }
 
 export const getPost = (id, callback) => {

@@ -24,6 +24,7 @@ export default function Posts() {
   const [sortOrder, setSortOrder] = useState("date")
   const [searchFilter, setSearchFilter] = useState("")
   const [cursor, setCursor] = useState(null)
+  const [hasMore, setHasMore] = useState(true)
 
   const filterPosts = (newFilter) => {
     setSearchFilter(newFilter)
@@ -52,24 +53,46 @@ export default function Posts() {
   }
 
   useEffect(() => {
-    getPosts("sentiment", null, (posts, lastVisible) => {
-      setDefaultData(posts)
-      setData(_.orderBy(posts, [sortOrder], ["desc"]))
-      setCursor(lastVisible)
+    getPosts("sentiment", null).then((res) => {
+      console.log(res)
+      setDefaultData(res.posts)
+      setData(_.orderBy(res.posts, [sortOrder], ["desc"]))
+      setCursor(res.lastVisible)
       setLoading(false)
     })
   }, [])
 
   const nextPage = async () => {
-    setLoading(true) //todo find a more elegant solution
-    getPosts("sentiment", cursor, (posts, lastVisible) => {
-      let newPosts = defaultData.concat(posts)
-      setDefaultData(newPosts)
-      setData(_.orderBy(newPosts, [sortOrder], ["desc"]))
-      filterPosts(searchFilter)
-      setCursor(lastVisible)
-      setLoading(false)
-    })
+    const res = await getPosts("sentiment", cursor)
+
+    if (res.posts.length === 0) {
+      console.log("No more posts to fetch")
+      return // Exit if no more posts are available
+    }
+
+    const newPosts = res.posts.filter(
+      (newPost) =>
+        !defaultData.some((existingPost) => existingPost.id === newPost.id)
+    )
+    const updatedPosts = defaultData.concat(newPosts)
+
+    setDefaultData(updatedPosts)
+
+    const filteredData = searchFilter
+      ? updatedPosts.filter(
+          (e) =>
+            e.title.toLowerCase().includes(searchFilter.toLowerCase()) ||
+            e.tags.some((t) =>
+              t.toLowerCase().includes(searchFilter.toLowerCase())
+            )
+        )
+      : updatedPosts
+
+    setData(_.orderBy(filteredData, [sortOrder], ["desc"]))
+    setCursor(res.lastVisible) // Update cursor for pagination
+    if (!res.lastVisible) {
+      setHasMore(false) // Disable "Load More" button
+    }
   }
 
   const colorP = (punteggio) => {
@@ -238,8 +261,8 @@ export default function Posts() {
         </Table>
       </Sheet>
       <Button
+        disabled={hasMore}
         style={{ margin: 25 }}
-        disabled={isLoading}
         onClick={() => {
           nextPage()
         }}
