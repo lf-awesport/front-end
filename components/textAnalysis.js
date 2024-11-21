@@ -1,30 +1,12 @@
 "use client"
 
 import styles from "./carousel.module.css"
-import { useState, useEffect } from "react"
-import { CircularProgress, Typography, Divider } from "@mui/joy"
-import { getSentimentAnalysis } from "@/utils/api"
+import { Typography, Divider } from "@mui/joy"
 import { Sentiment } from "./sentiment"
 import { Readability } from "./readability"
 import { Prejudice } from "./prejudice"
 
-export function TextAnalysis({ postId }) {
-  const [data, setData] = useState(null)
-  const [isLoading, setLoading] = useState(true)
-
-  useEffect(() => {
-    getSentimentAnalysis(postId, (res) => {
-      setData(res.data)
-      setLoading(false)
-    })
-  }, [])
-
-  if (isLoading)
-    return (
-      <main className={styles.loading}>
-        <CircularProgress variant="solid" size="lg" />
-      </main>
-    )
+export function TextAnalysis({ data }) {
   if (!data)
     return (
       <main className={styles.loading}>

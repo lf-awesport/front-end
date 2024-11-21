@@ -37,7 +37,7 @@ export const getPosts = (route, cursor, callback) => {
 
 export const getPost = (id, callback) => {
   let post
-  const docRef = doc(db, "posts", id)
+  const docRef = doc(db, "sentiment", id)
   getDoc(docRef).then((res) => {
     post = res.data()
     callback(post)

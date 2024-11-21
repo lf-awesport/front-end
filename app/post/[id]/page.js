@@ -113,9 +113,9 @@ export default function Post({ params }) {
             </div>
           </div>
           <Divider />
-          <WordCloud postId={data.id} />
+          <WordCloud data={data} />
           <Divider />
-          <TextAnalysis postId={data.id} />
+          <TextAnalysis data={data} />
         </TabPanel>
         <TabPanel
           sx={{
@@ -124,7 +124,7 @@ export default function Post({ params }) {
           }}
           value={1}
         >
-          <Takeaways postId={data.id} />
+          <Takeaways data={data} />
         </TabPanel>
         <TabPanel
           sx={{

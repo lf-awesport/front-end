@@ -1,32 +1,16 @@
 "use client"
 
 import styles from "./carousel.module.css"
-import { useState, useEffect } from "react"
-import { CircularProgress, Typography } from "@mui/joy"
-import { getWordCloud } from "@/utils/api"
+import { useState } from "react"
+import { Typography } from "@mui/joy"
 import { Text } from "@visx/text"
 import { scaleLog } from "@visx/scale"
 import Wordcloud from "@visx/wordcloud/lib/Wordcloud"
 
-export function WordCloud({ postId }) {
-  const [data, setData] = useState(null)
-  const [isLoading, setLoading] = useState(true)
+export function WordCloud({ data }) {
   const [spiralType, setSpiralType] = useState("archimedean")
   const [withRotation, setWithRotation] = useState(false)
 
-  useEffect(() => {
-    getWordCloud(postId, (res) => {
-      setData(res.data)
-      setLoading(false)
-    })
-  }, [])
-
-  if (isLoading)
-    return (
-      <main className={styles.loading}>
-        <CircularProgress variant="solid" size="lg" />
-      </main>
-    )
   if (!data)
     return (
       <main className={styles.loading}>
@@ -38,7 +22,8 @@ export function WordCloud({ postId }) {
 
   const width = 1080
   const height = 450
-  const words = wordFreq(data.text.text)
+  console.log(data)
+  const words = wordFreq(data.analysis?.cleanText)
   const colors = ["#0D47A1", "#1976D2", "#2196F3", "#BBDEFB", "#000"]
   function wordFreq(text) {
     const words = text.replace(/\./g, "").split(/\s/)

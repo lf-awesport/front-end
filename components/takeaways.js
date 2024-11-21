@@ -1,29 +1,9 @@
 "use client"
 
 import styles from "./carousel.module.css"
-import { useState, useEffect } from "react"
-import { Typography, CircularProgress, Avatar } from "@mui/joy"
-import { getTakeaways } from "@/utils/api"
+import { Typography, Avatar } from "@mui/joy"
 
-export function Takeaways({ postId }) {
-  const [data, setData] = useState([])
-  const [isLoading, setLoading] = useState(true)
-
-  useEffect(() => {
-    setLoading(true)
-
-    getTakeaways(postId, (res) => {
-      setData(res.data?.takeaways?.takeaways)
-      setLoading(false)
-    })
-  }, [])
-
-  if (isLoading)
-    return (
-      <main className={styles.loading}>
-        <CircularProgress variant="solid" size="lg" />
-      </main>
-    )
+export function Takeaways({ data }) {
   if (!data)
     return (
       <main className={styles.loading}>
@@ -39,7 +19,7 @@ export function Takeaways({ postId }) {
         Key Takeways
       </Typography>
       <div className={styles.textContainer}>
-        {data.map((p, index) => (
+        {data.analysis.takeaways.map((p, index) => (
           <div
             className={styles.paragraph}
             style={{ display: "flex" }}
