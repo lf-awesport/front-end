@@ -269,3 +269,7 @@
 .MuiButtonBase-root {
   color: "#fff" !important;
 }
+
+.tags > button {
+  margin-right: 2px !important;
+}

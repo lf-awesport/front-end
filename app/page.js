@@ -14,6 +14,7 @@ import Input from "@mui/joy/Input"
 import { getPosts, scrapePosts } from "@/utils/api"
 import Button from "@mui/joy/Button"
 import { Header } from "@/components/header"
+import { getCategoryDetails } from "@/utils/helpers"
 import { Avatar } from "@mui/joy"
 
 export default function Posts() {
@@ -180,11 +181,15 @@ export default function Posts() {
           <thead>
             <tr>
               <th style={{ width: "45%" }}>Titolo</th>
-              <th style={{ width: "10%", textAlign: "center" }}>Leggibilità</th>
-              <th style={{ width: "10%", textAlign: "center" }}>Pregiudizio</th>
+              <th style={{ width: "7.5%", textAlign: "center" }}>
+                Leggibilità
+              </th>
+              <th style={{ width: "7.5%", textAlign: "center" }}>
+                Pregiudizio
+              </th>
               <th style={{ width: "10%", textAlign: "center" }}>Data</th>
               <th style={{ width: "10%", textAlign: "center" }}>Autore</th>
-              <th style={{ width: "15%", textAlign: "center" }}>Tags</th>
+              <th style={{ width: "20%", textAlign: "center" }}>Tags</th>
             </tr>
           </thead>
           <tbody>
@@ -213,7 +218,20 @@ export default function Posts() {
                 </td>
                 <td>{post.date}</td>
                 <td>{post.author}</td>
-                <td>{post.tags}</td>
+                <td className={styles.tags}>
+                  {post.tags.map((tag) => (
+                    <Button
+                      size="sm"
+                      sx={{
+                        color: "#fff",
+                        background: getCategoryDetails(tag).color,
+                        pointerEvents: "none"
+                      }}
+                    >
+                      {getCategoryDetails(tag).acronym}
+                    </Button>
+                  ))}
+                </td>
               </tr>
             ))}
           </tbody>

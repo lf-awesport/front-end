@@ -11,6 +11,7 @@ import { Header } from "@/components/header"
 import { useState, useEffect } from "react"
 import {
   Divider,
+  Button,
   CircularProgress,
   Typography,
   Tab,
@@ -19,6 +20,7 @@ import {
   TabPanel
 } from "@mui/joy"
 import { getPost } from "@/utils/api"
+import { getCategoryDetails } from "@/utils/helpers"
 
 export default function Post({ params }) {
   const [data, setData] = useState(null)
@@ -109,6 +111,21 @@ export default function Post({ params }) {
                 >
                   {data.excerpt}
                 </Typography>
+                <Divider />
+                <div className={styles.tags}>
+                  {data.tags.map((tag) => (
+                    <Button
+                      size="sm"
+                      sx={{
+                        color: "#fff",
+                        background: getCategoryDetails(tag).color,
+                        pointerEvents: "none"
+                      }}
+                    >
+                      {getCategoryDetails(tag).acronym}
+                    </Button>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
