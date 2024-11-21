@@ -32,7 +32,9 @@ export default function Posts() {
           defaultData.filter(
             (e) =>
               e.title.toLowerCase().includes(newFilter.toLowerCase()) ||
-              e.excerpt.toLowerCase().includes(newFilter.toLowerCase())
+              e.tags.some((t) =>
+                t.toLowerCase().includes(newFilter.toLowerCase())
+              )
           ),
           [sortOrder],
           ["desc"]
@@ -49,7 +51,7 @@ export default function Posts() {
   }
 
   useEffect(() => {
-    getPosts("preview", null, (posts, lastVisible) => {
+    getPosts("sentiment", null, (posts, lastVisible) => {
       setDefaultData(posts)
       setData(_.orderBy(posts, [sortOrder], ["desc"]))
       setCursor(lastVisible)
@@ -59,7 +61,7 @@ export default function Posts() {
 
   const nextPage = async () => {
     setLoading(true) //todo find a more elegant solution
-    getPosts("preview", cursor, (posts, lastVisible) => {
+    getPosts("sentiment", cursor, (posts, lastVisible) => {
       let newPosts = defaultData.concat(posts)
       setDefaultData(newPosts)
       setData(_.orderBy(newPosts, [sortOrder], ["desc"]))
@@ -92,7 +94,7 @@ export default function Posts() {
 
   return (
     <main className={styles.main}>
-      <Header></Header>
+      <Header />
       <Sheet
         variant="outlined"
         sx={{
@@ -115,24 +117,21 @@ export default function Posts() {
           }}
         >
           <div>
+            <FormLabel>Articoli Caricati: {data.length}</FormLabel>
+
             <FormLabel>Sort by:</FormLabel>
             <Select
               size="sm"
               value={sortOrder}
               onChange={(event, newValue) => sortPosts(newValue)}
             >
-              {[
-                "date",
-                "title",
-                "author",
-                "readability",
-                "coherence",
-                "prejudice"
-              ].map((axis) => (
-                <Option key={axis} value={axis}>
-                  {axis}
-                </Option>
-              ))}
+              {["date", "title", "author", "readability", "prejudice"].map(
+                (axis) => (
+                  <Option key={axis} value={axis}>
+                    {axis}
+                  </Option>
+                )
+              )}
             </Select>
           </div>
         </FormControl>
@@ -182,10 +181,10 @@ export default function Posts() {
             <tr>
               <th style={{ width: "45%" }}>Titolo</th>
               <th style={{ width: "10%", textAlign: "center" }}>Leggibilità</th>
-              <th style={{ width: "10%", textAlign: "center" }}>Coerenza</th>
               <th style={{ width: "10%", textAlign: "center" }}>Pregiudizio</th>
               <th style={{ width: "10%", textAlign: "center" }}>Data</th>
-              <th style={{ width: "15%", textAlign: "center" }}>Autore</th>
+              <th style={{ width: "10%", textAlign: "center" }}>Autore</th>
+              <th style={{ width: "15%", textAlign: "center" }}>Tags</th>
             </tr>
           </thead>
           <tbody>
@@ -205,15 +204,6 @@ export default function Posts() {
                 </td>
                 <td>
                   <Avatar
-                    color={color(post.coherence)}
-                    sx={{ margin: "auto" }}
-                    size="md"
-                  >
-                    {post.coherence}
-                  </Avatar>
-                </td>
-                <td>
-                  <Avatar
                     color={colorP(post.prejudice)}
                     sx={{ margin: "auto" }}
                     size="md"
@@ -223,6 +213,7 @@ export default function Posts() {
                 </td>
                 <td>{post.date}</td>
                 <td>{post.author}</td>
+                <td>{post.tags}</td>
               </tr>
             ))}
           </tbody>

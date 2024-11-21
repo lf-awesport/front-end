@@ -5,7 +5,6 @@ import { useState, useEffect } from "react"
 import { CircularProgress, Typography, Divider } from "@mui/joy"
 import { getSentimentAnalysis } from "@/utils/api"
 import { Sentiment } from "./sentiment"
-import { Coherence } from "./coherence"
 import { Readability } from "./readability"
 import { Prejudice } from "./prejudice"
 
@@ -40,8 +39,6 @@ export function TextAnalysis({ postId }) {
       <Sentiment data={data.analysis.rilevazione_emozioni} />
       <Divider />
       <Readability data={data.analysis.analisi_leggibilità} />
-      <Divider />
-      <Coherence data={data.analysis.analisi_coesione_coerenza} />
       <Divider />
       <Prejudice data={data.analysis.rilevazione_di_pregiudizio} />
       <Divider />
