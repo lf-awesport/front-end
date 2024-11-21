@@ -54,7 +54,6 @@ export default function Posts() {
 
   useEffect(() => {
     getPosts("sentiment", null).then((res) => {
-      console.log(res)
       setDefaultData(res.posts)
       setData(_.orderBy(res.posts, [sortOrder], ["desc"]))
       setCursor(res.lastVisible)
@@ -66,7 +65,7 @@ export default function Posts() {
     const res = await getPosts("sentiment", cursor)
 
     if (res.posts.length === 0) {
-      console.log("No more posts to fetch")
+      setHasMore(false)
       return // Exit if no more posts are available
     }
 
@@ -90,9 +89,6 @@ export default function Posts() {
 
     setData(_.orderBy(filteredData, [sortOrder], ["desc"]))
     setCursor(res.lastVisible) // Update cursor for pagination
-    if (!res.lastVisible) {
-      setHasMore(false) // Disable "Load More" button
-    }
   }
 
   const colorP = (punteggio) => {
@@ -244,6 +240,7 @@ export default function Posts() {
                 <td className={styles.tags}>
                   {post.tags.map((tag) => (
                     <Button
+                      key={`${tag} + ${post.id}`}
                       size="sm"
                       sx={{
                         color: "#fff",
@@ -261,7 +258,7 @@ export default function Posts() {
         </Table>
       </Sheet>
       <Button
-        disabled={hasMore}
+        disabled={!hasMore}
         style={{ margin: 25 }}
         onClick={() => {
           nextPage()

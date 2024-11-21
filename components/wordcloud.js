@@ -22,7 +22,6 @@ export function WordCloud({ data }) {
 
   const width = 1080
   const height = 450
-  console.log(data)
   const words = wordFreq(data.analysis?.cleanText)
   const colors = ["#0D47A1", "#1976D2", "#2196F3", "#BBDEFB", "#000"]
   function wordFreq(text) {

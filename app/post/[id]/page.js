@@ -115,6 +115,7 @@ export default function Post({ params }) {
                 <div className={styles.tags}>
                   {data.tags.map((tag) => (
                     <Button
+                      key={`${tag} + ${data.id}`}
                       size="sm"
                       sx={{
                         color: "#fff",
