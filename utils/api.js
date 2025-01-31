@@ -13,6 +13,8 @@ import {
 import db from "./firestore"
 import axios from "axios"
 
+const domain = process.env.DOMAIN
+
 export const getPosts = async (route, cursor) => {
   let posts = []
   let res = { posts: [], lastVisible: null }
@@ -54,7 +56,7 @@ export const getPost = (id, callback) => {
 
 export const getCarousel = (id, callback) => {
   axios
-    .get(`http://localhost:4000/getCarousel`, {
+    .get(`${domain}/getCarousel`, {
       params: {
         id
       }
@@ -70,7 +72,7 @@ export const updateCarousel = (id, updatedPost, callback) => {
 
 export const downloadPDF = (ids, id, callback) => {
   axios
-    .get(`http://localhost:4000/screenshot`, {
+    .get(`${domain}/screenshot`, {
       responseType: "blob",
       params: {
         ids,
@@ -84,7 +86,7 @@ export const downloadPDF = (ids, id, callback) => {
 
 export const getDailySummary = (date, callback) => {
   axios
-    .get(`http://localhost:4000/getDailySummary`, {
+    .get(`${domain}/getDailySummary`, {
       params: {
         date
       }
@@ -93,12 +95,12 @@ export const getDailySummary = (date, callback) => {
 }
 
 export const scrapePosts = (callback) => {
-  axios.get(`http://localhost:4000/scrapePosts`).then((res) => callback(res))
+  axios.get(`${domain}/scrapePosts`).then((res) => callback(res))
 }
 
 export const getSentimentAnalysis = (id, callback) => {
   axios
-    .get(`http://localhost:4000/getSentimentAnalysis`, {
+    .get(`${domain}/getSentimentAnalysis`, {
       params: {
         id
       }
@@ -108,7 +110,7 @@ export const getSentimentAnalysis = (id, callback) => {
 
 export const generateHighlights = (id, callback) => {
   axios
-    .get(`http://localhost:4000/generateHighlights`, {
+    .get(`${domain}/generateHighlights`, {
       params: {
         id
       }
