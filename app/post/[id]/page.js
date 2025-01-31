@@ -154,7 +154,8 @@ export default function Post({ params }) {
           }}
           value={2}
         >
-          <Carousel postId={data.id} />
+          Coming soon
+          {/* <Carousel postId={data.id} /> */}
         </TabPanel>
         <TabPanel
           sx={{
@@ -163,7 +164,8 @@ export default function Post({ params }) {
           }}
           value={3}
         >
-          <Daily date={data.date} />
+          Coming soon
+          {/* <Daily date={data.date} /> */}
         </TabPanel>
       </Tabs>
     </main>
