@@ -24,14 +24,16 @@ import { getCategoryDetails } from "@/utils/helpers"
 
 export default function Post({ params }) {
   const [data, setData] = useState(null)
-  const [pathname, setPathname] = useState(null)
+  const [getPathname, setPathname] = useState(null)
   const [isLoading, setLoading] = useState(true)
+
+  const pathname = usePathname()
 
   useEffect(() => {
     let postId
 
     if (!params.id) {
-      setPathname(usePathname())
+      setPathname(pathname)
       postId = pathname.split("/")
     } else {
       postId = params.id
@@ -41,7 +43,7 @@ export default function Post({ params }) {
       setData(res)
       setLoading(false)
     })
-  }, [])
+  }, [params?.id, pathname])
 
   if (isLoading)
     return (
