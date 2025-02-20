@@ -43,7 +43,7 @@ export default function Post({ params }) {
       setData(res)
       setLoading(false)
     })
-  }, [params?.id, pathname])
+  }, [])
 
   if (isLoading)
     return (
@@ -154,8 +154,7 @@ export default function Post({ params }) {
           }}
           value={2}
         >
-          Coming soon
-          {/* <Carousel postId={data.id} /> */}
+          <Carousel postId={data.id} />
         </TabPanel>
         <TabPanel
           sx={{
@@ -164,8 +163,7 @@ export default function Post({ params }) {
           }}
           value={3}
         >
-          Coming soon
-          {/* <Daily date={data.date} /> */}
+          <Daily date={data.date} />
         </TabPanel>
       </Tabs>
     </main>

@@ -86,7 +86,7 @@ export const downloadPDF = (ids, id, callback) => {
 
 export const getDailySummary = (date, callback) => {
   axios
-    .get(`${domain}/getDailySummary`, {
+    .get(`https://dashboard-backend-six-pi.vercel.app/getDailySummary`, {
       params: {
         date
       }
@@ -95,7 +95,7 @@ export const getDailySummary = (date, callback) => {
 }
 
 export const scrapePosts = (callback) => {
-  axios.get(`${domain}/scrapePosts`).then((res) => callback(res))
+  axios.get(`${domain}/update`).then((res) => callback(res))
 }
 
 export const getSentimentAnalysis = (id, callback) => {
