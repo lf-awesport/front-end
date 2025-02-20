@@ -13,7 +13,7 @@ import {
 import db from "./firestore"
 import axios from "axios"
 
-const domain = process.env.DOMAIN
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"
 
 export const getPosts = async (route, cursor) => {
   let posts = []
@@ -56,7 +56,7 @@ export const getPost = (id, callback) => {
 
 export const getCarousel = (id, callback) => {
   axios
-    .get(`${domain}/getCarousel`, {
+    .get(`${API_URL}/getCarousel`, {
       params: {
         id
       }
@@ -84,28 +84,8 @@ export const downloadPDF = (ids, id, callback) => {
     })
 }
 
-export const getDailySummary = (date, callback) => {
-  axios
-    .get(`https://dashboard-backend-six-pi.vercel.app/getDailySummary`, {
-      params: {
-        date
-      }
-    })
-    .then((res) => callback(res))
-}
-
 export const scrapePosts = (callback) => {
-  axios.get(`${domain}/update`).then((res) => callback(res))
-}
-
-export const getSentimentAnalysis = (id, callback) => {
-  axios
-    .get(`${domain}/getSentimentAnalysis`, {
-      params: {
-        id
-      }
-    })
-    .then((res) => callback(res))
+  axios.get(`${API_URL}/update`).then((res) => callback(res))
 }
 
 export const generateHighlights = (id, callback) => {

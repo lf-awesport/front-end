@@ -20,7 +20,7 @@ import { Avatar } from "@mui/joy"
 export default function Posts() {
   const [defaultData, setDefaultData] = useState(null)
   const [data, setData] = useState(null)
-  const [isLoading, setLoading] = useState(true)
+  const [isLoading, setLoading] = useState(false)
   const [sortOrder, setSortOrder] = useState("date")
   const [searchFilter, setSearchFilter] = useState("")
   const [cursor, setCursor] = useState(null)
@@ -104,13 +104,12 @@ export default function Posts() {
     if (punteggio > 0) return "danger"
   }
 
-  if (isLoading)
+  if (isLoading || !data)
     return (
       <main className={styles.loading}>
         <CircularProgress variant="solid" size="lg" />
       </main>
     )
-  if (!data) return <p>No profile data</p>
 
   return (
     <main className={styles.main}>
