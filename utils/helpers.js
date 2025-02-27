@@ -9,7 +9,8 @@ export const getCategoryDetails = (category) => {
     "Sport for Good": { color: "#00ACC1", acronym: "SFG" },
     "Sport Equipment": { color: "#5D4037", acronym: "EQP" },
     "Sport Tourism": { color: "#7CB342", acronym: "TOU" },
-    Media: { color: "#424242", acronym: "MED" }
+    Media: { color: "#424242", acronym: "MED" },
+    "Fan Experience": { color: "purples", acronym: "EXP" }
   }
 
   return categoryDetails[category] || { color: "#000000", acronym: "UNK" } // Default to black and "UNK" for unknown categories
