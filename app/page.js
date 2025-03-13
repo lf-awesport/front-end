@@ -237,19 +237,21 @@ export default function Posts() {
                 <td>{post.date}</td>
                 <td>{post.author}</td>
                 <td className={styles.tags}>
-                  {post.tags.map((tag) => (
-                    <Button
-                      key={`${tag} + ${post.id}`}
-                      size="sm"
-                      sx={{
-                        color: "#fff",
-                        background: getCategoryDetails(tag).color,
-                        pointerEvents: "none"
-                      }}
-                    >
-                      {getCategoryDetails(tag).acronym}
-                    </Button>
-                  ))}
+                  {post.tags.map((tag) =>
+                    getCategoryDetails(tag).acronym !== "UNK" ? (
+                      <Button
+                        key={`${tag} + ${post.id}`}
+                        size="sm"
+                        sx={{
+                          color: "#fff",
+                          background: getCategoryDetails(tag).color,
+                          pointerEvents: "none"
+                        }}
+                      >
+                        {getCategoryDetails(tag).acronym}
+                      </Button>
+                    ) : null
+                  )}
                 </td>
               </tr>
             ))}
