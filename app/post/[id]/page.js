@@ -5,6 +5,7 @@ import styles from "./post.module.css"
 import { TextAnalysis } from "@/components/textAnalysis"
 import { WordCloud } from "@/components/wordcloud"
 import { Takeaways } from "@/components/takeaways"
+import { Suggestions } from "@/components/suggestions"
 import { Header } from "@/components/header"
 import { useState, useEffect } from "react"
 import {
@@ -69,6 +70,8 @@ export default function Post({ params }) {
         <TabList>
           <Tab>Info</Tab>
           <Tab>Key Takeaways</Tab>
+          <Tab>Related Articles</Tab>
+          <Tab>Chat</Tab>
         </TabList>
         <TabPanel
           sx={{
@@ -141,6 +144,16 @@ export default function Post({ params }) {
           value={1}
         >
           <Takeaways data={data} />
+        </TabPanel>
+        <Divider />
+        <TabPanel
+          sx={{
+            width: "1180px",
+            padding: "0 50px"
+          }}
+          value={2}
+        >
+          <Suggestions data={data} />
         </TabPanel>
       </Tabs>
     </main>
