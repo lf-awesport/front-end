@@ -83,7 +83,7 @@ export default function Post({ params }) {
         >
           <div className={styles.summary}>
             <a href={data.url} target="_blank">
-              <Typography level="h1" color="fff" style={{ marginBottom: 20 }}>
+              <Typography level="h2" color="fff" style={{ marginBottom: 20 }}>
                 {data.title}
               </Typography>
             </a>

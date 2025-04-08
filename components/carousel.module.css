@@ -3,6 +3,10 @@
   white-space: pre-line;
 }
 
+.main {
+  margin-bottom: 40px;
+}
+
 .carouselHeadline {
   color: #fff;
   font-weight: 900;

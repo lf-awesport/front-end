@@ -22,7 +22,7 @@ export function Suggestions({ data }) {
 
   return (
     <main className={styles.main}>
-      <Typography level="h1" color="fff" style={{ margin: "50px 0" }}>
+      <Typography level="h2" color="#000" style={{ margin: "50px 0" }}>
         Related Articles
       </Typography>
       <div className={styles.textContainer}>

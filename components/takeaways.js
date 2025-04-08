@@ -7,7 +7,7 @@ export function Takeaways({ data }) {
   if (!data)
     return (
       <main className={styles.loading}>
-        <Typography level="h1" color="fff" style={{ marginBottom: 20 }}>
+        <Typography level="h1" color="#000" style={{ marginBottom: 20 }}>
           NOT FOUND
         </Typography>
       </main>
@@ -15,7 +15,7 @@ export function Takeaways({ data }) {
 
   return (
     <main className={styles.main}>
-      <Typography level="h1" color="fff" style={{ margin: "50px 0" }}>
+      <Typography level="h2" color="#000" style={{ margin: "50px 0" }}>
         Key Takeways
       </Typography>
       <div className={styles.textContainer}>
