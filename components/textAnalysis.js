@@ -20,7 +20,7 @@ export function TextAnalysis({ data }) {
     <div>
       <Sentiment data={data.analysis.rilevazione_emozioni} />
       <Divider />
-      <Readability data={data.analysis.analisi_leggibilità} />
+      <Readability data={data.analysis.analisi_leggibilita} />
       <Divider />
       <Prejudice data={data.analysis.rilevazione_di_pregiudizio} />
       <Divider />

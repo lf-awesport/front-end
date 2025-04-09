@@ -6,9 +6,7 @@ import {
   query,
   limit,
   orderBy,
-  startAfter,
-  updateDoc,
-  deleteDoc
+  startAfter
 } from "firebase/firestore"
 import db from "./firestore"
 import axios from "axios"
@@ -54,54 +52,6 @@ export const getPost = (id, callback) => {
   })
 }
 
-export const getCarousel = (id, callback) => {
-  axios
-    .get(`${API_URL}/getCarousel`, {
-      params: {
-        id
-      }
-    })
-    .then((res) => callback(res))
-}
-
-export const updateCarousel = (id, updatedPost, callback) => {
-  updateDoc(doc(db, "carousels", id), updatedPost).then(() => {
-    getCarousel(id, callback)
-  })
-}
-
-export const downloadPDF = (ids, id, callback) => {
-  axios
-    .get(`${domain}/screenshot`, {
-      responseType: "blob",
-      params: {
-        ids,
-        id
-      }
-    })
-    .then((res) => {
-      callback(res)
-    })
-}
-
 export const scrapePosts = (callback) => {
   axios.get(`${API_URL}/update`).then((res) => callback(res))
-}
-
-export const generateHighlights = (id, callback) => {
-  axios
-    .get(`${domain}/generateHighlights`, {
-      params: {
-        id
-      }
-    })
-    .then((res) => callback(res))
-}
-
-export const deleteHighlights = (id, callback) => {
-  deleteDoc(doc(db, "highlights", id)).then((res) => callback(res))
-}
-
-export const getHighlights = (id, callback) => {
-  getDoc(doc(db, "highlights", id)).then((res) => callback(res))
 }
