@@ -4,14 +4,10 @@ import dynamic from "next/dynamic"
 import styles from "./carousel.module.css"
 import { Typography } from "@mui/joy"
 
-export function ArticleChat({ data }) {
-  const articleId = data.id
-
+export function ArticleChat() {
   const DeepChat = dynamic(
     () => import("deep-chat-react").then((mod) => mod.DeepChat),
-    {
-      ssr: false
-    }
+    { ssr: false }
   )
 
   return (
@@ -23,30 +19,34 @@ export function ArticleChat({ data }) {
       <DeepChat
         style={{ borderRadius: "10px", width: "1080px", height: "600px" }}
         introMessage={{
-          text: "Fai una domanda sull'articolo o sui correlati"
+          text: "Chiedimi qualcosa su sport, finanza, calcio..."
         }}
         connect={{
-          url: `http://localhost:4000/askAgentAboutArticle?id=${articleId}`,
-          method: "GET",
-          query: { id: articleId } // per sicurezza
+          url: `http://localhost:4000/askAgent`, // ✅ solo endpoint
+          method: "POST"
         }}
         textInput={{
           placeholder: { text: "Scrivi la tua domanda qui..." }
         }}
         requestBodyLimits={{ maxMessages: -1 }}
         requestInterceptor={(details) => {
-          if (details.body && details.body.messages) {
-            const lastMessage = details.body.messages.at(-1)?.text
-            details.query = {
-              id: articleId,
-              q: lastMessage
+          const lastMessage = details.body?.messages?.at(-1)?.text
+
+          // 🔁 NON sovrascrivere il body, estendilo
+          return {
+            ...details,
+            body: {
+              ...details.body,
+              q: lastMessage // ➕ aggiungi il campo
             }
           }
-          return details
         }}
         responseInterceptor={(response) => {
           console.log("🤖 Risposta AI:", response)
-          return { text: response.answer }
+          if (response && typeof response === "object" && response.answer) {
+            return { text: response.answer }
+          }
+          return { text: "⚠️ Nessuna risposta ricevuta." }
         }}
       />
     </main>
