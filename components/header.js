@@ -7,8 +7,8 @@ export function Header({ children }) {
     <div className={styles.header}>
       <div className={styles.leftColumn}>{children}</div>
       <div className={styles.centerColumn}>
-        <Typography color="#003399" level="h1">
-          Dashboard
+        <Typography color="primary" level="h1">
+          AWE Eddy
         </Typography>
       </div>
       <div className={styles.rightColumn}>

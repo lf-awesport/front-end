@@ -13,10 +13,6 @@ export function ArticleChat() {
 
   return (
     <main className={styles.main}>
-      <Typography level="h2" color="#000" style={{ margin: "50px 0" }}>
-        Ask Eddy
-      </Typography>
-
       <DeepChat
         style={{ borderRadius: "10px", width: "1080px", height: "600px" }}
         introMessage={{

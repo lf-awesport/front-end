@@ -11,7 +11,7 @@ import _ from "lodash"
 import CircularProgress from "@mui/joy/CircularProgress"
 import FormLabel from "@mui/joy/FormLabel"
 import Input from "@mui/joy/Input"
-import { getPosts, scrapePosts } from "@/utils/api"
+import { getPosts } from "@/utils/api"
 import Button from "@mui/joy/Button"
 import { Header } from "@/components/header"
 import { getCategoryDetails } from "@/utils/helpers"
@@ -123,7 +123,7 @@ export default function Posts() {
         <TabPanel
           sx={{
             width: "1180px",
-            padding: "0 50px"
+            padding: "50px"
           }}
           value={0}
         >
@@ -196,26 +196,6 @@ export default function Posts() {
                   onChange={(e) => filterPosts(e.target.value)}
                 />
               </div>
-              <Button
-                disabled={isLoading}
-                sx={{
-                  color: "#fff",
-                  background: "#003399"
-                }}
-                onClick={() => {
-                  setLoading(true)
-                  scrapePosts(() => {
-                    setLoading(false)
-                    getPosts((posts) => {
-                      setDefaultData(_.orderBy(posts, [sortOrder], ["desc"]))
-                      setData(_.orderBy(posts, [sortOrder], ["desc"]))
-                      setLoading(false)
-                    }, "posts")
-                  })
-                }}
-              >
-                Update
-              </Button>
             </FormControl>
             <Table>
               <thead>
