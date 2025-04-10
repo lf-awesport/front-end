@@ -11,7 +11,8 @@ import {
 import db from "./firestore"
 import axios from "axios"
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"
+export const API_URL =
+  process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"
 
 export const getPosts = async (route, cursor) => {
   let posts = []
@@ -50,8 +51,4 @@ export const getPost = (id, callback) => {
     post = res.data()
     callback(post)
   })
-}
-
-export const scrapePosts = (callback) => {
-  axios.get(`${API_URL}/update`).then((res) => callback(res))
 }

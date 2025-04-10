@@ -3,6 +3,7 @@
 import dynamic from "next/dynamic"
 import styles from "./carousel.module.css"
 import { Typography } from "@mui/joy"
+import { API_URL } from "@/utils/api"
 
 export function ArticleChat() {
   const DeepChat = dynamic(
@@ -22,7 +23,7 @@ export function ArticleChat() {
           text: "Chiedimi qualcosa su sport, finanza, calcio..."
         }}
         connect={{
-          url: `http://localhost:4000/askAgent`, // ✅ solo endpoint
+          url: `${API_URL}/askAgent`, // ✅ solo endpoint
           method: "POST"
         }}
         textInput={{
