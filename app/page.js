@@ -15,7 +15,8 @@ import { getPosts, scrapePosts } from "@/utils/api"
 import Button from "@mui/joy/Button"
 import { Header } from "@/components/header"
 import { getCategoryDetails } from "@/utils/helpers"
-import { Avatar } from "@mui/joy"
+import { Avatar, Tab, Tabs, TabList, TabPanel } from "@mui/joy"
+import { ArticleChat } from "@/components/articleChat"
 
 export default function Posts() {
   const [defaultData, setDefaultData] = useState(null)
@@ -114,163 +115,186 @@ export default function Posts() {
   return (
     <main className={styles.main}>
       <Header />
-      <Sheet
-        variant="outlined"
-        sx={{
-          width: "100%",
-          boxShadow: "sm",
-          borderRadius: "sm",
-          padding: "20px"
-        }}
-      >
-        <FormControl
-          orientation="horizontal"
+      <Tabs aria-label="Basic tabs" defaultValue={0}>
+        <TabList>
+          <Tab>Chat</Tab>
+          <Tab>Search</Tab>
+        </TabList>
+        <TabPanel
           sx={{
-            mb: 2,
-            ml: 1,
-            mt: 2,
-            display: "flex",
-            justifyContent: "space-between",
-            height: "50px",
-            alignItems: "center"
+            width: "1180px",
+            padding: "0 50px"
           }}
+          value={0}
         >
-          <div>
-            <FormLabel>Articoli Caricati: {data.length}</FormLabel>
-
-            <FormLabel>Sort by:</FormLabel>
-            <Select
-              size="sm"
-              value={sortOrder}
-              onChange={(event, newValue) => sortPosts(newValue)}
+          <ArticleChat data={data} />
+        </TabPanel>
+        <TabPanel
+          sx={{
+            width: "1180px",
+            padding: "50px"
+          }}
+          value={1}
+        >
+          <Sheet
+            variant="outlined"
+            sx={{
+              width: "100%",
+              boxShadow: "sm",
+              borderRadius: "sm",
+              padding: "20px"
+            }}
+          >
+            <FormControl
+              orientation="horizontal"
+              sx={{
+                mb: 2,
+                ml: 1,
+                mt: 2,
+                display: "flex",
+                justifyContent: "space-between",
+                height: "50px",
+                alignItems: "center"
+              }}
             >
-              {["date", "title", "author", "readability", "prejudice"].map(
-                (axis) => (
-                  <Option key={axis} value={axis}>
-                    {axis}
-                  </Option>
-                )
-              )}
-            </Select>
-          </div>
-        </FormControl>
-        <FormControl
-          orientation="horizontal"
-          sx={{
-            mb: 2,
-            ml: 1,
-            mt: 2,
-            display: "flex",
-            justifyContent: "space-between",
-            height: "50px",
-            alignItems: "center"
-          }}
-        >
-          <div>
-            <FormLabel>Search</FormLabel>
-            <Input
-              placeholder="Type anything"
-              value={searchFilter}
-              onChange={(e) => filterPosts(e.target.value)}
-            />
-          </div>
+              <div>
+                <FormLabel>Articoli Caricati: {data.length}</FormLabel>
+
+                <FormLabel>Sort by:</FormLabel>
+                <Select
+                  size="sm"
+                  value={sortOrder}
+                  onChange={(event, newValue) => sortPosts(newValue)}
+                >
+                  {["date", "title", "author", "readability", "prejudice"].map(
+                    (axis) => (
+                      <Option key={axis} value={axis}>
+                        {axis}
+                      </Option>
+                    )
+                  )}
+                </Select>
+              </div>
+            </FormControl>
+            <FormControl
+              orientation="horizontal"
+              sx={{
+                mb: 2,
+                ml: 1,
+                mt: 2,
+                display: "flex",
+                justifyContent: "space-between",
+                height: "50px",
+                alignItems: "center"
+              }}
+            >
+              <div>
+                <FormLabel>Search</FormLabel>
+                <Input
+                  placeholder="Type anything"
+                  value={searchFilter}
+                  onChange={(e) => filterPosts(e.target.value)}
+                />
+              </div>
+              <Button
+                disabled={isLoading}
+                sx={{
+                  color: "#fff",
+                  background: "#003399"
+                }}
+                onClick={() => {
+                  setLoading(true)
+                  scrapePosts(() => {
+                    setLoading(false)
+                    getPosts((posts) => {
+                      setDefaultData(_.orderBy(posts, [sortOrder], ["desc"]))
+                      setData(_.orderBy(posts, [sortOrder], ["desc"]))
+                      setLoading(false)
+                    }, "posts")
+                  })
+                }}
+              >
+                Update
+              </Button>
+            </FormControl>
+            <Table>
+              <thead>
+                <tr>
+                  <th style={{ width: "45%" }}>Titolo</th>
+                  <th style={{ width: "7.5%", textAlign: "center" }}>
+                    Leggibilità
+                  </th>
+                  <th style={{ width: "7.5%", textAlign: "center" }}>
+                    Pregiudizio
+                  </th>
+                  <th style={{ width: "10%", textAlign: "center" }}>Data</th>
+                  <th style={{ width: "10%", textAlign: "center" }}>Autore</th>
+                  <th style={{ width: "20%", textAlign: "center" }}>Tags</th>
+                </tr>
+              </thead>
+              <tbody>
+                {data.map((post) => (
+                  <tr key={post.id}>
+                    <td style={{ textAlign: "left" }}>
+                      <a href={`/post/${post.id}`}>{post.title}</a>
+                    </td>
+                    <td>
+                      <Avatar
+                        color={color(post.readability)}
+                        sx={{ margin: "auto" }}
+                        size="md"
+                      >
+                        {post.readability}
+                      </Avatar>
+                    </td>
+                    <td>
+                      <Avatar
+                        color={colorP(post.prejudice)}
+                        sx={{ margin: "auto" }}
+                        size="md"
+                      >
+                        {post.prejudice}
+                      </Avatar>
+                    </td>
+                    <td>{post.date}</td>
+                    <td>{post.author}</td>
+                    <td className={styles.tags}>
+                      {post.tags.map((tag) =>
+                        getCategoryDetails(tag).acronym !== "UNK" ? (
+                          <Button
+                            key={`${tag} + ${post.id}`}
+                            size="sm"
+                            sx={{
+                              color: "#fff",
+                              background: getCategoryDetails(tag).color,
+                              pointerEvents: "none"
+                            }}
+                          >
+                            {getCategoryDetails(tag).acronym}
+                          </Button>
+                        ) : null
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </Table>
+          </Sheet>
           <Button
-            disabled={isLoading}
+            disabled={!hasMore}
+            style={{ margin: 25 }}
+            onClick={() => {
+              nextPage()
+            }}
             sx={{
               color: "#fff",
               background: "#003399"
             }}
-            onClick={() => {
-              setLoading(true)
-              scrapePosts(() => {
-                setLoading(false)
-                getPosts((posts) => {
-                  setDefaultData(_.orderBy(posts, [sortOrder], ["desc"]))
-                  setData(_.orderBy(posts, [sortOrder], ["desc"]))
-                  setLoading(false)
-                }, "posts")
-              })
-            }}
           >
-            Update
+            Load More
           </Button>
-        </FormControl>
-        <Table>
-          <thead>
-            <tr>
-              <th style={{ width: "45%" }}>Titolo</th>
-              <th style={{ width: "7.5%", textAlign: "center" }}>
-                Leggibilità
-              </th>
-              <th style={{ width: "7.5%", textAlign: "center" }}>
-                Pregiudizio
-              </th>
-              <th style={{ width: "10%", textAlign: "center" }}>Data</th>
-              <th style={{ width: "10%", textAlign: "center" }}>Autore</th>
-              <th style={{ width: "20%", textAlign: "center" }}>Tags</th>
-            </tr>
-          </thead>
-          <tbody>
-            {data.map((post) => (
-              <tr key={post.id}>
-                <td style={{ textAlign: "left" }}>
-                  <a href={`/post/${post.id}`}>{post.title}</a>
-                </td>
-                <td>
-                  <Avatar
-                    color={color(post.readability)}
-                    sx={{ margin: "auto" }}
-                    size="md"
-                  >
-                    {post.readability}
-                  </Avatar>
-                </td>
-                <td>
-                  <Avatar
-                    color={colorP(post.prejudice)}
-                    sx={{ margin: "auto" }}
-                    size="md"
-                  >
-                    {post.prejudice}
-                  </Avatar>
-                </td>
-                <td>{post.date}</td>
-                <td>{post.author}</td>
-                <td className={styles.tags}>
-                  {post.tags.map((tag) =>
-                    getCategoryDetails(tag).acronym !== "UNK" ? (
-                      <Button
-                        key={`${tag} + ${post.id}`}
-                        size="sm"
-                        sx={{
-                          color: "#fff",
-                          background: getCategoryDetails(tag).color,
-                          pointerEvents: "none"
-                        }}
-                      >
-                        {getCategoryDetails(tag).acronym}
-                      </Button>
-                    ) : null
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
-      </Sheet>
-      <Button
-        disabled={!hasMore}
-        style={{ margin: 25 }}
-        onClick={() => {
-          nextPage()
-        }}
-        sx={{
-          color: "#fff",
-          background: "#003399"
-        }}
-      >
-        Load More
-      </Button>
+        </TabPanel>
+      </Tabs>
     </main>
   )
 }

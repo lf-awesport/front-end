@@ -7,7 +7,6 @@ import { WordCloud } from "@/components/wordcloud"
 import { Takeaways } from "@/components/takeaways"
 import { Suggestions } from "@/components/suggestions"
 import { Header } from "@/components/header"
-import { ArticleChat } from "@/components/articleChat"
 import { useState, useEffect } from "react"
 import {
   Divider,
@@ -72,7 +71,6 @@ export default function Post({ params }) {
           <Tab>Info</Tab>
           <Tab>Key Takeaways</Tab>
           <Tab>Related Articles</Tab>
-          <Tab>Chat</Tab>
         </TabList>
         <TabPanel
           sx={{
@@ -155,15 +153,6 @@ export default function Post({ params }) {
           value={2}
         >
           <Suggestions data={data} />
-        </TabPanel>
-        <TabPanel
-          sx={{
-            width: "1180px",
-            padding: "0 50px"
-          }}
-          value={3}
-        >
-          <ArticleChat data={data} />
         </TabPanel>
       </Tabs>
     </main>
