@@ -15,6 +15,7 @@ import { getCategoryDetails } from "@/utils/helpers"
 import { Avatar, Tab, Tabs, TabList, TabPanel } from "@mui/joy"
 import { ArticleChat } from "@/components/articleChat"
 import { getPosts, fetchSearchResults } from "@/utils/api"
+import { useSearchParams, useRouter } from "next/navigation"
 
 export default function Posts() {
   const [defaultData, setDefaultData] = useState(null)
@@ -25,6 +26,10 @@ export default function Posts() {
   const [searchFilter, setSearchFilter] = useState("")
   const [cursor, setCursor] = useState(null)
   const [hasMore, setHasMore] = useState(true)
+  const [tabValue, setTabValue] = useState(0)
+
+  const router = useRouter()
+  const searchParams = useSearchParams()
 
   const loadInitialPosts = async () => {
     setLoading(true)
@@ -51,6 +56,12 @@ export default function Posts() {
 
   const filterPosts = async () => {
     setLoading(true)
+    if (searchFilter.trim()) {
+      router.push(`?tab=search&q=${encodeURIComponent(searchFilter)}`)
+    } else {
+      router.push("?tab=search")
+    }
+
     const results = searchFilter.trim()
       ? await fetchSearchResults(searchFilter)
       : await getPosts("sentiment", null).then((res) => res.posts)
@@ -58,6 +69,7 @@ export default function Posts() {
     setData(_.orderBy(results, [sortOrder], [sortAsc ? "asc" : "desc"]))
     setHasMore(false)
     setLoading(false)
+    setTabValue(1)
   }
 
   const sortPosts = (newField) => {
@@ -67,7 +79,9 @@ export default function Posts() {
 
   const resetFilters = () => {
     setSearchFilter("")
+    router.push("/")
     loadInitialPosts()
+    setTabValue(1)
   }
 
   const colorP = (punteggio) => {
@@ -78,8 +92,23 @@ export default function Posts() {
   }
 
   useEffect(() => {
-    loadInitialPosts()
-  }, [])
+    const tabParam = searchParams.get("tab")
+    const queryParam = searchParams.get("q") || ""
+
+    if (tabParam === "search") {
+      setSearchFilter(queryParam)
+      setTabValue(1)
+      setLoading(true)
+      fetchSearchResults(queryParam).then((results) => {
+        setDefaultData(results)
+        setData(_.orderBy(results, [sortOrder], [sortAsc ? "asc" : "desc"]))
+        setHasMore(false)
+        setLoading(false)
+      })
+    } else {
+      loadInitialPosts()
+    }
+  }, [searchParams])
 
   if (isLoading || !data)
     return (
@@ -91,7 +120,11 @@ export default function Posts() {
   return (
     <main className={styles.main}>
       <Header />
-      <Tabs aria-label="Basic tabs" defaultValue={0}>
+      <Tabs
+        aria-label="Basic tabs"
+        value={tabValue}
+        onChange={(e, val) => setTabValue(val)}
+      >
         <TabList>
           <Tab>Chat</Tab>
           <Tab>Search</Tab>
@@ -122,6 +155,9 @@ export default function Posts() {
                 placeholder="Cerca articoli"
                 value={searchFilter}
                 onChange={(e) => setSearchFilter(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") filterPosts()
+                }}
               />
               <Button onClick={filterPosts}>Cerca</Button>
               <Button variant="outlined" onClick={resetFilters}>
