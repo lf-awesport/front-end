@@ -1,21 +1,30 @@
 "use client"
 
 import styles from "./posts.module.css"
-import Table from "@mui/joy/Table"
-import Sheet from "@mui/joy/Sheet"
 import { useState, useEffect } from "react"
-import Select from "@mui/joy/Select"
-import Option from "@mui/joy/Option"
-import _ from "lodash"
-import CircularProgress from "@mui/joy/CircularProgress"
-import Input from "@mui/joy/Input"
-import Button from "@mui/joy/Button"
+import {
+  Sheet,
+  Input,
+  Button,
+  CircularProgress,
+  Typography,
+  Select,
+  Option,
+  Tabs,
+  TabList,
+  Tab,
+  TabPanel,
+  Card,
+  CardContent,
+  CardActions,
+  Box
+} from "@mui/joy"
 import { Header } from "@/components/header"
 import { getCategoryDetails } from "@/utils/helpers"
-import { Avatar, Tab, Tabs, TabList, TabPanel } from "@mui/joy"
 import { ArticleChat } from "@/components/articleChat"
 import { getPosts, fetchSearchResults } from "@/utils/api"
 import { useSearchParams, useRouter } from "next/navigation"
+import _ from "lodash"
 
 export default function Posts() {
   const [defaultData, setDefaultData] = useState(null)
@@ -84,13 +93,6 @@ export default function Posts() {
     setTabValue(1)
   }
 
-  const colorP = (punteggio) => {
-    if (punteggio === 0) return "neutral"
-    if (punteggio < 25) return "success"
-    if (punteggio > 59) return "danger"
-    if (punteggio > 25) return "warning"
-  }
-
   useEffect(() => {
     const tabParam = searchParams.get("tab")
     const queryParam = searchParams.get("q") || ""
@@ -118,10 +120,13 @@ export default function Posts() {
     )
 
   return (
-    <main className={styles.main}>
+    <main
+      className={styles.main}
+      style={{ width: "100%", maxWidth: "100%", padding: "2rem 1rem" }}
+    >
       <Header />
       <Tabs
-        aria-label="Basic tabs"
+        aria-label="Tabs"
         value={tabValue}
         onChange={(e, val) => setTabValue(val)}
       >
@@ -129,119 +134,123 @@ export default function Posts() {
           <Tab>Chat</Tab>
           <Tab>Search</Tab>
         </TabList>
-        <TabPanel sx={{ width: "1180px", padding: "50px" }} value={0}>
-          <ArticleChat data={data} />
-        </TabPanel>
-        <TabPanel sx={{ width: "1180px", padding: "50px" }} value={1}>
-          <Sheet
-            variant="outlined"
+        <TabPanel value={0} sx={{ px: 2, py: 2 }}>
+          {" "}
+          {/* padding mobile-friendly */}
+          <Box
             sx={{
-              width: "100%",
-              boxShadow: "sm",
-              borderRadius: "sm",
-              padding: "20px"
+              maxWidth: 900,
+              mx: "auto",
+              backgroundColor: "background.level1",
+              p: 3,
+              borderRadius: "lg",
+              boxShadow: "sm"
             }}
           >
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "flex-start",
-                gap: "12px",
-                marginBottom: 20,
-                marginLeft: 10
+            <Typography level="h4" sx={{ mb: 2 }}>
+              Parla con il nostro assistente AI
+            </Typography>
+            <Typography level="body-md" sx={{ mb: 2 }}>
+              Fatti aiutare a trovare insight, trend o spiegazioni sui contenuti
+              di sport business.
+            </Typography>
+            <ArticleChat data={data} />
+          </Box>
+        </TabPanel>
+        <TabPanel value={1} sx={{ px: 2, py: 2 }}>
+          <Sheet
+            sx={{
+              mb: 4,
+              p: 2,
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 2,
+              alignItems: "center"
+            }}
+          >
+            <Input
+              placeholder="Cerca articoli..."
+              value={searchFilter}
+              onChange={(e) => setSearchFilter(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && filterPosts()}
+              sx={{ flex: 1, minWidth: 200 }}
+            />
+            <Button onClick={filterPosts}>Cerca</Button>
+            <Button variant="outlined" onClick={resetFilters}>
+              Reset
+            </Button>
+            <Select
+              value={sortOrder}
+              onChange={(e, value) => sortPosts(value)}
+              size="sm"
+            >
+              <Option value="date">Data</Option>
+              <Option value="title">Titolo</Option>
+              <Option value="author">Autore</Option>
+              <Option value="prejudice">Pregiudizio</Option>
+            </Select>
+            <Button
+              variant="outlined"
+              size="sm"
+              onClick={() => {
+                setSortAsc(!sortAsc)
+                setData(
+                  _.orderBy(data, [sortOrder], [!sortAsc ? "asc" : "desc"])
+                )
               }}
             >
-              <Input
-                placeholder="Cerca articoli"
-                value={searchFilter}
-                onChange={(e) => setSearchFilter(e.target.value)}
-                onKeyDown={(e) => {
-                  if (e.key === "Enter") filterPosts()
-                }}
-              />
-              <Button onClick={filterPosts}>Cerca</Button>
-              <Button variant="outlined" onClick={resetFilters}>
-                Reset
-              </Button>
-              <Select
-                placeholder="Ordina per"
-                size="sm"
-                value={sortOrder}
-                onChange={(e, value) => sortPosts(value)}
-              >
-                <Option value="date">Data</Option>
-                <Option value="title">Titolo</Option>
-                <Option value="author">Autore</Option>
-                <Option value="prejudice">Pregiudizio</Option>
-              </Select>
-              <Button
-                size="sm"
-                variant="outlined"
-                onClick={() => {
-                  setSortAsc(!sortAsc)
-                  setData(
-                    _.orderBy(data, [sortOrder], [!sortAsc ? "asc" : "desc"])
-                  )
-                }}
-              >
-                {sortAsc ? "⬆️ ASC" : "⬇️ DESC"}
-              </Button>
-            </div>
-
-            <Table>
-              <thead>
-                <tr>
-                  <th style={{ width: "40%" }}>Titolo</th>
-                  <th style={{ width: "10%" }}>Pregiudizio</th>
-                  <th style={{ width: "15%" }}>Data</th>
-                  <th style={{ width: "15%" }}>Autore</th>
-                  <th style={{ textAlign: "center", width: "20%" }}>Tags</th>
-                </tr>
-              </thead>
-              <tbody>
-                {data.map((post) => (
-                  <tr key={post.id}>
-                    <td style={{ textAlign: "left" }}>
-                      <a href={`/post/${post.id}`}>{post.title}</a>
-                    </td>
-                    <td>
-                      <Avatar
-                        color={colorP(post.prejudice)}
-                        sx={{ margin: "auto" }}
-                        size="md"
-                      >
-                        {post.prejudice}
-                      </Avatar>
-                    </td>
-                    <td>{post.date}</td>
-                    <td>{post.author}</td>
-                    <td className={styles.tags}>
-                      {post.tags.map((tag) =>
-                        getCategoryDetails(tag).acronym !== "UNK" ? (
-                          <Button
-                            key={`${tag} + ${post.id}`}
-                            size="sm"
-                            sx={{
-                              color: "#fff",
-                              background: getCategoryDetails(tag).color,
-                              pointerEvents: "none"
-                            }}
-                          >
-                            {getCategoryDetails(tag).acronym}
-                          </Button>
-                        ) : null
-                      )}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </Table>
-            {hasMore && (
-              <Button onClick={loadMorePosts} sx={{ mt: 3 }}>
-                Carica altri
-              </Button>
-            )}
+              {sortAsc ? "⬆️ ASC" : "⬇️ DESC"}
+            </Button>
           </Sheet>
+
+          {data.map((post) => (
+            <Card
+              key={post.id}
+              variant="outlined"
+              sx={{ mb: 2, width: "100%" }}
+            >
+              <CardContent>
+                <Typography level="title-lg">
+                  <a href={`/post/${post.id}`}>{post.title}</a>
+                </Typography>
+                <Typography level="body-sm" sx={{ mb: 1 }}>
+                  {post.date} · {post.author}
+                </Typography>
+                <Typography level="body-md">{post.excerpt}</Typography>
+              </CardContent>
+              <CardActions
+                sx={{ justifyContent: "flex-start", flexWrap: "wrap" }}
+              >
+                {post.tags.map((tag) => {
+                  const cat = getCategoryDetails(tag)
+                  return cat.acronym !== "UNK" ? (
+                    <Button
+                      key={`${tag}-${post.id}`}
+                      size="sm"
+                      sx={{
+                        mr: 1,
+                        mb: 1,
+                        background: cat.color,
+                        color: "#fff",
+                        pointerEvents: "none",
+                        width: "auto",
+                        minWidth: "fit-content",
+                        maxWidth: "50px"
+                      }}
+                    >
+                      {cat.acronym}
+                    </Button>
+                  ) : null
+                })}
+              </CardActions>
+            </Card>
+          ))}
+
+          {hasMore && (
+            <Button onClick={loadMorePosts} sx={{ mt: 3 }}>
+              Carica altri
+            </Button>
+          )}
         </TabPanel>
       </Tabs>
     </main>

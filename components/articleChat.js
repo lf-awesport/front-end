@@ -1,8 +1,7 @@
 "use client"
 
 import dynamic from "next/dynamic"
-import styles from "./carousel.module.css"
-import { Typography } from "@mui/joy"
+import { Box } from "@mui/joy"
 import { API_URL } from "@/utils/api"
 
 export function ArticleChat() {
@@ -12,9 +11,13 @@ export function ArticleChat() {
   )
 
   return (
-    <main className={styles.main}>
+    <Box sx={{ width: "100%", maxWidth: "100%", overflow: "hidden" }}>
       <DeepChat
-        style={{ borderRadius: "10px", width: "1080px", height: "600px" }}
+        style={{
+          width: "100%",
+          height: "min(600px, 80vh)",
+          borderRadius: "10px"
+        }}
         messageStyles={{
           default: {
             shared: {
@@ -98,7 +101,7 @@ export function ArticleChat() {
           text: "Chiedimi qualcosa su sport, finanza, calcio..."
         }}
         connect={{
-          url: `${API_URL}/askAgent`, // ✅ solo endpoint
+          url: `${API_URL}/askAgent`,
           method: "POST"
         }}
         textInput={{
@@ -107,24 +110,22 @@ export function ArticleChat() {
         requestBodyLimits={{ maxMessages: -1 }}
         requestInterceptor={(details) => {
           const lastMessage = details.body?.messages?.at(-1)?.text
-
-          // 🔁 NON sovrascrivere il body, estendilo
           return {
             ...details,
             body: {
               ...details.body,
-              q: lastMessage // ➕ aggiungi il campo
+              q: lastMessage
             }
           }
         }}
         responseInterceptor={(response) => {
           console.log("🤖 Risposta AI:", response)
-          if (response && typeof response === "object" && response.answer) {
-            return { text: response.answer }
+          if (response && typeof response === "object" && response.text) {
+            return { text: response.text.answer }
           }
           return { text: "⚠️ Nessuna risposta ricevuta." }
         }}
       />
-    </main>
+    </Box>
   )
 }
