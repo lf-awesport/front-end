@@ -9,7 +9,6 @@ import {
   startAfter
 } from "firebase/firestore"
 import db from "./firestore"
-import axios from "axios"
 
 export const API_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"
@@ -51,4 +50,19 @@ export const getPost = (id, callback) => {
     post = res.data()
     callback(post)
   })
+}
+
+export async function fetchSearchResults(query, filters = []) {
+  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/search`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ query, filters })
+  })
+
+  if (!response.ok) {
+    throw new Error("Errore durante la ricerca")
+  }
+
+  const data = await response.json()
+  return data.sources
 }

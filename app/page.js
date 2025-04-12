@@ -4,92 +4,70 @@ import styles from "./posts.module.css"
 import Table from "@mui/joy/Table"
 import Sheet from "@mui/joy/Sheet"
 import { useState, useEffect } from "react"
-import FormControl from "@mui/joy/FormControl"
 import Select from "@mui/joy/Select"
 import Option from "@mui/joy/Option"
 import _ from "lodash"
 import CircularProgress from "@mui/joy/CircularProgress"
-import FormLabel from "@mui/joy/FormLabel"
 import Input from "@mui/joy/Input"
-import { getPosts } from "@/utils/api"
 import Button from "@mui/joy/Button"
 import { Header } from "@/components/header"
 import { getCategoryDetails } from "@/utils/helpers"
 import { Avatar, Tab, Tabs, TabList, TabPanel } from "@mui/joy"
 import { ArticleChat } from "@/components/articleChat"
+import { getPosts, fetchSearchResults } from "@/utils/api"
 
 export default function Posts() {
   const [defaultData, setDefaultData] = useState(null)
   const [data, setData] = useState(null)
-  const [isLoading, setLoading] = useState(false)
+  const [isLoading, setLoading] = useState(true)
   const [sortOrder, setSortOrder] = useState("date")
+  const [sortAsc, setSortAsc] = useState(false)
   const [searchFilter, setSearchFilter] = useState("")
   const [cursor, setCursor] = useState(null)
   const [hasMore, setHasMore] = useState(true)
 
-  const filterPosts = (newFilter) => {
-    setSearchFilter(newFilter)
-    if (newFilter) {
-      setData(
-        _.orderBy(
-          defaultData.filter(
-            (e) =>
-              e.title.toLowerCase().includes(newFilter.toLowerCase()) ||
-              e.tags.some((t) =>
-                t.toLowerCase().includes(newFilter.toLowerCase())
-              )
-          ),
-          [sortOrder],
-          ["desc"]
-        )
-      )
-    } else {
-      setData(_.orderBy(defaultData, [sortOrder], ["desc"]))
-    }
+  const loadInitialPosts = async () => {
+    setLoading(true)
+    const res = await getPosts("sentiment", null)
+    setDefaultData(res.posts)
+    setData(_.orderBy(res.posts, [sortOrder], [sortAsc ? "asc" : "desc"]))
+    setCursor(res.lastVisible)
+    setHasMore(res.posts.length === 25)
+    setLoading(false)
   }
 
-  const sortPosts = (newValue) => {
-    setSortOrder(newValue)
-    setData(_.orderBy(data, [newValue], ["desc"]))
-  }
-
-  useEffect(() => {
-    getPosts("sentiment", null).then((res) => {
-      setDefaultData(res.posts)
-      setData(_.orderBy(res.posts, [sortOrder], ["desc"]))
-      setCursor(res.lastVisible)
-      setLoading(false)
-    })
-  }, [])
-
-  const nextPage = async () => {
+  const loadMorePosts = async () => {
+    if (!hasMore) return
     const res = await getPosts("sentiment", cursor)
-
-    if (res.posts.length === 0) {
-      setHasMore(false)
-      return // Exit if no more posts are available
-    }
-
     const newPosts = res.posts.filter(
-      (newPost) =>
-        !defaultData.some((existingPost) => existingPost.id === newPost.id)
+      (p) => !defaultData.some((e) => e.id === p.id)
     )
-    const updatedPosts = defaultData.concat(newPosts)
+    const updated = [...defaultData, ...newPosts]
+    setDefaultData(updated)
+    setData(_.orderBy(updated, [sortOrder], [sortAsc ? "asc" : "desc"]))
+    setCursor(res.lastVisible)
+    setHasMore(res.posts.length === 25)
+  }
 
-    setDefaultData(updatedPosts)
+  const filterPosts = async () => {
+    setLoading(true)
+    const results = searchFilter.trim()
+      ? await fetchSearchResults(searchFilter)
+      : await getPosts("sentiment", null).then((res) => res.posts)
+    setDefaultData(results)
+    setData(_.orderBy(results, [sortOrder], [sortAsc ? "asc" : "desc"]))
+    setHasMore(false)
+    setLoading(false)
+  }
 
-    const filteredData = searchFilter
-      ? updatedPosts.filter(
-          (e) =>
-            e.title.toLowerCase().includes(searchFilter.toLowerCase()) ||
-            e.tags.some((t) =>
-              t.toLowerCase().includes(searchFilter.toLowerCase())
-            )
-        )
-      : updatedPosts
+  const sortPosts = (newField) => {
+    setSortOrder(newField)
+    setData(_.orderBy(data, [newField], [sortAsc ? "asc" : "desc"]))
+  }
 
-    setData(_.orderBy(filteredData, [sortOrder], ["desc"]))
-    setCursor(res.lastVisible) // Update cursor for pagination
+  const resetFilters = () => {
+    setSearchFilter("")
+    loadInitialPosts()
   }
 
   const colorP = (punteggio) => {
@@ -99,11 +77,9 @@ export default function Posts() {
     if (punteggio > 25) return "warning"
   }
 
-  const color = (punteggio) => {
-    if (punteggio > 64) return "success"
-    if (punteggio > 33) return "warning"
-    if (punteggio > 0) return "danger"
-  }
+  useEffect(() => {
+    loadInitialPosts()
+  }, [])
 
   if (isLoading || !data)
     return (
@@ -120,22 +96,10 @@ export default function Posts() {
           <Tab>Chat</Tab>
           <Tab>Search</Tab>
         </TabList>
-        <TabPanel
-          sx={{
-            width: "1180px",
-            padding: "50px"
-          }}
-          value={0}
-        >
+        <TabPanel sx={{ width: "1180px", padding: "50px" }} value={0}>
           <ArticleChat data={data} />
         </TabPanel>
-        <TabPanel
-          sx={{
-            width: "1180px",
-            padding: "50px"
-          }}
-          value={1}
-        >
+        <TabPanel sx={{ width: "1180px", padding: "50px" }} value={1}>
           <Sheet
             variant="outlined"
             sx={{
@@ -145,71 +109,57 @@ export default function Posts() {
               padding: "20px"
             }}
           >
-            <FormControl
-              orientation="horizontal"
-              sx={{
-                mb: 2,
-                ml: 1,
-                mt: 2,
+            <div
+              style={{
                 display: "flex",
-                justifyContent: "space-between",
-                height: "50px",
-                alignItems: "center"
+                justifyContent: "flex-start",
+                gap: "12px",
+                marginBottom: 20,
+                marginLeft: 10
               }}
             >
-              <div>
-                <FormLabel>Articoli Caricati: {data.length}</FormLabel>
+              <Input
+                placeholder="Cerca articoli"
+                value={searchFilter}
+                onChange={(e) => setSearchFilter(e.target.value)}
+              />
+              <Button onClick={filterPosts}>Cerca</Button>
+              <Button variant="outlined" onClick={resetFilters}>
+                Reset
+              </Button>
+              <Select
+                placeholder="Ordina per"
+                size="sm"
+                value={sortOrder}
+                onChange={(e, value) => sortPosts(value)}
+              >
+                <Option value="date">Data</Option>
+                <Option value="title">Titolo</Option>
+                <Option value="author">Autore</Option>
+                <Option value="prejudice">Pregiudizio</Option>
+              </Select>
+              <Button
+                size="sm"
+                variant="outlined"
+                onClick={() => {
+                  setSortAsc(!sortAsc)
+                  setData(
+                    _.orderBy(data, [sortOrder], [!sortAsc ? "asc" : "desc"])
+                  )
+                }}
+              >
+                {sortAsc ? "⬆️ ASC" : "⬇️ DESC"}
+              </Button>
+            </div>
 
-                <FormLabel>Sort by:</FormLabel>
-                <Select
-                  size="sm"
-                  value={sortOrder}
-                  onChange={(event, newValue) => sortPosts(newValue)}
-                >
-                  {["date", "title", "author", "readability", "prejudice"].map(
-                    (axis) => (
-                      <Option key={axis} value={axis}>
-                        {axis}
-                      </Option>
-                    )
-                  )}
-                </Select>
-              </div>
-            </FormControl>
-            <FormControl
-              orientation="horizontal"
-              sx={{
-                mb: 2,
-                ml: 1,
-                mt: 2,
-                display: "flex",
-                justifyContent: "space-between",
-                height: "50px",
-                alignItems: "center"
-              }}
-            >
-              <div>
-                <FormLabel>Search</FormLabel>
-                <Input
-                  placeholder="Type anything"
-                  value={searchFilter}
-                  onChange={(e) => filterPosts(e.target.value)}
-                />
-              </div>
-            </FormControl>
             <Table>
               <thead>
                 <tr>
-                  <th style={{ width: "45%" }}>Titolo</th>
-                  <th style={{ width: "7.5%", textAlign: "center" }}>
-                    Leggibilità
-                  </th>
-                  <th style={{ width: "7.5%", textAlign: "center" }}>
-                    Pregiudizio
-                  </th>
-                  <th style={{ width: "10%", textAlign: "center" }}>Data</th>
-                  <th style={{ width: "10%", textAlign: "center" }}>Autore</th>
-                  <th style={{ width: "20%", textAlign: "center" }}>Tags</th>
+                  <th style={{ width: "40%" }}>Titolo</th>
+                  <th style={{ width: "10%" }}>Pregiudizio</th>
+                  <th style={{ width: "15%" }}>Data</th>
+                  <th style={{ width: "15%" }}>Autore</th>
+                  <th style={{ textAlign: "center", width: "20%" }}>Tags</th>
                 </tr>
               </thead>
               <tbody>
@@ -217,15 +167,6 @@ export default function Posts() {
                   <tr key={post.id}>
                     <td style={{ textAlign: "left" }}>
                       <a href={`/post/${post.id}`}>{post.title}</a>
-                    </td>
-                    <td>
-                      <Avatar
-                        color={color(post.readability)}
-                        sx={{ margin: "auto" }}
-                        size="md"
-                      >
-                        {post.readability}
-                      </Avatar>
                     </td>
                     <td>
                       <Avatar
@@ -259,20 +200,12 @@ export default function Posts() {
                 ))}
               </tbody>
             </Table>
+            {hasMore && (
+              <Button onClick={loadMorePosts} sx={{ mt: 3 }}>
+                Carica altri
+              </Button>
+            )}
           </Sheet>
-          <Button
-            disabled={!hasMore}
-            style={{ margin: 25 }}
-            onClick={() => {
-              nextPage()
-            }}
-            sx={{
-              color: "#fff",
-              background: "#003399"
-            }}
-          >
-            Load More
-          </Button>
         </TabPanel>
       </Tabs>
     </main>
