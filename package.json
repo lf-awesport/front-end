@@ -23,6 +23,7 @@
     "firebase": "^10.12.5",
     "js-file-download": "^0.4.12",
     "lodash": "^4.17.21",
+    "marked": "^15.0.8",
     "next": "14.2.5",
     "react": "^18",
     "react-dom": "^18",

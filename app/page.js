@@ -122,7 +122,7 @@ export default function Posts() {
   return (
     <main
       className={styles.main}
-      style={{ width: "100%", maxWidth: "100%", padding: "2rem 1rem" }}
+      style={{ width: "100%", maxWidth: "100%", padding: "2rem 0it" }}
     >
       <Header />
       <Tabs
@@ -134,34 +134,30 @@ export default function Posts() {
           <Tab>Chat</Tab>
           <Tab>Search</Tab>
         </TabList>
-        <TabPanel value={0} sx={{ px: 2, py: 2 }}>
+        <TabPanel value={0}>
           {" "}
           {/* padding mobile-friendly */}
-          <Box
+          <Sheet
             sx={{
-              maxWidth: 900,
-              mx: "auto",
-              backgroundColor: "background.level1",
-              p: 3,
-              borderRadius: "lg",
-              boxShadow: "sm"
+              mb: 4,
+              p: 0,
+              display: "flex",
+              flexWrap: "wrap",
+              gap: 2,
+              alignItems: "center"
             }}
           >
             <Typography level="h4" sx={{ mb: 2 }}>
               Parla con il nostro assistente AI
             </Typography>
-            <Typography level="body-md" sx={{ mb: 2 }}>
-              Fatti aiutare a trovare insight, trend o spiegazioni sui contenuti
-              di sport business.
-            </Typography>
             <ArticleChat data={data} />
-          </Box>
+          </Sheet>
         </TabPanel>
-        <TabPanel value={1} sx={{ px: 2, py: 2 }}>
+        <TabPanel value={1}>
           <Sheet
             sx={{
               mb: 4,
-              p: 2,
+              p: 0,
               display: "flex",
               flexWrap: "wrap",
               gap: 2,

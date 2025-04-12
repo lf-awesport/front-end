@@ -1,112 +1,72 @@
 "use client"
 
-import dynamic from "next/dynamic"
 import { Box } from "@mui/joy"
 import { API_URL } from "@/utils/api"
+import dynamic from "next/dynamic"
+import React from "react"
+import { marked } from "marked"
+
+const DeepChat = dynamic(
+  () => import("deep-chat-react").then((mod) => mod.DeepChat),
+  {
+    ssr: false
+  }
+)
 
 export function ArticleChat() {
-  const DeepChat = dynamic(
-    () => import("deep-chat-react").then((mod) => mod.DeepChat),
-    { ssr: false }
-  )
-
   return (
-    <Box sx={{ width: "100%", maxWidth: "100%", overflow: "hidden" }}>
+    <Box sx={{ width: "100%", maxWidth: "100%", overflow: "hidden", p: 0 }}>
       <DeepChat
         style={{
           width: "100%",
           height: "min(600px, 80vh)",
-          borderRadius: "10px"
+          borderRadius: "16px",
+          border: "1px solid #e0e0e0",
+          backgroundColor: "#fff",
+          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)"
         }}
         messageStyles={{
           default: {
             shared: {
               bubble: {
-                maxWidth: "100%",
-                backgroundColor: "unset",
+                fontFamily: "'Inter', sans-serif",
+                fontSize: "16px",
+                color: "#1a1a1a",
+                backgroundColor: "#f9fafb",
+                border: "1px solid #e0e0e0",
+                borderRadius: "12px",
+                padding: "12px",
                 marginTop: "10px",
-                marginBottom: "10px"
+                marginBottom: "10px",
+                maxWidth: "100%"
               }
             },
             user: {
               bubble: {
-                marginLeft: "0px",
-                color: "black"
+                backgroundColor: "#e6f4ea",
+                border: "1px solid #c3e5d6",
+                color: "#1a1a1a"
               }
             },
             ai: {
+              bubble: {
+                backgroundColor: "#f4f4f4",
+                border: "1px solid #ddd",
+                color: "#1a1a1a"
+              },
               outerContainer: {
-                backgroundColor: "rgba(247,247,248)",
-                borderTop: "1px solid rgba(0,0,0,.1)",
-                borderBottom: "1px solid rgba(0,0,0,.1)"
+                backgroundColor: "transparent"
               }
             }
           }
         }}
+        allowHtml={{ ai: true, user: false }}
         avatars={{
           ai: { styles: { position: "left" } },
           user: { styles: { position: "right" } }
         }}
-        submitButtonStyles={{
-          submit: {
-            container: {
-              default: { backgroundColor: "#19c37d" },
-              hover: { backgroundColor: "#0bab69" },
-              click: { backgroundColor: "#068e56" }
-            },
-            svg: {
-              content:
-                '<?xml version="1.0" ?> <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"> <g> <path d="M21.66,12a2,2,0,0,1-1.14,1.81L5.87,20.75A2.08,2.08,0,0,1,5,21a2,2,0,0,1-1.82-2.82L5.46,13H11a1,1,0,0,0,0-2H5.46L3.18,5.87A2,2,0,0,1,5.86,3.25h0l14.65,6.94A2,2,0,0,1,21.66,12Z"> </path> </g> </svg>',
-              styles: {
-                default: {
-                  width: "1.3em",
-                  marginTop: "0.15em",
-                  filter:
-                    "brightness(0) saturate(100%) invert(100%) sepia(28%) saturate(2%) hue-rotate(69deg) brightness(107%) contrast(100%)"
-                }
-              }
-            }
-          },
-          loading: {
-            container: { default: { backgroundColor: "white" } },
-            svg: {
-              styles: {
-                default: {
-                  filter:
-                    "brightness(0) saturate(100%) invert(72%) sepia(0%) saturate(3044%) hue-rotate(322deg) brightness(100%) contrast(96%)"
-                }
-              }
-            }
-          },
-          stop: {
-            container: {
-              default: { backgroundColor: "white" },
-              hover: { backgroundColor: "#dadada52" }
-            },
-            svg: {
-              content:
-                '<?xml version="1.0" encoding="utf-8"?> <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"> <rect width="24" height="24" rx="4" ry="4" /> </svg>',
-              styles: {
-                default: {
-                  width: "0.95em",
-                  marginTop: "0.32em",
-                  filter:
-                    "brightness(0) saturate(100%) invert(72%) sepia(0%) saturate(3044%) hue-rotate(322deg) brightness(100%) contrast(96%)"
-                }
-              }
-            }
-          }
-        }}
-        introMessage={{
-          text: "Chiedimi qualcosa su sport, finanza, calcio..."
-        }}
-        connect={{
-          url: `${API_URL}/askAgent`,
-          method: "POST"
-        }}
-        textInput={{
-          placeholder: { text: "Scrivi la tua domanda qui..." }
-        }}
+        textInput={{ placeholder: { text: "Scrivi la tua domanda qui..." } }}
+        connect={{ url: `${API_URL}/askAgent`, method: "POST" }}
         requestBodyLimits={{ maxMessages: -1 }}
         requestInterceptor={(details) => {
           const lastMessage = details.body?.messages?.at(-1)?.text
@@ -118,12 +78,28 @@ export function ArticleChat() {
             }
           }
         }}
+        introMessage={{
+          text: "Ciao! Sono Eddy, il tuo assistente AI dedicato allo sport business. Posso aiutarti ad analizzare trend, capire concetti complessi, scoprire dati economici e finanziari, e rispondere alle tue domande su calcio, eventi, infrastrutture, marketing e molto altro."
+        }}
         responseInterceptor={(response) => {
-          console.log("🤖 Risposta AI:", response)
           if (response && typeof response === "object" && response.text) {
-            return { text: response.text.answer }
+            let message = response.text.answer || response.text
+
+            // Convert Markdown to HTML
+            let htmlMessage = `<div style="font-family: 'Inter', sans-serif; font-size: 16px; color: #1a1a1a;">${marked.parse(message)}</div>`
+
+            if (Array.isArray(response.sources)) {
+              const sourcesLinks = response.sources
+                .map(
+                  (src) =>
+                    `<a href="${src.url}" target="_blank" rel="noopener noreferrer">${src.title}</a>`
+                )
+                .join(", ")
+              htmlMessage += `<br><br><span style='font-size: 8px; color: #;'>Fonti: ${sourcesLinks}</span>`
+            }
+            return { html: htmlMessage }
           }
-          return { text: "⚠️ Nessuna risposta ricevuta." }
+          return { html: "<i>⚠️ Nessuna risposta ricevuta.</i>" }
         }}
       />
     </Box>
