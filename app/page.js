@@ -20,6 +20,7 @@ import {
   Box
 } from "@mui/joy"
 import { Header } from "@/components/header"
+import { Footer } from "@/components/footer"
 import { getCategoryDetails } from "@/utils/helpers"
 import { ArticleChat } from "@/components/articleChat"
 import { getPosts, fetchSearchResults } from "@/utils/api"
@@ -147,9 +148,6 @@ export default function Posts() {
               alignItems: "center"
             }}
           >
-            <Typography level="h4" sx={{ mb: 2 }}>
-              Parla con il nostro assistente AI
-            </Typography>
             <ArticleChat data={data} />
           </Sheet>
         </TabPanel>
@@ -249,6 +247,7 @@ export default function Posts() {
           )}
         </TabPanel>
       </Tabs>
+      <Footer />
     </main>
   )
 }
