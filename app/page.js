@@ -135,11 +135,37 @@ function Posts() {
         aria-label="Tabs"
         value={tabValue}
         onChange={(e, val) => setTabValue(val)}
-        sx={{ width: "100%" }}
+        sx={{
+          width: "100%",
+          boxShadow: "0px 4px 8px rgba(92, 201, 250, 0.5)",
+          border: "1px solid #5cc9fa",
+          borderRadius: "8px",
+          padding: 1
+        }}
       >
         <TabList sx={{ width: "100%" }}>
-          <Tab>Chat</Tab>
-          <Tab>Search</Tab>
+          <Tab
+            sx={{
+              '&[aria-selected="true"]': {
+                backgroundColor: "#5cc9fa", // Replace with your desired color
+                color: "#fff"
+              }
+            }}
+            color="primary"
+          >
+            Chat
+          </Tab>
+          <Tab
+            color="primary"
+            sx={{
+              '&[aria-selected="true"]': {
+                backgroundColor: "#5cc9fa", // Replace with your desired color
+                color: "#fff"
+              }
+            }}
+          >
+            Search
+          </Tab>
         </TabList>
         <TabPanel value={0} sx={{ padding: 0 }}>
           <Sheet

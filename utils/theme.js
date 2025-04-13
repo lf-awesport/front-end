@@ -21,7 +21,7 @@ const aweTheme = extendTheme({
         primary: {
           solidBg: "#00339a",
           solidHoverBg: "#002a82",
-          solidActiveBg: "#001f66",
+          solidActiveBg: "#fff",
           plainColor: "#00339a",
           plainHoverBg: "#e6f0ff",
           outlinedBorder: "#00339a",
@@ -51,19 +51,7 @@ const aweTheme = extendTheme({
     body: "'Inter', sans-serif",
     display: "'Inter', sans-serif"
   },
-  shadows: [
-    "none",
-    "0px 1px 3px rgba(0,0,0,0.2)",
-    "0px 1px 5px rgba(0,0,0,0.3)",
-    "0px 1px 8px rgba(0,0,0,0.3)",
-    "0px 2px 4px rgba(0,0,0,0.4)",
-    "0px 3px 5px rgba(0,0,0,0.4)",
-    "0px 4px 6px rgba(0,0,0,0.4)",
-    "0px 5px 7px rgba(0,0,0,0.4)",
-    "0px 6px 8px rgba(0,0,0,0.4)",
-    "0px 7px 9px rgba(0,0,0,0.4)",
-    "0px 8px 10px rgba(0,0,0,0.4)"
-  ]
+  shadows: ["none"]
 })
 
 export default function ThemeProvider({ children }) {

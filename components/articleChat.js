@@ -32,6 +32,8 @@ export function ArticleChat() {
           flex: 1,
           height: "calc(100dvh - 200px)",
           width: "100%",
+          maxWidth: "800px",
+          margin: "auto",
           borderRadius: "16px",
           border: "1px solid #e0e0e0",
           backgroundColor: "#fff",
@@ -55,7 +57,7 @@ export function ArticleChat() {
             },
             user: {
               bubble: {
-                backgroundColor: "#e6f4ea",
+                backgroundColor: "#5cc9fa",
                 border: "1px solid #c3e5d6",
                 color: "#1a1a1a"
               }
@@ -103,8 +105,8 @@ export function ArticleChat() {
             if (Array.isArray(response.sources)) {
               const sourcesLinks = response.sources
                 .map(
-                  (src) =>
-                    `<a href="${src.url}" target="_blank" rel="noopener noreferrer">${src.title}</a>`
+                  (src, i) =>
+                    `<a href="${src.url}" target="_blank" rel="noopener noreferrer">[${i + 1}]</a>`
                 )
                 .join(", ")
               htmlMessage += `<br><br><span style='font-size: 8px; color: #;'>Fonti: ${sourcesLinks}</span>`

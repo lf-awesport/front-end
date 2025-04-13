@@ -56,9 +56,29 @@ export default function Post({ params }) {
         margin: "auto"
       }}
     >
-      <Tabs aria-label="Basic tabs" defaultValue={0} sx={{ width: "100%" }}>
+      <Tabs
+        aria-label="Basic tabs"
+        defaultValue={0}
+        sx={{
+          width: "100%",
+          boxShadow: "0px 4px 8px rgba(92, 201, 250, 0.5)",
+          border: "1px solid #5cc9fa",
+          borderRadius: "8px",
+          padding: 1
+        }}
+      >
         <TabList sx={{ width: "100%" }}>
-          <Tab>Info</Tab>
+          <Tab
+            color="primary"
+            sx={{
+              '&[aria-selected="true"]': {
+                backgroundColor: "#5cc9fa", // Replace with your desired color
+                color: "#fff"
+              }
+            }}
+          >
+            Info
+          </Tab>
         </TabList>
 
         {/* Tab 1 */}

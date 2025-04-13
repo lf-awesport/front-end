@@ -15,7 +15,7 @@
     "@fontsource/inter": "^5.0.20",
     "@mui/icons-material": "^7.0.2",
     "@mui/joy": "^5.0.0-beta.48",
-    "@mui/x-charts": "^7.14.0",
+    "@mui/x-charts": "^8.0.0-beta.3",
     "@tailwindcss/postcss": "^4.1.3",
     "@visx/visx": "^3.11.0",
     "axios": "^1.7.3",
