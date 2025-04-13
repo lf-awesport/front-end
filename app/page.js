@@ -140,6 +140,7 @@ function Posts() {
           boxShadow: "0px 4px 8px rgba(92, 201, 250, 0.5)",
           border: "1px solid #5cc9fa",
           borderRadius: "8px",
+          boxSizing: "border-box",
           padding: 1
         }}
       >

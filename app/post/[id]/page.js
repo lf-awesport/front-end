@@ -61,6 +61,7 @@ export default function Post({ params }) {
         defaultValue={0}
         sx={{
           width: "100%",
+          boxSizing: "border-box",
           boxShadow: "0px 4px 8px rgba(92, 201, 250, 0.5)",
           border: "1px solid #5cc9fa",
           borderRadius: "8px",
