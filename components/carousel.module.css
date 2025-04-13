@@ -136,6 +136,8 @@
   height: 100px;
   align-items: center;
   justify-content: space-between;
+  max-width: 1300px;
+  margin: auto;
 }
 
 .leftColumn {
@@ -169,6 +171,8 @@
   justify-content: center;
   height: 100px;
   width: 100%;
+  max-width: 1300px;
+  margin: auto;
 }
 
 .sentiment svg {
@@ -194,5 +198,29 @@
 
   .explanationContainer {
     width: 100%;
+  }
+}
+
+/* components/loading.module.css */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: calc(100vh - 200px);
+  width: 100%;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+  width: 60px;
+  height: 60px;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
   }
 }

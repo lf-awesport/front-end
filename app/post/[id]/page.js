@@ -5,13 +5,12 @@ import styles from "./post.module.css"
 import { TextAnalysis } from "@/components/textAnalysis"
 import { WordCloud } from "@/components/wordcloud"
 import { Takeaways } from "@/components/takeaways"
-import { Header } from "@/components/header"
-import { Footer } from "@/components/footer"
+import Loading from "@/components/loading"
+
 import { useState, useEffect } from "react"
 import {
   Divider,
   Button,
-  CircularProgress,
   Typography,
   Tab,
   Tabs,
@@ -45,34 +44,18 @@ export default function Post({ params }) {
     })
   }, [])
 
-  if (isLoading)
-    return (
-      <main className={styles.loading}>
-        <CircularProgress variant="solid" size="lg" />
-      </main>
-    )
-  if (!data)
-    return (
-      <main className={styles.loading}>
-        <Typography level="h1" color="fff" style={{ marginBottom: 20 }}>
-          NOT FOUND
-        </Typography>
-      </main>
-    )
+  if (isLoading) return <Loading />
+  if (!data) return <Loading />
 
   return (
     <main
       className={styles.main}
       style={{
         width: "100%",
-        maxWidth: "100%"
+        maxWidth: "1300px",
+        margin: "auto"
       }}
     >
-      <Header>
-        <a href="/">
-          <code className={styles.code}>Home</code>
-        </a>
-      </Header>
       <Tabs aria-label="Basic tabs" defaultValue={0} sx={{ width: "100%" }}>
         <TabList sx={{ width: "100%" }}>
           <Tab>Info</Tab>
@@ -159,7 +142,6 @@ export default function Post({ params }) {
           </Sheet>
         </TabPanel>
       </Tabs>
-      <Footer />
     </main>
   )
 }

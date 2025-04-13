@@ -15,11 +15,19 @@ const DeepChat = dynamic(
 
 export function ArticleChat() {
   return (
-    <Box sx={{ width: "100%", maxWidth: "100%", overflow: "hidden", p: 0 }}>
+    <Box
+      sx={{
+        width: "100%",
+        maxWidth: "100%",
+        overflow: "hidden",
+        p: 0,
+        height: "calc(100vh - 150px)"
+      }}
+    >
       <DeepChat
         style={{
           width: "100%",
-          height: "min(600px, 80vh)",
+          height: "calc(100vh - 150px)",
           borderRadius: "16px",
           border: "1px solid #e0e0e0",
           backgroundColor: "#fff",

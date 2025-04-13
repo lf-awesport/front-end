@@ -7,7 +7,6 @@ import {
   Sheet,
   Input,
   Button,
-  CircularProgress,
   Typography,
   Select,
   Option,
@@ -17,16 +16,14 @@ import {
   TabPanel,
   Card,
   CardContent,
-  CardActions,
-  Box
+  CardActions
 } from "@mui/joy"
-import { Header } from "@/components/header"
-import { Footer } from "@/components/footer"
 import { getCategoryDetails } from "@/utils/helpers"
 import { ArticleChat } from "@/components/articleChat"
 import { getPosts, fetchSearchResults } from "@/utils/api"
 import { useSearchParams, useRouter } from "next/navigation"
 import _ from "lodash"
+import Loading from "@/components/loading"
 
 export default function PostsWrapper() {
   return (
@@ -122,16 +119,18 @@ function Posts() {
     }
   }, [searchParams])
 
-  if (isLoading || !data)
-    return (
-      <main className={styles.loading}>
-        <CircularProgress variant="solid" size="lg" />
-      </main>
-    )
+  if (isLoading) return <Loading />
+  if (!data) return <Loading />
 
   return (
-    <main className={styles.main} style={{ width: "100%", maxWidth: "100%" }}>
-      <Header />
+    <main
+      className={styles.main}
+      style={{
+        width: "100%",
+        maxWidth: "1300px",
+        margin: "auto"
+      }}
+    >
       <Tabs
         aria-label="Tabs"
         value={tabValue}
@@ -256,7 +255,6 @@ function Posts() {
           </Sheet>
         </TabPanel>
       </Tabs>
-      <Footer />
     </main>
   )
 }

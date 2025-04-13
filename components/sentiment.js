@@ -6,7 +6,7 @@ import { axisClasses } from "@mui/x-charts/ChartsAxis"
 import { Typography } from "@mui/joy"
 
 const chartSetting = {
-  width: 400,
+  width: 340,
   height: 400,
   sx: {
     [`.${axisClasses.left} .${axisClasses.label}`]: {
