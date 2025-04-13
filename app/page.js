@@ -1,5 +1,6 @@
 "use client"
 
+import { Suspense } from "react"
 import styles from "./posts.module.css"
 import { useState, useEffect } from "react"
 import {
@@ -121,135 +122,137 @@ export default function Posts() {
     )
 
   return (
-    <main
-      className={styles.main}
-      style={{ width: "100%", maxWidth: "100%", padding: "2rem 0it" }}
-    >
-      <Header />
-      <Tabs
-        aria-label="Tabs"
-        value={tabValue}
-        onChange={(e, val) => setTabValue(val)}
+    <Suspense fallback={<p>Caricamento...</p>}>
+      <main
+        className={styles.main}
+        style={{ width: "100%", maxWidth: "100%", padding: "2rem 0it" }}
       >
-        <TabList>
-          <Tab>Chat</Tab>
-          <Tab>Search</Tab>
-        </TabList>
-        <TabPanel value={0}>
-          <Sheet
-            sx={{
-              mb: 4,
-              p: 0,
-              display: "flex",
-              flexWrap: "wrap",
-              gap: 2,
-              alignItems: "center"
-            }}
-          >
-            <ArticleChat data={data} />
-          </Sheet>
-        </TabPanel>
-        <TabPanel value={1}>
-          <Sheet
-            sx={{
-              mb: 4,
-              p: 0,
-              display: "flex",
-              flexWrap: "wrap",
-              gap: 2,
-              alignItems: "center"
-            }}
-          >
-            <Input
-              placeholder="Cerca articoli..."
-              value={searchFilter}
-              onChange={(e) => setSearchFilter(e.target.value)}
-              onKeyDown={(e) => e.key === "Enter" && filterPosts()}
-              sx={{ flex: 1, minWidth: 200 }}
-            />
-            <Button onClick={filterPosts} sx={{ background: "#5cc9fa" }}>
-              Cerca
-            </Button>
-            <Button variant="outlined" onClick={resetFilters}>
-              Reset
-            </Button>
-            <Select
-              value={sortOrder}
-              onChange={(e, value) => sortPosts(value)}
-              size="sm"
-            >
-              <Option value="date">Data</Option>
-              <Option value="title">Titolo</Option>
-              <Option value="author">Autore</Option>
-              <Option value="prejudice">Pregiudizio</Option>
-            </Select>
-            <Button
-              variant="outlined"
-              size="sm"
-              onClick={() => {
-                setSortAsc(!sortAsc)
-                setData(
-                  _.orderBy(data, [sortOrder], [!sortAsc ? "asc" : "desc"])
-                )
+        <Header />
+        <Tabs
+          aria-label="Tabs"
+          value={tabValue}
+          onChange={(e, val) => setTabValue(val)}
+        >
+          <TabList>
+            <Tab>Chat</Tab>
+            <Tab>Search</Tab>
+          </TabList>
+          <TabPanel value={0}>
+            <Sheet
+              sx={{
+                mb: 4,
+                p: 0,
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 2,
+                alignItems: "center"
               }}
             >
-              {sortAsc ? "⬆️ ASC" : "⬇️ DESC"}
-            </Button>
-            {data.map((post) => (
-              <Card
-                key={post.id}
-                variant="outlined"
-                sx={{ mb: 2, width: "100%" }}
-              >
-                <CardContent>
-                  <Typography level="title-lg">
-                    <a href={`/post/${post.id}`}>{post.title}</a>
-                  </Typography>
-                  <Typography level="body-sm" sx={{ mb: 1 }}>
-                    {post.date} · {post.author}
-                  </Typography>
-                  <Typography level="body-md">{post.excerpt}</Typography>
-                </CardContent>
-                <CardActions
-                  sx={{ justifyContent: "flex-start", flexWrap: "wrap" }}
-                >
-                  {post.tags.map((tag) => {
-                    const cat = getCategoryDetails(tag)
-                    return cat.acronym !== "UNK" ? (
-                      <Button
-                        key={`${tag}-${post.id}`}
-                        size="sm"
-                        sx={{
-                          mr: 1,
-                          mb: 1,
-                          background: cat.color,
-                          color: "#fff",
-                          pointerEvents: "none",
-                          width: "auto",
-                          minWidth: "fit-content",
-                          maxWidth: "50px"
-                        }}
-                      >
-                        {cat.acronym}
-                      </Button>
-                    ) : null
-                  })}
-                </CardActions>
-              </Card>
-            ))}
-
-            {hasMore && (
-              <Button
-                onClick={loadMorePosts}
-                sx={{ background: "#5cc9fa", mt: 3 }}
-              >
-                Carica altri
+              <ArticleChat data={data} />
+            </Sheet>
+          </TabPanel>
+          <TabPanel value={1}>
+            <Sheet
+              sx={{
+                mb: 4,
+                p: 0,
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 2,
+                alignItems: "center"
+              }}
+            >
+              <Input
+                placeholder="Cerca articoli..."
+                value={searchFilter}
+                onChange={(e) => setSearchFilter(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && filterPosts()}
+                sx={{ flex: 1, minWidth: 200 }}
+              />
+              <Button onClick={filterPosts} sx={{ background: "#5cc9fa" }}>
+                Cerca
               </Button>
-            )}
-          </Sheet>
-        </TabPanel>
-      </Tabs>
-      <Footer />
-    </main>
+              <Button variant="outlined" onClick={resetFilters}>
+                Reset
+              </Button>
+              <Select
+                value={sortOrder}
+                onChange={(e, value) => sortPosts(value)}
+                size="sm"
+              >
+                <Option value="date">Data</Option>
+                <Option value="title">Titolo</Option>
+                <Option value="author">Autore</Option>
+                <Option value="prejudice">Pregiudizio</Option>
+              </Select>
+              <Button
+                variant="outlined"
+                size="sm"
+                onClick={() => {
+                  setSortAsc(!sortAsc)
+                  setData(
+                    _.orderBy(data, [sortOrder], [!sortAsc ? "asc" : "desc"])
+                  )
+                }}
+              >
+                {sortAsc ? "⬆️ ASC" : "⬇️ DESC"}
+              </Button>
+              {data.map((post) => (
+                <Card
+                  key={post.id}
+                  variant="outlined"
+                  sx={{ mb: 2, width: "100%" }}
+                >
+                  <CardContent>
+                    <Typography level="title-lg">
+                      <a href={`/post/${post.id}`}>{post.title}</a>
+                    </Typography>
+                    <Typography level="body-sm" sx={{ mb: 1 }}>
+                      {post.date} · {post.author}
+                    </Typography>
+                    <Typography level="body-md">{post.excerpt}</Typography>
+                  </CardContent>
+                  <CardActions
+                    sx={{ justifyContent: "flex-start", flexWrap: "wrap" }}
+                  >
+                    {post.tags.map((tag) => {
+                      const cat = getCategoryDetails(tag)
+                      return cat.acronym !== "UNK" ? (
+                        <Button
+                          key={`${tag}-${post.id}`}
+                          size="sm"
+                          sx={{
+                            mr: 1,
+                            mb: 1,
+                            background: cat.color,
+                            color: "#fff",
+                            pointerEvents: "none",
+                            width: "auto",
+                            minWidth: "fit-content",
+                            maxWidth: "50px"
+                          }}
+                        >
+                          {cat.acronym}
+                        </Button>
+                      ) : null
+                    })}
+                  </CardActions>
+                </Card>
+              ))}
+
+              {hasMore && (
+                <Button
+                  onClick={loadMorePosts}
+                  sx={{ background: "#5cc9fa", mt: 3 }}
+                >
+                  Carica altri
+                </Button>
+              )}
+            </Sheet>
+          </TabPanel>
+        </Tabs>
+        <Footer />
+      </main>
+    </Suspense>
   )
 }
