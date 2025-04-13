@@ -3,10 +3,8 @@
   flex-direction: column;
   justify-content: space-between;
   align-items: center;
-  padding: 0;
   text-align: center;
-  width: 1180px;
-  margin: auto;
+  outline: 1px solid;
 }
 
 .loading {
@@ -23,12 +21,12 @@
   justify-content: space-between;
   font-size: 0.85rem;
   width: 100%;
-  padding: 25px 0;
+  padding: 1em 0;
 }
 
 .summary {
   width: 100%;
-  margin: 50px auto;
+  margin: 1em auto;
 }
 
 .summaryText {
@@ -37,7 +35,7 @@
   flex-direction: column;
   justify-content: space-around;
   text-align: left;
-  padding: 25px;
+  padding: 1em 0;
 }
 
 .subSummary {
@@ -163,6 +161,26 @@
 @media (max-width: 700px) {
   .content {
     padding: 4rem;
+  }
+
+  .summaryText {
+    width: 100%;
+  }
+
+  .img {
+    width: 100%;
+  }
+
+  .subSummary {
+    flex-direction: column;
+  }
+
+  .carousel_chart {
+    flex-direction: column;
+  }
+
+  .explanationContainer {
+    width: 100%;
   }
 
   .grid {

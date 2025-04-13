@@ -21,12 +21,6 @@
   line-height: 60px;
 }
 
-.aweLogo {
-  display: block;
-  margin-left: auto;
-  margin-right: auto;
-}
-
 .carouselButton {
   padding: 10px;
   width: 150px;
@@ -96,7 +90,7 @@
   justify-content: space-around;
   width: 60%;
   text-align: left;
-  padding: 50px;
+  padding: 1em 0;
 }
 
 .leftColumn {
@@ -111,7 +105,7 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 25px;
+  padding: 1em 0;
   text-align: left;
 }
 
@@ -138,19 +132,23 @@
 
 .header {
   display: flex;
-  width: 1180px;
-  height: 50px;
-  margin: 25px 0px;
-  padding: 10px 0;
+  width: 100%;
+  height: 100px;
+  padding: 2rem;
   align-items: center;
   justify-content: space-between;
 }
 
 .leftColumn {
-  width: 33.33%;
+  width: calc(33.33% - 1em);
   display: flex;
   justify-content: center;
   align-items: flex-start;
+  margin-left: 1em;
+}
+
+.leftColumn > a {
+  color: #fff;
 }
 
 .centerColumn {
@@ -160,9 +158,10 @@
 }
 
 .rightColumn {
-  width: 33.33%;
   display: flex;
+  width: calc(33.33% - 1em);
   justify-content: flex-end;
+  margin-right: 1em;
 }
 
 .footer {
@@ -170,4 +169,31 @@
   align-items: center;
   justify-content: center;
   padding: 12px 16px;
+  height: 100px;
+}
+
+.sentiment svg {
+  display: block;
+  margin: auto;
+  height: auto;
+  max-width: 100%;
+}
+
+/* Mobile */
+@media (max-width: 700px) {
+  .content {
+    padding: 4rem;
+  }
+
+  .subSummary {
+    flex-direction: column;
+  }
+
+  .chart {
+    flex-direction: column;
+  }
+
+  .explanationContainer {
+    width: 100%;
+  }
 }

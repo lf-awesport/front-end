@@ -136,8 +136,6 @@ export default function Posts() {
           <Tab>Search</Tab>
         </TabList>
         <TabPanel value={0}>
-          {" "}
-          {/* padding mobile-friendly */}
           <Sheet
             sx={{
               mb: 4,
@@ -169,7 +167,9 @@ export default function Posts() {
               onKeyDown={(e) => e.key === "Enter" && filterPosts()}
               sx={{ flex: 1, minWidth: 200 }}
             />
-            <Button onClick={filterPosts}>Cerca</Button>
+            <Button onClick={filterPosts} sx={{ background: "#5cc9fa" }}>
+              Cerca
+            </Button>
             <Button variant="outlined" onClick={resetFilters}>
               Reset
             </Button>
@@ -195,56 +195,58 @@ export default function Posts() {
             >
               {sortAsc ? "⬆️ ASC" : "⬇️ DESC"}
             </Button>
-          </Sheet>
-
-          {data.map((post) => (
-            <Card
-              key={post.id}
-              variant="outlined"
-              sx={{ mb: 2, width: "100%" }}
-            >
-              <CardContent>
-                <Typography level="title-lg">
-                  <a href={`/post/${post.id}`}>{post.title}</a>
-                </Typography>
-                <Typography level="body-sm" sx={{ mb: 1 }}>
-                  {post.date} · {post.author}
-                </Typography>
-                <Typography level="body-md">{post.excerpt}</Typography>
-              </CardContent>
-              <CardActions
-                sx={{ justifyContent: "flex-start", flexWrap: "wrap" }}
+            {data.map((post) => (
+              <Card
+                key={post.id}
+                variant="outlined"
+                sx={{ mb: 2, width: "100%" }}
               >
-                {post.tags.map((tag) => {
-                  const cat = getCategoryDetails(tag)
-                  return cat.acronym !== "UNK" ? (
-                    <Button
-                      key={`${tag}-${post.id}`}
-                      size="sm"
-                      sx={{
-                        mr: 1,
-                        mb: 1,
-                        background: cat.color,
-                        color: "#fff",
-                        pointerEvents: "none",
-                        width: "auto",
-                        minWidth: "fit-content",
-                        maxWidth: "50px"
-                      }}
-                    >
-                      {cat.acronym}
-                    </Button>
-                  ) : null
-                })}
-              </CardActions>
-            </Card>
-          ))}
+                <CardContent>
+                  <Typography level="title-lg">
+                    <a href={`/post/${post.id}`}>{post.title}</a>
+                  </Typography>
+                  <Typography level="body-sm" sx={{ mb: 1 }}>
+                    {post.date} · {post.author}
+                  </Typography>
+                  <Typography level="body-md">{post.excerpt}</Typography>
+                </CardContent>
+                <CardActions
+                  sx={{ justifyContent: "flex-start", flexWrap: "wrap" }}
+                >
+                  {post.tags.map((tag) => {
+                    const cat = getCategoryDetails(tag)
+                    return cat.acronym !== "UNK" ? (
+                      <Button
+                        key={`${tag}-${post.id}`}
+                        size="sm"
+                        sx={{
+                          mr: 1,
+                          mb: 1,
+                          background: cat.color,
+                          color: "#fff",
+                          pointerEvents: "none",
+                          width: "auto",
+                          minWidth: "fit-content",
+                          maxWidth: "50px"
+                        }}
+                      >
+                        {cat.acronym}
+                      </Button>
+                    ) : null
+                  })}
+                </CardActions>
+              </Card>
+            ))}
 
-          {hasMore && (
-            <Button onClick={loadMorePosts} sx={{ mt: 3 }}>
-              Carica altri
-            </Button>
-          )}
+            {hasMore && (
+              <Button
+                onClick={loadMorePosts}
+                sx={{ background: "#5cc9fa", mt: 3 }}
+              >
+                Carica altri
+              </Button>
+            )}
+          </Sheet>
         </TabPanel>
       </Tabs>
       <Footer />
