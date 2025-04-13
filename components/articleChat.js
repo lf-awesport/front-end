@@ -83,7 +83,15 @@ export function ArticleChat() {
         connect={{ url: `${API_URL}/askAgent`, method: "POST" }}
         requestBodyLimits={{ maxMessages: -1 }}
         requestInterceptor={(details) => {
+          // Recupera l'ultimo messaggio inviato
           const lastMessage = details.body?.messages?.at(-1)?.text
+          // Esegue il blur sull'elemento attivo per chiudere la tastiera mobile
+          if (
+            document.activeElement &&
+            typeof document.activeElement.blur === "function"
+          ) {
+            document.activeElement.blur()
+          }
           return {
             ...details,
             body: {
@@ -109,7 +117,7 @@ export function ArticleChat() {
                     `<a href="${src.url}" target="_blank" rel="noopener noreferrer">[${i + 1}]</a>`
                 )
                 .join(", ")
-              htmlMessage += `<br><br><span style='font-size: 8px; color: #;'>Fonti: ${sourcesLinks}</span>`
+              htmlMessage += `<br><br><span style='font-size: 8px;'>Fonti: ${sourcesLinks}</span>`
             }
             return { html: htmlMessage }
           }
