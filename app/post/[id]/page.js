@@ -115,7 +115,7 @@ export default function Post({ params }) {
                   <Typography
                     level="body-sm"
                     color="fff"
-                    style={{ marginBottom: 20 }}
+                    style={{ margin: "20px 0" }}
                   >
                     {data.date}
                   </Typography>
@@ -123,7 +123,7 @@ export default function Post({ params }) {
                   <Typography
                     level="body-sm"
                     color="fff"
-                    style={{ marginBottom: 20 }}
+                    style={{ margin: "20px 0" }}
                   >
                     {data.author}
                   </Typography>
@@ -131,7 +131,7 @@ export default function Post({ params }) {
                   <Typography
                     level="body-sm"
                     color="fff"
-                    style={{ marginBottom: 20 }}
+                    style={{ margin: "20px 0" }}
                   >
                     {data.excerpt}
                   </Typography>
@@ -146,7 +146,8 @@ export default function Post({ params }) {
                           sx={{
                             color: "#fff",
                             background: cat.color,
-                            pointerEvents: "none"
+                            pointerEvents: "none",
+                            margin: "20px 20px 0 20px"
                           }}
                         >
                           {cat.acronym}

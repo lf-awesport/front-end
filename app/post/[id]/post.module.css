@@ -164,8 +164,8 @@
 
   .summaryText {
     width: 100%;
+    padding-bottom: 0;
   }
-
   .img {
     width: 100%;
   }
