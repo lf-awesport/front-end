@@ -130,25 +130,23 @@ function Posts() {
     )
 
   return (
-    <main
-      className={styles.main}
-      style={{ width: "100%", maxWidth: "100%", padding: "2rem 0it" }}
-    >
+    <main className={styles.main} style={{ width: "100%", maxWidth: "100%" }}>
       <Header />
       <Tabs
         aria-label="Tabs"
         value={tabValue}
         onChange={(e, val) => setTabValue(val)}
+        sx={{ width: "100%" }}
       >
-        <TabList>
+        <TabList sx={{ width: "100%" }}>
           <Tab>Chat</Tab>
           <Tab>Search</Tab>
         </TabList>
-        <TabPanel value={0}>
+        <TabPanel value={0} sx={{ padding: 0 }}>
           <Sheet
             sx={{
               mb: 4,
-              p: 0,
+              p: 1,
               display: "flex",
               flexWrap: "wrap",
               gap: 2,
@@ -220,7 +218,7 @@ function Posts() {
                   <Typography level="body-md">{post.excerpt}</Typography>
                 </CardContent>
                 <CardActions
-                  sx={{ justifyContent: "flex-start", flexWrap: "wrap" }}
+                  sx={{ justifyContent: "flex-start", flexWrap: "wrap", p: 0 }}
                 >
                   {post.tags.map((tag) => {
                     const cat = getCategoryDetails(tag)

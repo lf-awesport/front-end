@@ -65,8 +65,7 @@ export default function Post({ params }) {
       className={styles.main}
       style={{
         width: "100%",
-        maxWidth: "100%",
-        padding: "2rem 0"
+        maxWidth: "100%"
       }}
     >
       <Header>
@@ -74,21 +73,30 @@ export default function Post({ params }) {
           <code className={styles.code}>Home</code>
         </a>
       </Header>
-      <Tabs aria-label="Basic tabs" defaultValue={0}>
-        <TabList>
+      <Tabs aria-label="Basic tabs" defaultValue={0} sx={{ width: "100%" }}>
+        <TabList sx={{ width: "100%" }}>
           <Tab>Info</Tab>
         </TabList>
 
         {/* Tab 1 */}
-        <TabPanel>
+        <TabPanel
+          sx={{
+            p: 0,
+            boxSizing: "border-box",
+            "--Tabs-spacing": "0px"
+          }}
+        >
           <Sheet
             sx={{
               mb: 4,
-              p: 0,
+              p: 2,
+              boxSizing: "border-box",
               display: "flex",
               flexWrap: "wrap",
               gap: 2,
-              alignItems: "center"
+              alignItems: "center",
+              overflowX: "hidden", // optional safety net
+              minWidth: 0 // 🛠️ this is key
             }}
           >
             <div className={styles.summary}>
