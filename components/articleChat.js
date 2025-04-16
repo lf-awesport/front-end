@@ -20,7 +20,7 @@ export function ArticleChat() {
         display: "flex",
         flexDirection: "column",
         height: "calc(100dvh - 200px)",
-        maxHeight: "100dvh", // use viewport height accounting for keyboard on mobile
+        // maxHeight: "100dvh", // use viewport height accounting for keyboard on mobile
         width: "100%",
         maxWidth: "100%",
         overflow: "hidden",
