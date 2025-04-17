@@ -11,20 +11,17 @@ export function Header({ children }) {
           <HomeIcon sx={{ color: "#fff", fontSize: 40 }} />{" "}
         </a>
       </div>
+      <div className={styles.headerCenterColumn}>
+        <Image
+          src="/eddy-logo.png"
+          alt="awe Logo"
+          className={styles.aweLogo}
+          width={75}
+          height={50}
+          priority
+        />
+      </div>
       <div className={styles.headerRightColumn}>
-        {/* <Typography
-          level="body-sm"
-          sx={{
-            color: "#fff",
-            fontFamily: "Inter",
-            textAlign: "right",
-            width: "100%",
-            fontWeight: "bold",
-            marginRight: "1em"
-          }}
-        >
-          AWE EDDY
-        </Typography> */}
         <Image
           src="/EDDY.png"
           alt="awe Logo"
