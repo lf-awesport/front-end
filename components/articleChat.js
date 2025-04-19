@@ -131,11 +131,18 @@ export function ArticleChat() {
               return {
                 html:
                   styledHtml +
-                  `<br><br><span style='font-size: 8px;'>Fonti: ${sourcesLinks}</span>`
+                  `<br><br><span style='font-size: 8px;'>Fonti: ${sourcesLinks}</span>` +
+                  `<div style="margin-top: 10px; text-align: right;">
+                  <button onclick="navigator.clipboard.writeText(\`${markdown.replace(/`/g, "\\`")}\`)">📋 Copia</button>
+                </div>`
               }
             }
 
-            return { html: styledHtml }
+            return {
+              html: `
+                ${styledHtml}
+              `
+            }
           }
           return { html: "<i>⚠️ Nessuna risposta ricevuta.</i>" }
         }}
