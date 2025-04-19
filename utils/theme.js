@@ -61,7 +61,7 @@ export default function ThemeProvider({ children }) {
         sx={{
           bgcolor: "background.body",
           color: "text.primary",
-          minHeight: "100vh",
+          minHeight: "100dvh",
           display: "flex",
           flexDirection: "column"
         }}

@@ -17,25 +17,27 @@ export function ArticleChat() {
       sx={{
         display: "flex",
         flexDirection: "column",
-        height: "calc(100dvh - 200px)",
         width: "100%",
+        height: "100%",
         maxWidth: "100%",
         overflow: "hidden",
         p: 0,
-        scrollbarGutter: "stable"
+        scrollbarGutter: "stable",
+        flex: 1
       }}
     >
       <DeepChat
         style={{
           flex: 1,
-          height: "calc(100dvh - 200px)",
           width: "100%",
           maxWidth: "800px",
+          height: "100%",
           margin: "auto",
           borderRadius: "16px",
           border: "1px solid #e0e0e0",
           backgroundColor: "#fff",
-          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)"
+          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)",
+          flex: 1
         }}
         messageStyles={{
           default: {
@@ -47,9 +49,9 @@ export function ArticleChat() {
                 backgroundColor: "#f9fafb",
                 border: "1px solid #e0e0e0",
                 borderRadius: "12px",
-                padding: "12px",
-                marginTop: "10px",
-                marginBottom: "10px",
+                padding: "10px",
+                marginTop: "5px",
+                marginBottom: "5px",
                 maxWidth: "100%",
                 overflowWrap: "anywhere"
               }
@@ -69,6 +71,9 @@ export function ArticleChat() {
               },
               outerContainer: {
                 backgroundColor: "transparent"
+              },
+              innerContainer: {
+                width: "calc(100% - 10px)"
               }
             }
           }

@@ -128,7 +128,7 @@ function Posts() {
       style={{
         width: "100%",
         maxWidth: "1300px",
-        margin: "auto"
+        margin: "0 auto"
       }}
     >
       <Tabs
@@ -141,7 +141,8 @@ function Posts() {
           border: "1px solid #5cc9fa",
           borderRadius: "8px",
           boxSizing: "border-box",
-          padding: 1
+          padding: 1,
+          flex: 1
         }}
       >
         <TabList sx={{ width: "100%" }}>
@@ -168,15 +169,15 @@ function Posts() {
             Search
           </Tab>
         </TabList>
-        <TabPanel value={0} sx={{ padding: 0 }}>
+        <TabPanel value={0} sx={{ padding: 0, display: "flex", flex: 1 }}>
           <Sheet
             sx={{
-              mb: 4,
-              p: 1,
+              mb: 0,
               display: "flex",
               flexWrap: "wrap",
               gap: 2,
-              alignItems: "center"
+              alignItems: "center",
+              flex: 1
             }}
           >
             <ArticleChat data={data} />

@@ -139,6 +139,7 @@
   max-width: 1300px;
   margin: auto;
   background-color: #00339a;
+  flex-shrink: 0;
 }
 
 .leftColumn {
@@ -198,6 +199,7 @@
   max-width: 1300px;
   margin: auto;
   background-color: #00339a;
+  flex-shrink: 0;
 }
 
 .sentiment svg {

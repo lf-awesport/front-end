@@ -2,9 +2,9 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  align-items: center;
-  margin: 0auto;
+  margin: 0;
   padding: 0;
+  flex: 1;
 }
 
 .loading {
