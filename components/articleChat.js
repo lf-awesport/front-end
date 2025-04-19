@@ -34,7 +34,8 @@ export function ArticleChat() {
           height: "100%",
           margin: "auto",
           backgroundColor: "#fff",
-          borderStyle: "none",
+          borderStyle: "hidden",
+          border: "0px",
           boxShadow: "none",
           flex: 1
         }}
