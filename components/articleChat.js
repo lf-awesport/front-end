@@ -33,10 +33,9 @@ export function ArticleChat() {
           maxWidth: "800px",
           height: "100%",
           margin: "auto",
-          borderRadius: "16px",
-          border: "1px solid #e0e0e0",
           backgroundColor: "#fff",
-          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.05)",
+          borderStyle: "none",
+          boxShadow: "none",
           flex: 1
         }}
         messageStyles={{
@@ -47,8 +46,6 @@ export function ArticleChat() {
                 fontSize: "16px",
                 color: "#1a1a1a",
                 backgroundColor: "#f9fafb",
-                border: "1px solid #e0e0e0",
-                borderRadius: "12px",
                 padding: "10px",
                 marginTop: "5px",
                 marginBottom: "5px",
