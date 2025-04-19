@@ -8,9 +8,7 @@ import { marked } from "marked"
 
 const DeepChat = dynamic(
   () => import("deep-chat-react").then((mod) => mod.DeepChat),
-  {
-    ssr: false
-  }
+  { ssr: false }
 )
 
 export function ArticleChat() {
@@ -20,11 +18,11 @@ export function ArticleChat() {
         display: "flex",
         flexDirection: "column",
         height: "calc(100dvh - 200px)",
-        // maxHeight: "100dvh", // use viewport height accounting for keyboard on mobile
         width: "100%",
         maxWidth: "100%",
         overflow: "hidden",
-        p: 0
+        p: 0,
+        scrollbarGutter: "stable"
       }}
     >
       <DeepChat
@@ -52,7 +50,8 @@ export function ArticleChat() {
                 padding: "12px",
                 marginTop: "10px",
                 marginBottom: "10px",
-                maxWidth: "100%"
+                maxWidth: "100%",
+                overflowWrap: "anywhere"
               }
             },
             user: {
@@ -83,9 +82,7 @@ export function ArticleChat() {
         connect={{ url: `${API_URL}/askAgent`, method: "POST" }}
         requestBodyLimits={{ maxMessages: -1 }}
         requestInterceptor={(details) => {
-          // Recupera l'ultimo messaggio inviato
           const lastMessage = details.body?.messages?.at(-1)?.text
-          // Esegue il blur sull'elemento attivo per chiudere la tastiera mobile
           if (
             document.activeElement &&
             typeof document.activeElement.blur === "function"
@@ -105,10 +102,21 @@ export function ArticleChat() {
         }}
         responseInterceptor={(response) => {
           if (response && typeof response === "object" && response.text) {
-            let message = response.text.answer || response.text
+            const markdown = response.text.answer || response.text
 
-            // Convert Markdown to HTML
-            let htmlMessage = `<div style="font-family: 'Inter', sans-serif; font-size: 16px; color: #1a1a1a;">${marked.parse(message)}</div>`
+            const htmlContent = marked.parse(markdown)
+            const styledHtml = `
+              <div style="font-family: 'Inter', sans-serif; font-size: 16px; color: #1a1a1a; line-height: 1.6;">
+                <style>
+                  h1, h2, h3 { font-weight: 600; margin: 1rem 0 0.5rem 0; }
+                  ul, ol { padding-left: 1.25rem; margin-bottom: 1rem; }
+                  li { margin-bottom: 0.25rem; }
+                  p { margin-bottom: 1rem; }
+                  strong { font-weight: 600; }
+                </style>
+                ${htmlContent}
+              </div>
+            `
 
             if (Array.isArray(response.sources)) {
               const sourcesLinks = response.sources
@@ -117,9 +125,14 @@ export function ArticleChat() {
                     `<a href="${src.url}" target="_blank" rel="noopener noreferrer">[${i + 1}]</a>`
                 )
                 .join(", ")
-              htmlMessage += `<br><br><span style='font-size: 8px;'>Fonti: ${sourcesLinks}</span>`
+              return {
+                html:
+                  styledHtml +
+                  `<br><br><span style='font-size: 8px;'>Fonti: ${sourcesLinks}</span>`
+              }
             }
-            return { html: htmlMessage }
+
+            return { html: styledHtml }
           }
           return { html: "<i>⚠️ Nessuna risposta ricevuta.</i>" }
         }}
