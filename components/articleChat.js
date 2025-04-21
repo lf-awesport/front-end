@@ -83,8 +83,9 @@ export function ArticleChat() {
         }}
         textInput={{ placeholder: { text: "Scrivi la tua domanda qui..." } }}
         connect={{ url: `${API_URL}/askAgent`, method: "POST" }}
-        requestBodyLimits={{ maxMessages: -1 }}
+        requestBodyLimits={{ maxMessages: 1 }}
         requestInterceptor={(details) => {
+          console.log(details)
           const lastMessage = details.body?.messages?.at(-1)?.text
           if (
             document.activeElement &&
