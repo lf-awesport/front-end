@@ -5,6 +5,7 @@ import { API_URL } from "@/utils/api"
 import dynamic from "next/dynamic"
 import React from "react"
 import { marked } from "marked"
+import { logAgentQuery } from "@/utils/logAgentQuery"
 
 const DeepChat = dynamic(
   () => import("deep-chat-react").then((mod) => mod.DeepChat),
@@ -85,7 +86,6 @@ export function ArticleChat() {
         connect={{ url: `${API_URL}/askAgent`, method: "POST" }}
         requestBodyLimits={{ maxMessages: 1 }}
         requestInterceptor={(details) => {
-          console.log(details)
           const lastMessage = details.body?.messages?.at(-1)?.text
           if (
             document.activeElement &&
@@ -106,8 +106,8 @@ export function ArticleChat() {
         }}
         responseInterceptor={(response) => {
           if (response && typeof response === "object" && response.text) {
+            logAgentQuery(response)
             const markdown = response.text.answer || response.text
-
             const htmlContent = marked.parse(markdown)
             const styledHtml = `
               <div style="font-family: 'Inter', sans-serif; font-size: 16px; color: #1a1a1a; line-height: 1.6;">

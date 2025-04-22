@@ -32,7 +32,6 @@ export default function ClientHeaderRight() {
     padding: 0,
     textDecoration: "underline"
   }
-
   return (
     <Suspense fallback={null}>
       <div
