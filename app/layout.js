@@ -1,7 +1,8 @@
 import ThemeProvider from "../utils/theme"
+import { AuthProvider } from "../utils/authContext"
 
 export const metadata = {
-  title: "AWE Eddy",
+  title: "AWE EDDY",
   description: "AI sport business assistant"
 }
 
@@ -12,11 +13,13 @@ export default function RootLayout({ children }) {
   return (
     <html lang="it">
       <body style={{ margin: "0 auto" }}>
-        <ThemeProvider>
-          <Header />
-          {children}
-          <Footer />
-        </ThemeProvider>
+        <AuthProvider>
+          <ThemeProvider>
+            <Header />
+            {children}
+            <Footer />
+          </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   )

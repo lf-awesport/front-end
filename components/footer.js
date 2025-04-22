@@ -13,7 +13,7 @@ export function Footer() {
           fontWeight: "bold"
         }}
       >
-        © 2025 AWE Eddy — Powered by ⚽🤖
+        © 2025 AWE EDDY — Powered by ⚽🤖
       </Typography>
     </div>
   )

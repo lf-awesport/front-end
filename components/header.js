@@ -1,6 +1,8 @@
 import styles from "./carousel.module.css"
 import Image from "next/image"
-import HomeIcon from "@mui/icons-material/Home"
+import dynamic from "next/dynamic"
+
+const Menu = dynamic(() => import("./menu"), { ssr: false })
 
 export function Header({ children }) {
   return (
@@ -29,7 +31,9 @@ export function Header({ children }) {
           </div>
         </a>
       </div>
-      <div className={styles.headerRightColumn}></div>
+      <div className={styles.headerRightColumn}>
+        <Menu />
+      </div>
     </div>
   )
 }

@@ -1,4 +1,5 @@
 import { initializeApp } from "firebase/app"
+import { getAuth } from "firebase/auth"
 
 const firebaseConfig = {
   apiKey: process.env.NEXT_PUBLIC_FB_API_KEY,
@@ -11,5 +12,8 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig)
+const auth = getAuth(app)
+
+export { auth }
 
 export default app
