@@ -1,8 +1,7 @@
 "use client"
 
-import { Suspense } from "react"
+import { Suspense, useState, useEffect } from "react"
 import styles from "./posts.module.css"
-import { useState, useEffect } from "react"
 import {
   Sheet,
   Input,
@@ -120,8 +119,7 @@ function Posts() {
     }
   }, [searchParams])
 
-  if (isLoading) return <Loading />
-  if (!data) return <Loading />
+  if (isLoading || !data) return <Loading />
 
   return (
     <ProtectedRoute>
@@ -142,16 +140,16 @@ function Posts() {
             boxShadow: "0px 4px 8px rgba(92, 201, 250, 0.5)",
             border: "1px solid #5cc9fa",
             borderRadius: "8px",
-            boxSizing: "border-box",
             padding: 1,
-            flex: 1
+            flex: 1,
+            boxSizing: "border-box"
           }}
         >
-          <TabList sx={{ width: "100%" }}>
+          <TabList>
             <Tab
               sx={{
                 '&[aria-selected="true"]': {
-                  backgroundColor: "#5cc9fa", // Replace with your desired color
+                  backgroundColor: "#5cc9fa",
                   color: "#fff"
                 }
               }}
@@ -160,15 +158,15 @@ function Posts() {
               Chat
             </Tab>
             <Tab
-              color="primary"
               sx={{
                 '&[aria-selected="true"]': {
-                  backgroundColor: "#5cc9fa", // Replace with your desired color
+                  backgroundColor: "#5cc9fa",
                   color: "#fff"
                 }
               }}
+              color="primary"
             >
-              Search
+              Feed
             </Tab>
           </TabList>
           <TabPanel value={0} sx={{ padding: 0, display: "flex", flex: 1 }}>
@@ -190,53 +188,82 @@ function Posts() {
               sx={{
                 mb: 4,
                 p: 0,
-                display: "flex",
-                flexWrap: "wrap",
-                gap: 2,
-                alignItems: "center"
+                display: "grid",
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  sm: "1fr 1fr",
+                  md: "1fr 1fr 1fr"
+                },
+                gap: 2
               }}
             >
-              <Input
-                placeholder="Cerca articoli..."
-                value={searchFilter}
-                onChange={(e) => setSearchFilter(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && filterPosts()}
-                sx={{ flex: 1, minWidth: 200 }}
-              />
-              <Button onClick={filterPosts} sx={{ background: "#5cc9fa" }}>
-                Cerca
-              </Button>
-              <Button variant="outlined" onClick={resetFilters}>
-                Reset
-              </Button>
-              <Select
-                value={sortOrder}
-                onChange={(e, value) => sortPosts(value)}
-                size="sm"
-              >
-                <Option value="date">Data</Option>
-                <Option value="title">Titolo</Option>
-                <Option value="author">Autore</Option>
-                <Option value="prejudice">Pregiudizio</Option>
-              </Select>
-              <Button
-                variant="outlined"
-                size="sm"
-                onClick={() => {
-                  setSortAsc(!sortAsc)
-                  setData(
-                    _.orderBy(data, [sortOrder], [!sortAsc ? "asc" : "desc"])
-                  )
+              {/* Filters */}
+              <Sheet
+                sx={{
+                  gridColumn: "1 / -1",
+                  display: "flex",
+                  flexWrap: "wrap",
+                  gap: 2,
+                  alignItems: "center"
                 }}
               >
-                {sortAsc ? "⬆️ ASC" : "⬇️ DESC"}
-              </Button>
+                <Input
+                  placeholder="Cerca articoli..."
+                  value={searchFilter}
+                  onChange={(e) => setSearchFilter(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && filterPosts()}
+                  sx={{ flex: 1, minWidth: 200 }}
+                />
+                <Button onClick={filterPosts}>Cerca</Button>
+                <Button variant="outlined" onClick={resetFilters}>
+                  Reset
+                </Button>
+                <Select
+                  value={sortOrder}
+                  onChange={(e, value) => sortPosts(value)}
+                  size="sm"
+                >
+                  <Option value="date">Data</Option>
+                  <Option value="title">Titolo</Option>
+                  <Option value="author">Autore</Option>
+                  <Option value="prejudice">Pregiudizio</Option>
+                </Select>
+                <Button
+                  variant="outlined"
+                  size="sm"
+                  onClick={() => {
+                    setSortAsc(!sortAsc)
+                    setData(
+                      _.orderBy(data, [sortOrder], [!sortAsc ? "asc" : "desc"])
+                    )
+                  }}
+                >
+                  {sortAsc ? "⬆️ ASC" : "⬇️ DESC"}
+                </Button>
+              </Sheet>
+
+              {/* Cards */}
               {data.map((post) => (
                 <Card
                   key={post.id}
                   variant="outlined"
-                  sx={{ mb: 2, width: "100%" }}
+                  sx={{ width: "100%", boxSizing: "border-box" }}
                 >
+                  {post.imgLink && (
+                    <a href={`/post/${post.id}`}>
+                      <img
+                        src={post.imgLink}
+                        alt={post.title}
+                        style={{
+                          width: "100%",
+                          height: "auto",
+                          borderTopLeftRadius: "8px",
+                          borderTopRightRadius: "8px",
+                          objectFit: "cover"
+                        }}
+                      />
+                    </a>
+                  )}
                   <CardContent>
                     <Typography level="title-lg">
                       <a href={`/post/${post.id}`}>{post.title}</a>
@@ -278,10 +305,11 @@ function Posts() {
                 </Card>
               ))}
 
+              {/* Load More */}
               {hasMore && (
                 <Button
                   onClick={loadMorePosts}
-                  sx={{ background: "#5cc9fa", mt: 3 }}
+                  sx={{ gridColumn: "1 / -1", mt: 3 }}
                 >
                   Carica altri
                 </Button>
