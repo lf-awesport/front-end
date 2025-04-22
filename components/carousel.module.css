@@ -222,6 +222,11 @@
   .chart {
     flex-direction: column;
   }
+  .chart * {
+    cursor: text !important;
+    text-decoration: None !important;
+    pointer-events: none;
+  }
 
   .explanationContainer {
     width: 100%;

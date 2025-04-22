@@ -8,6 +8,11 @@ import { Typography } from "@mui/joy"
 const chartSetting = {
   width: 340,
   height: 400,
+  disableHover: true,
+  highlightedItem: -1,
+  slotProps: {
+    tooltip: { trigger: "none" }
+  },
   sx: {
     [`.${axisClasses.left} .${axisClasses.label}`]: {
       transform: "translate(-20px, 0)"
@@ -28,8 +33,8 @@ const chartSetting = {
     "& .MuiChartsAxis-left .MuiChartsAxis-line": {
       strokeWidth: 0.4
     },
-    ".MuiChartsLegend-mark + text > tspan": {
-      strokeWidth: 0.4
+    ".MuiChartsTooltip-root": {
+      display: "hidden"
     }
   }
 }
@@ -61,6 +66,12 @@ export function Sentiment({ data }) {
             {
               scaleType: "band",
               dataKey: "label"
+            }
+          ]}
+          yAxis={[
+            {
+              min: 0,
+              max: 100
             }
           ]}
           series={[
