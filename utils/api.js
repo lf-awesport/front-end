@@ -10,6 +10,27 @@ import {
 } from "firebase/firestore"
 import db from "./firestore"
 
+export async function getModulesFromFirestore(materia) {
+  try {
+    const q = query(
+      collection(db, "learningModules", materia, "lessons"),
+      orderBy("createdAt", "desc"),
+      limit(50)
+    )
+
+    const snapshot = await getDocs(q)
+    const modules = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data()
+    }))
+
+    return modules
+  } catch (error) {
+    console.error("❌ Errore durante il recupero dei moduli:", error)
+    return []
+  }
+}
+
 export const API_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"
 

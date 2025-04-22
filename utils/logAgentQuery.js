@@ -9,7 +9,7 @@ export async function logAgentQuery({ query, text, sources }) {
   const timestamp = serverTimestamp()
 
   try {
-    await addDoc(collection(db, "agent_queries"), {
+    await addDoc(collection(db, "z_agent_queries"), {
       userId: user?.uid ?? "anonymous",
       userEmail: user?.email ?? "anonymous",
       ...JSON.parse(JSON.stringify(user.metadata)), // pulizia extra      query,

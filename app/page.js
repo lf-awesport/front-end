@@ -1,6 +1,6 @@
 "use client"
 
-import { Suspense, useState, useEffect } from "react"
+import { Suspense, useEffect, useState } from "react"
 import styles from "./posts.module.css"
 import {
   Sheet,
@@ -18,12 +18,13 @@ import {
   CardActions
 } from "@mui/joy"
 import { getCategoryDetails } from "@/utils/helpers"
-import { ArticleChat } from "@/components/articleChat"
 import { getPosts, fetchSearchResults } from "@/utils/api"
 import { useSearchParams, useRouter } from "next/navigation"
 import _ from "lodash"
 import Loading from "@/components/loading"
 import ProtectedRoute from "@/components/protectedRoute"
+import { ArticleChat } from "@/components/articleChat"
+import { getModulesFromFirestore } from "@/utils/api"
 
 export default function PostsWrapper() {
   return (
@@ -43,7 +44,7 @@ function Posts() {
   const [cursor, setCursor] = useState(null)
   const [hasMore, setHasMore] = useState(true)
   const [tabValue, setTabValue] = useState(0)
-
+  const [modules, setModules] = useState([])
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -119,17 +120,21 @@ function Posts() {
     }
   }, [searchParams])
 
+  useEffect(() => {
+    if (tabValue === 2 && modules.length === 0) {
+      getModulesFromFirestore("Sports Law")
+        .then(setModules)
+        .catch(console.error)
+    }
+  }, [tabValue])
+
   if (isLoading || !data) return <Loading />
 
   return (
     <ProtectedRoute>
       <main
         className={styles.main}
-        style={{
-          width: "100%",
-          maxWidth: "1300px",
-          margin: "0 auto"
-        }}
+        style={{ width: "100%", maxWidth: "1300px", margin: "0 auto" }}
       >
         <Tabs
           aria-label="Tabs"
@@ -168,22 +173,25 @@ function Posts() {
             >
               Feed
             </Tab>
-          </TabList>
-          <TabPanel value={0} sx={{ padding: 0, display: "flex", flex: 1 }}>
-            <Sheet
+            <Tab
               sx={{
-                mb: 0,
-                display: "flex",
-                flexWrap: "wrap",
-                gap: 2,
-                alignItems: "center",
-                flex: 1
+                '&[aria-selected="true"]': {
+                  backgroundColor: "#5cc9fa",
+                  color: "#fff"
+                }
               }}
+              color="primary"
             >
-              <ArticleChat data={data} />
-            </Sheet>
+              Moduli
+            </Tab>
+          </TabList>
+
+          <TabPanel value={0}>
+            <ArticleChat data={data} />
           </TabPanel>
+
           <TabPanel value={1}>
+            {/* Feed */}
             <Sheet
               sx={{
                 mb: 4,
@@ -257,9 +265,9 @@ function Posts() {
                         style={{
                           width: "100%",
                           height: "auto",
+                          objectFit: "cover",
                           borderTopLeftRadius: "8px",
-                          borderTopRightRadius: "8px",
-                          objectFit: "cover"
+                          borderTopRightRadius: "8px"
                         }}
                       />
                     </a>
@@ -304,8 +312,6 @@ function Posts() {
                   </CardActions>
                 </Card>
               ))}
-
-              {/* Load More */}
               {hasMore && (
                 <Button
                   onClick={loadMorePosts}
@@ -314,6 +320,122 @@ function Posts() {
                   Carica altri
                 </Button>
               )}
+            </Sheet>
+          </TabPanel>
+
+          <TabPanel value={2}>
+            <Sheet
+              sx={{
+                mb: 4,
+                p: 0,
+                display: "grid",
+                gridTemplateColumns: {
+                  xs: "1fr",
+                  sm: "1fr 1fr",
+                  md: "1fr 1fr 1fr"
+                },
+                gap: 2
+              }}
+            >
+              {modules.map((mod) => {
+                const levels = mod.levels || {}
+                const levelTags = Object.keys(levels)
+
+                return (
+                  <Card
+                    key={mod.id}
+                    variant="outlined"
+                    sx={{ width: "100%", boxSizing: "border-box" }}
+                  >
+                    {mod.imgLink && (
+                      <a href={`/module/${mod.id}`}>
+                        <img
+                          src={mod.imgLink}
+                          alt={mod.topic}
+                          style={{
+                            width: "100%",
+                            height: "auto",
+                            borderTopLeftRadius: "8px",
+                            borderTopRightRadius: "8px",
+                            objectFit: "cover"
+                          }}
+                        />
+                      </a>
+                    )}
+                    <CardContent>
+                      <Typography level="title-lg">
+                        <a href={`/module/${mod.id}`}>{mod.topic}</a>
+                      </Typography>
+                      <Typography level="body-sm" sx={{ mb: 1 }}>
+                        {mod.materia}
+                      </Typography>
+
+                      <Sheet
+                        sx={{
+                          display: "flex",
+                          gap: 1,
+                          flexWrap: "wrap",
+                          mt: 1
+                        }}
+                      >
+                        {["easy", "medium", "hard"].map((level) =>
+                          levels[level]?.length ? (
+                            <Button
+                              key={level}
+                              size="sm"
+                              sx={{
+                                background:
+                                  level === "easy"
+                                    ? "#56cc9d"
+                                    : level === "medium"
+                                      ? "#f6b93b"
+                                      : "#e55039",
+                                color: "#fff",
+                                pointerEvents: "none",
+                                width: "auto",
+                                minWidth: "fit-content",
+                                fontWeight: "bold",
+                                textTransform: "uppercase"
+                              }}
+                            >
+                              {level.charAt(0)} · {levels[level].length}
+                            </Button>
+                          ) : null
+                        )}
+                      </Sheet>
+                    </CardContent>
+                    <CardActions
+                      sx={{
+                        justifyContent: "flex-start",
+                        flexWrap: "wrap",
+                        p: 0
+                      }}
+                    >
+                      {mod.tags?.map((tag) => {
+                        const cat = getCategoryDetails(tag)
+                        return (
+                          <Button
+                            key={`${tag}-${mod.id}`}
+                            size="sm"
+                            sx={{
+                              mr: 1,
+                              mb: 1,
+                              background: cat.color,
+                              color: "#fff",
+                              pointerEvents: "none",
+                              width: "auto",
+                              minWidth: "fit-content",
+                              maxWidth: "50px"
+                            }}
+                          >
+                            {cat.acronym}
+                          </Button>
+                        )
+                      })}
+                    </CardActions>
+                  </Card>
+                )
+              })}
             </Sheet>
           </TabPanel>
         </Tabs>
