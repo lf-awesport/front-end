@@ -23,6 +23,7 @@ import {
   LinearProgress
 } from "@mui/joy"
 import styles from "../../posts.module.css"
+import HomeIcon from "@mui/icons-material/Home"
 
 export default function ModulePageClient() {
   const { id } = useParams()
@@ -31,7 +32,7 @@ export default function ModulePageClient() {
   const [mounted, setMounted] = useState(false)
   const [user, setUser] = useState(undefined)
   const [moduleData, setModuleData] = useState(null)
-  const [tabValue, setTabValue] = useState(0)
+  const [tabValue, setTabValue] = useState(1)
   const [progress, setProgress] = useState(null)
 
   useEffect(() => {
@@ -122,7 +123,10 @@ export default function ModulePageClient() {
     >
       <Tabs
         value={tabValue}
-        onChange={(e, val) => setTabValue(val)}
+        onChange={(e, val) => {
+          if (val === 0) router.push("/")
+          else setTabValue(val)
+        }}
         sx={{
           position: "sticky",
           top: 0,
@@ -135,6 +139,19 @@ export default function ModulePageClient() {
         }}
       >
         <TabList>
+          <Tab
+            onClick={() => router.push("/")}
+            key={0}
+            sx={{
+              '&[aria-selected="true"]': {
+                backgroundColor: "#5cc9fa",
+                color: "#fff"
+              }
+            }}
+            color="primary"
+          >
+            <HomeIcon />
+          </Tab>
           {[1, 2, 3].map((lvl) => (
             <Tab
               key={lvl}
@@ -161,7 +178,7 @@ export default function ModulePageClient() {
           ).length
 
           return (
-            <TabPanel key={lvl} value={i} sx={{ px: 0 }}>
+            <TabPanel key={lvl} value={lvl} sx={{ px: 0 }}>
               {!isUnlocked(lvl) ? (
                 <Typography level="body-sm" sx={{ mt: 2 }}>
                   🔒 Completa il livello {lvl - 1} per sbloccare questo
