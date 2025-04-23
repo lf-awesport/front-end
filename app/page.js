@@ -18,13 +18,19 @@ import {
   CardActions
 } from "@mui/joy"
 import { getCategoryDetails } from "@/utils/helpers"
-import { getPosts, fetchSearchResults } from "@/utils/api"
+import {
+  getPosts,
+  fetchSearchResults,
+  getUserModuleProgress,
+  getModulesFromFirestore
+} from "@/utils/api"
 import { useSearchParams, useRouter } from "next/navigation"
 import _ from "lodash"
 import Loading from "@/components/loading"
 import ProtectedRoute from "@/components/protectedRoute"
 import { ArticleChat } from "@/components/articleChat"
-import { getModulesFromFirestore } from "@/utils/api"
+import { onAuthStateChanged } from "firebase/auth"
+import { auth } from "@/utils/firebaseConfig"
 
 export default function PostsWrapper() {
   return (
@@ -43,8 +49,10 @@ function Posts() {
   const [searchFilter, setSearchFilter] = useState("")
   const [cursor, setCursor] = useState(null)
   const [hasMore, setHasMore] = useState(true)
-  const [tabValue, setTabValue] = useState(0)
+  const [tabValue, setTabValue] = useState(2)
   const [modules, setModules] = useState([])
+  const [user, setUser] = useState(null)
+  const [progressMap, setProgressMap] = useState({})
   const router = useRouter()
   const searchParams = useSearchParams()
 
@@ -121,10 +129,23 @@ function Posts() {
   }, [searchParams])
 
   useEffect(() => {
-    if (tabValue === 2 && modules.length === 0) {
-      getModulesFromFirestore("Sports Law")
-        .then(setModules)
-        .catch(console.error)
+    if (tabValue === 2) {
+      onAuthStateChanged(auth, async (currentUser) => {
+        if (currentUser) {
+          setUser(currentUser)
+          const progresses = await getUserModuleProgress(
+            currentUser.uid,
+            "Sports Law"
+          )
+          setProgressMap(progresses)
+        }
+      })
+
+      if (modules.length === 0) {
+        getModulesFromFirestore("Sports Law")
+          .then(setModules)
+          .catch(console.error)
+      }
     }
   }, [tabValue])
 
@@ -158,6 +179,7 @@ function Posts() {
                   color: "#fff"
                 }
               }}
+              disabled
               color="primary"
             >
               Chat
@@ -169,6 +191,7 @@ function Posts() {
                   color: "#fff"
                 }
               }}
+              disabled
               color="primary"
             >
               Feed
@@ -182,7 +205,7 @@ function Posts() {
               }}
               color="primary"
             >
-              Moduli
+              Lezioni
             </Tab>
           </TabList>
 
@@ -191,7 +214,6 @@ function Posts() {
           </TabPanel>
 
           <TabPanel value={1}>
-            {/* Feed */}
             <Sheet
               sx={{
                 mb: 4,
@@ -250,7 +272,6 @@ function Posts() {
                 </Button>
               </Sheet>
 
-              {/* Cards */}
               {data.map((post) => (
                 <Card
                   key={post.id}
@@ -339,18 +360,16 @@ function Posts() {
             >
               {modules.map((mod) => {
                 const levels = mod.levels || {}
-                const levelTags = Object.keys(levels)
-
                 return (
                   <Card
                     key={mod.id}
                     variant="outlined"
                     sx={{ width: "100%", boxSizing: "border-box" }}
                   >
-                    {mod.imgLink && (
+                    {mod.cover && (
                       <a href={`/module/${mod.id}`}>
                         <img
-                          src={mod.imgLink}
+                          src={mod.cover}
                           alt={mod.topic}
                           style={{
                             width: "100%",
@@ -369,7 +388,6 @@ function Posts() {
                       <Typography level="body-sm" sx={{ mb: 1 }}>
                         {mod.materia}
                       </Typography>
-
                       <Sheet
                         sx={{
                           display: "flex",
@@ -378,30 +396,26 @@ function Posts() {
                           mt: 1
                         }}
                       >
-                        {["easy", "medium", "hard"].map((level) =>
-                          levels[level]?.length ? (
+                        {[1, 2, 3].map((lvl) => {
+                          const isDone =
+                            progressMap?.[mod.id]?.[`level${lvl}Completed`]
+                          return (
                             <Button
-                              key={level}
+                              key={`badge-${lvl}`}
                               size="sm"
+                              variant="soft"
                               sx={{
-                                background:
-                                  level === "easy"
-                                    ? "#56cc9d"
-                                    : level === "medium"
-                                      ? "#f6b93b"
-                                      : "#e55039",
+                                backgroundColor: isDone ? "#2ecc71" : "#ccc",
                                 color: "#fff",
                                 pointerEvents: "none",
-                                width: "auto",
-                                minWidth: "fit-content",
-                                fontWeight: "bold",
-                                textTransform: "uppercase"
+                                minWidth: 50,
+                                fontWeight: "bold"
                               }}
                             >
-                              {level.charAt(0)} · {levels[level].length}
+                              LVL {lvl}
                             </Button>
-                          ) : null
-                        )}
+                          )
+                        })}
                       </Sheet>
                     </CardContent>
                     <CardActions

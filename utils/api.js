@@ -10,6 +10,30 @@ import {
 } from "firebase/firestore"
 import db from "./firestore"
 
+export async function getUserModuleProgress(userId, materia) {
+  try {
+    const modulesRef = collection(db, "learningModules", materia, "lessons")
+    const modulesSnapshot = await getDocs(modulesRef)
+
+    const progressMap = {}
+
+    for (const moduleDoc of modulesSnapshot.docs) {
+      const modId = moduleDoc.id
+      const progressRef = doc(db, "learningProgress", userId, "modules", modId)
+      const progressSnap = await getDoc(progressRef)
+
+      if (progressSnap.exists()) {
+        progressMap[modId] = progressSnap.data()
+      }
+    }
+
+    return progressMap
+  } catch (error) {
+    console.error("❌ Errore nel recupero del progresso utente:", error)
+    return {}
+  }
+}
+
 export async function getModulesFromFirestore(materia) {
   try {
     const q = query(

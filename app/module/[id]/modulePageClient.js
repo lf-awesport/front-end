@@ -77,10 +77,9 @@ export default function ModulePageClient() {
       }
     }
 
-    const cardList =
-      moduleData.levels?.[
-        level === 1 ? "easy" : level === 2 ? "medium" : "hard"
-      ] || []
+    const levelKey = level === 1 ? "easy" : level === 2 ? "medium" : "hard"
+    const cardList = moduleData.levels?.[levelKey]?.cards || []
+
     const correct = cardList[index]?.quiz?.correctAnswer
 
     const isFullyAnswered =
@@ -154,7 +153,8 @@ export default function ModulePageClient() {
         </TabList>
 
         {[1, 2, 3].map((lvl, i) => {
-          const cards = moduleData.levels[levels[lvl]] || []
+          const levelData = moduleData.levels[levels[lvl]] || {}
+          const cards = levelData.cards || []
           const userAnswers = progress.answers?.[lvl] || {}
           const correctCount = Object.entries(userAnswers).filter(
             ([i, val]) => val === cards[i]?.quiz.correctAnswer
@@ -170,9 +170,7 @@ export default function ModulePageClient() {
               ) : (
                 <>
                   <Typography level="h2" sx={{ mb: 1, fontWeight: 700 }}>
-                    📘{" "}
-                    {moduleData.levels[levels[lvl]]?.title ||
-                      `Lezione – Livello ${lvl}`}
+                    {levelData.levelTitle || `Lezione – Livello ${lvl}`}
                   </Typography>
 
                   <Box sx={{ mb: 3 }}>
