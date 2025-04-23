@@ -135,14 +135,14 @@ function Posts() {
           setUser(currentUser)
           const progresses = await getUserModuleProgress(
             currentUser.uid,
-            "Sports Law"
+            "Sport Law"
           )
           setProgressMap(progresses)
         }
       })
 
       if (modules.length === 0) {
-        getModulesFromFirestore("Sports Law")
+        getModulesFromFirestore("Sport Law")
           .then(setModules)
           .catch(console.error)
       }

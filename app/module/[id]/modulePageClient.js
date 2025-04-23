@@ -47,7 +47,7 @@ export default function ModulePageClient() {
   useEffect(() => {
     if (!user || !id) return
 
-    const ref = doc(db, "learningModules", "Sports Law", "lessons", id)
+    const ref = doc(db, "learningModules", "Sport Law", "lessons", id)
     getDoc(ref).then((snap) => {
       if (snap.exists()) setModuleData(snap.data())
     })
