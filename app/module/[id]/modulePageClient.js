@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { onAuthStateChanged } from "firebase/auth"
+import { marked } from "marked"
 import { auth } from "@/utils/firebaseConfig"
 import { doc, getDoc, setDoc, onSnapshot } from "firebase/firestore"
 import db from "@/utils/firestore"
@@ -148,6 +149,9 @@ export default function ModulePageClient() {
               Lvl. {lvl}
             </Tab>
           ))}
+          <Tab value={4} color="primary">
+            📖
+          </Tab>
         </TabList>
 
         {[1, 2, 3].map((lvl) => {
@@ -268,6 +272,16 @@ export default function ModulePageClient() {
             </TabPanel>
           )
         })}
+        <TabPanel value={4}>
+          <Typography level="h2" sx={{ fontWeight: 700, mb: 2 }}>
+            {moduleData.essay?.title || "Saggio introduttivo"}
+          </Typography>
+          <div
+            dangerouslySetInnerHTML={{
+              __html: marked.parse(moduleData.essay?.essay || "")
+            }}
+          />
+        </TabPanel>
       </Tabs>
     </main>
   )

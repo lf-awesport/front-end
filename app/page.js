@@ -179,7 +179,6 @@ function Posts() {
                   color: "#fff"
                 }
               }}
-              disabled
               color="primary"
             >
               Chat
@@ -191,7 +190,6 @@ function Posts() {
                   color: "#fff"
                 }
               }}
-              disabled
               color="primary"
             >
               Feed
