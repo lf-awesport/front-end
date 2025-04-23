@@ -207,8 +207,19 @@ function Posts() {
             </Tab>
           </TabList>
 
-          <TabPanel value={0}>
-            <ArticleChat data={data} />
+          <TabPanel value={0} sx={{ padding: 0, display: "flex", flex: 1 }}>
+            <Sheet
+              sx={{
+                mb: 0,
+                display: "flex",
+                flexWrap: "wrap",
+                gap: 2,
+                alignItems: "center",
+                flex: 1
+              }}
+            >
+              <ArticleChat data={data} />
+            </Sheet>
           </TabPanel>
 
           <TabPanel value={1}>
