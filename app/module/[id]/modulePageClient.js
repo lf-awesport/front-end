@@ -24,6 +24,16 @@ import {
 } from "@mui/joy"
 import styles from "../../posts.module.css"
 import HomeIcon from "@mui/icons-material/Home"
+import LibraryBooksIcon from "@mui/icons-material/LibraryBooks"
+import LooksOneIcon from "@mui/icons-material/LooksOne"
+import LooksTwoIcon from "@mui/icons-material/LooksTwo"
+import Looks3Icon from "@mui/icons-material/Looks3"
+
+const getLevelIcon = (level) => {
+  if (level === 1) return <LooksOneIcon />
+  if (level === 2) return <LooksTwoIcon />
+  if (level === 3) return <Looks3Icon />
+}
 
 export default function ModulePageClient() {
   const { id } = useParams()
@@ -130,7 +140,16 @@ export default function ModulePageClient() {
         }}
       >
         <TabList>
-          <Tab value={0} color="primary">
+          <Tab
+            value={0}
+            color="primary"
+            sx={{
+              '&[aria-selected="true"]': {
+                backgroundColor: "#5cc9fa",
+                color: "#fff"
+              }
+            }}
+          >
             <HomeIcon />
           </Tab>
           {[1, 2, 3].map((lvl) => (
@@ -146,11 +165,20 @@ export default function ModulePageClient() {
                 }
               }}
             >
-              Lvl. {lvl}
+              {getLevelIcon(lvl)}
             </Tab>
           ))}
-          <Tab value={4} color="primary">
-            📖
+          <Tab
+            value={4}
+            color="primary"
+            sx={{
+              '&[aria-selected="true"]': {
+                backgroundColor: "#5cc9fa",
+                color: "#fff"
+              }
+            }}
+          >
+            <LibraryBooksIcon />
           </Tab>
         </TabList>
 
@@ -180,7 +208,7 @@ export default function ModulePageClient() {
                         Object.entries(answers).filter(
                           ([i, val]) => val === cards[i]?.quiz.correctAnswer
                         ).length
-                      }{" "}
+                      }
                       / {cards.length}
                     </Typography>
                     <LinearProgress
