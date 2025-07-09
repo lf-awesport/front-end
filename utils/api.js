@@ -97,11 +97,11 @@ export const getPost = (id, callback) => {
   })
 }
 
-export async function fetchSearchResults(query, filters = []) {
+export async function fetchSearchResults(params) {
   const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/search`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ query, filters })
+    body: JSON.stringify(params)
   })
 
   if (!response.ok) {

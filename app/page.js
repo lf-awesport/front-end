@@ -24,13 +24,15 @@ import {
   getUserModuleProgress,
   getModulesFromFirestore
 } from "@/utils/api"
-import { useSearchParams, useRouter } from "next/navigation"
+import { useRouter } from "next/navigation"
 import _ from "lodash"
 import Loading from "@/components/loading"
 import ProtectedRoute from "@/components/protectedRoute"
+import DateFilterPanel from "@/components/dateFilterPanel"
 import { ArticleChat } from "@/components/articleChat"
 import { onAuthStateChanged } from "firebase/auth"
 import { auth } from "@/utils/firebaseConfig"
+import dayjs from "dayjs"
 
 export default function PostsWrapper() {
   return (
@@ -47,6 +49,8 @@ function Posts() {
   const [sortOrder, setSortOrder] = useState("date")
   const [sortAsc, setSortAsc] = useState(false)
   const [searchFilter, setSearchFilter] = useState("")
+  const [fromDate, setFromDate] = useState(null)
+  const [toDate, setToDate] = useState(null)
   const [cursor, setCursor] = useState(null)
   const [hasMore, setHasMore] = useState(true)
   const [tabValue, setTabValue] = useState(2)
@@ -54,7 +58,6 @@ function Posts() {
   const [user, setUser] = useState(null)
   const [progressMap, setProgressMap] = useState({})
   const router = useRouter()
-  const searchParams = useSearchParams()
 
   const loadInitialPosts = async () => {
     setLoading(true)
@@ -81,15 +84,18 @@ function Posts() {
 
   const filterPosts = async () => {
     setLoading(true)
-    if (searchFilter.trim()) {
-      router.push(`?tab=search&q=${encodeURIComponent(searchFilter)}`)
-    } else {
-      router.push("?tab=search")
+
+    const filters = {
+      query: searchFilter.trim(),
+      fromYear: fromDate?.year(),
+      fromMonth: fromDate ? fromDate.month() + 1 : undefined,
+      fromDay: fromDate?.date(),
+      toYear: toDate?.year(),
+      toMonth: toDate ? toDate.month() + 1 : undefined,
+      toDay: toDate?.date()
     }
 
-    const results = searchFilter.trim()
-      ? await fetchSearchResults(searchFilter)
-      : await getPosts("sentiment", null).then((res) => res.posts)
+    const results = await fetchSearchResults(filters)
     setDefaultData(results)
     setData(_.orderBy(results, [sortOrder], [sortAsc ? "asc" : "desc"]))
     setHasMore(false)
@@ -104,29 +110,15 @@ function Posts() {
 
   const resetFilters = () => {
     setSearchFilter("")
-    router.push("/")
+    setFromDate(null)
+    setToDate(null)
     loadInitialPosts()
     setTabValue(1)
   }
 
   useEffect(() => {
-    const tabParam = searchParams.get("tab")
-    const queryParam = searchParams.get("q") || ""
-
-    if (tabParam === "search") {
-      setSearchFilter(queryParam)
-      setTabValue(1)
-      setLoading(true)
-      fetchSearchResults(queryParam).then((results) => {
-        setDefaultData(results)
-        setData(_.orderBy(results, [sortOrder], [sortAsc ? "asc" : "desc"]))
-        setHasMore(false)
-        setLoading(false)
-      })
-    } else {
-      loadInitialPosts()
-    }
-  }, [searchParams])
+    loadInitialPosts()
+  }, [])
 
   useEffect(() => {
     if (tabValue === 2) {
@@ -253,7 +245,9 @@ function Posts() {
                   onKeyDown={(e) => e.key === "Enter" && filterPosts()}
                   sx={{ flex: 1, minWidth: 200 }}
                 />
-                <Button onClick={filterPosts}>Cerca</Button>
+                <Button disabled={!searchFilter} onClick={filterPosts}>
+                  Cerca
+                </Button>
                 <Button variant="outlined" onClick={resetFilters}>
                   Reset
                 </Button>
@@ -279,6 +273,17 @@ function Posts() {
                 >
                   {sortAsc ? "⬆️ ASC" : "⬇️ DESC"}
                 </Button>
+                <DateFilterPanel
+                  fromDate={fromDate}
+                  toDate={toDate}
+                  setFromDate={setFromDate}
+                  setToDate={setToDate}
+                  shouldDisableFromDate={(date) =>
+                    date.isAfter(dayjs(), "day") ||
+                    (toDate && date.isAfter(toDate, "day"))
+                  }
+                  shouldDisableToDate={(date) => date.isAfter(dayjs(), "day")}
+                />
               </Sheet>
 
               {data.map((post) => (
@@ -304,7 +309,9 @@ function Posts() {
                   )}
                   <CardContent>
                     <Typography level="title-lg">
-                      <a href={`/post/${post.id}`}>{post.title}</a>
+                      <a href={`/post/${post.id}`} target="_blank">
+                        {post.title}
+                      </a>
                     </Typography>
                     <Typography level="body-sm" sx={{ mb: 1 }}>
                       {post.date} · {post.author}
