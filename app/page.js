@@ -127,14 +127,14 @@ function Posts() {
           setUser(currentUser)
           const progresses = await getUserModuleProgress(
             currentUser.uid,
-            "Sport Marketing"
+            "Sport Management"
           )
           setProgressMap(progresses)
         }
       })
 
       if (modules.length === 0) {
-        getModulesFromFirestore("Sport Marketing")
+        getModulesFromFirestore("Sport Management")
           .then(setModules)
           .catch(console.error)
       }
