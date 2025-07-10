@@ -53,7 +53,7 @@ function Posts() {
   const [toDate, setToDate] = useState(null)
   const [cursor, setCursor] = useState(null)
   const [hasMore, setHasMore] = useState(true)
-  const [tabValue, setTabValue] = useState(2)
+  const [tabValue, setTabValue] = useState(1)
   const [modules, setModules] = useState([])
   const [user, setUser] = useState(null)
   const [progressMap, setProgressMap] = useState({})
@@ -127,14 +127,14 @@ function Posts() {
           setUser(currentUser)
           const progresses = await getUserModuleProgress(
             currentUser.uid,
-            "Sport Law"
+            "Sport Marketing"
           )
           setProgressMap(progresses)
         }
       })
 
       if (modules.length === 0) {
-        getModulesFromFirestore("Sport Law")
+        getModulesFromFirestore("Sport Marketing")
           .then(setModules)
           .catch(console.error)
       }
