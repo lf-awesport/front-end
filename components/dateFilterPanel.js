@@ -27,6 +27,7 @@ export default function DateFilterPanel({
           />
           <DatePicker
             label="A"
+            sx={{ ml: 0 }}
             value={toDate}
             onChange={(newValue) => setToDate(newValue)}
             slotProps={{ textField: { variant: "outlined", size: "small" } }}

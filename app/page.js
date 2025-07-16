@@ -15,7 +15,8 @@ import {
   TabPanel,
   Card,
   CardContent,
-  CardActions
+  CardActions,
+  Avatar
 } from "@mui/joy"
 import { getCategoryDetails } from "@/utils/helpers"
 import {
@@ -141,6 +142,12 @@ function Posts() {
     }
   }, [tabValue])
 
+  const color = (punteggio) => {
+    if (punteggio > 70) return "success"
+    if (punteggio > 40) return "warning"
+    if (punteggio > 0) return "danger"
+  }
+
   if (isLoading || !data) return <Loading />
 
   return (
@@ -259,7 +266,6 @@ function Posts() {
                   <Option value="date">Data</Option>
                   <Option value="title">Titolo</Option>
                   <Option value="author">Autore</Option>
-                  <Option value="prejudice">Pregiudizio</Option>
                 </Select>
                 <Button
                   variant="outlined"
@@ -347,6 +353,11 @@ function Posts() {
                       ) : null
                     })}
                   </CardActions>
+                  {post.similarityScore && (
+                    <Avatar color={color(post.similarityScore)} size="lg">
+                      {post.similarityScore}
+                    </Avatar>
+                  )}
                 </Card>
               ))}
               {hasMore && (
