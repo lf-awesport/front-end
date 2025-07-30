@@ -29,7 +29,7 @@
     "js-file-download": "^0.4.12",
     "lodash": "^4.17.21",
     "marked": "^15.0.8",
-    "next": "14.2.5",
+    "next": "^14.2.30",
     "react": "^18",
     "react-dom": "^18",
     "react-multi-highlight": "^1.0.3"
