@@ -13,6 +13,7 @@
     "@emotion/styled": "^11.13.0",
     "@firebase/firestore": "^4.6.5",
     "@fontsource/inter": "^5.0.20",
+    "@jaredreisinger/react-crossword": "^5.2.0",
     "@mui/icons-material": "^7.0.2",
     "@mui/joy": "^5.0.0-beta.48",
     "@mui/lab": "^7.0.0-beta.14",
