@@ -1,4 +1,4 @@
-  // Log ogni lettera digitata nella griglia
+// Log ogni lettera digitata nella griglia
 
 "use client"
 
@@ -25,6 +25,20 @@ const crosswordTheme = {
 }
 
 class DailyPageClient extends Component {
+  handleResetCrossword = () => {
+    if (this.crosswordRef.current && this.crosswordRef.current.reset) {
+      this.crosswordRef.current.reset()
+      this.setState({ crosswordCompleted: false })
+    }
+  }
+  state = {
+    user: null,
+    crosswordData: null,
+    summary: null,
+    date: null,
+    loading: true,
+    crosswordCompleted: false
+  }
   // Riempie tutte le risposte corrette nel cruciverba
   handleFillAllAnswers = () => {
     if (this.crosswordRef.current && this.crosswordRef.current.fillAllAnswers) {
@@ -86,21 +100,26 @@ class DailyPageClient extends Component {
 
   // Mostra alert e log quando una parola viene indovinata
   handleClueCorrect = (direction, number, answer) => {
-    console.log(`[onCorrect] Parola indovinata: n. ${number} (${direction}) = ${answer}`)
+    console.log(
+      `[onCorrect] Parola indovinata: n. ${number} (${direction}) = ${answer}`
+    )
     alert(`Hai indovinato la parola n. ${number} (${direction}): ${answer}`)
   }
 
   // Logga in console quando il cruciverba è completato
   handleCrosswordComplete = (isCorrect) => {
     if (isCorrect) {
+      this.setState({ crosswordCompleted: true })
       console.log("✅ Cruciverba completato correttamente!")
     } else {
+      this.setState({ crosswordCompleted: false })
       console.log("❌ Cruciverba non ancora completato correttamente.")
     }
   }
 
   render() {
-    const { user, crosswordData, summary, date, loading } = this.state
+    const { user, crosswordData, summary, date, loading, crosswordCompleted } =
+      this.state
     if (!user || loading) return <Loading message="Caricamento..." />
     if (!crosswordData) return <Loading message="Caricamento cruciverba..." />
     return (
@@ -108,16 +127,46 @@ class DailyPageClient extends Component {
         className={styles.main}
         style={{ width: "100%", maxWidth: "900px", margin: "0 auto" }}
       >
-        <h2
+        <div
           style={{
-            margin: "32px 0 24px 0",
-            fontWeight: 700,
-            textAlign: "center",
-            color: "#5cc9fa"
+            display: "flex",
+            justifyContent: "center",
+            gap: 16,
+            marginBottom: 24
           }}
         >
-          {date ? date : "Cruciverba Sport Business"}
-        </h2>
+          <button
+            style={{
+              padding: "8px 20px",
+              background: "#5cc9fa",
+              color: "#fff",
+              border: "none",
+              borderRadius: 8,
+              fontWeight: 600,
+              fontSize: 16,
+              cursor: crosswordCompleted ? "not-allowed" : "pointer"
+            }}
+            onClick={this.handleFillAllAnswers}
+            disabled={crosswordCompleted}
+          >
+            Mostra tutte le risposte
+          </button>
+          <button
+            style={{
+              padding: "8px 20px",
+              background: "#eee",
+              color: "#222",
+              border: "none",
+              borderRadius: 8,
+              fontWeight: 600,
+              fontSize: 16,
+              cursor: crosswordCompleted ? "not-allowed" : "pointer"
+            }}
+            onClick={this.handleResetCrossword}
+          >
+            Reset
+          </button>
+        </div>
         {summary && (
           <section
             style={{
@@ -137,24 +186,12 @@ class DailyPageClient extends Component {
             {summary}
           </section>
         )}
-        <button
-          style={{
-            display: "block",
-            margin: "0 auto 24px auto",
-            padding: "8px 20px",
-            background: "#5cc9fa",
-            color: "#fff",
-            border: "none",
-            borderRadius: 8,
-            fontWeight: 600,
-            fontSize: 16,
-            cursor: "pointer"
-          }}
-          onClick={this.handleFillAllAnswers}
+        <div
+          className={responsiveStyles["responsive-crossword-container"]}
+          style={
+            crosswordCompleted ? { pointerEvents: "none", opacity: 0.9 } : {}
+          }
         >
-          Mostra tutte le risposte
-        </button>
-        <div className={responsiveStyles["responsive-crossword-container"]}>
           <Crossword
             ref={this.crosswordRef}
             data={crosswordData}
