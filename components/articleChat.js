@@ -3,9 +3,8 @@
 import { Box } from "@mui/joy"
 import { API_URL } from "@/utils/api"
 import dynamic from "next/dynamic"
-import React from "react"
+import React, { useRef, useEffect } from "react"
 import { marked } from "marked"
-import { logAgentQuery } from "@/utils/logAgentQuery"
 
 const DeepChat = dynamic(
   () => import("deep-chat-react").then((mod) => mod.DeepChat),
@@ -13,6 +12,8 @@ const DeepChat = dynamic(
 )
 
 export function ArticleChat() {
+  const scrollRef = useRef(null)
+
   return (
     <Box
       sx={{
@@ -21,7 +22,7 @@ export function ArticleChat() {
         width: "100%",
         height: "100%",
         maxWidth: "100%",
-        overflow: "hidden",
+        overflow: "auto",
         p: 0,
         scrollbarGutter: "stable",
         flex: 1
@@ -83,7 +84,7 @@ export function ArticleChat() {
           user: { styles: { position: "right" } }
         }}
         textInput={{ placeholder: { text: "Scrivi la tua domanda qui..." } }}
-        connect={{ url: `${API_URL}/askAgent`, method: "POST" }}
+        connect={{ url: `${API_URL}/askAgent`, method: "POST", stream: true }}
         requestBodyLimits={{ maxMessages: 1 }}
         requestInterceptor={(details) => {
           const lastMessage = details.body?.messages?.at(-1)?.text
@@ -104,9 +105,33 @@ export function ArticleChat() {
         introMessage={{
           text: "Ciao! Sono Eddy, il tuo assistente AI dedicato allo sport business. Posso aiutarti ad analizzare trend, capire concetti complessi, scoprire dati economici e finanziari, e rispondere alle tue domande su calcio, eventi, infrastrutture, marketing e molto altro."
         }}
+        onMessage={() => {
+          const scrollElement = scrollRef.current
+          if (scrollElement) {
+            const scrollElement = scrollRef.current
+            scrollElement.scrollIntoView({ behavior: "smooth", block: "end" })
+          }
+        }}
         responseInterceptor={(response) => {
+          console.log("Response interceptor:", response)
+          // Handle sources chunk at the end of streaming
+          if (response && typeof response === "object" && response.sources) {
+            // Render sources only (no text)
+            const sourcesLinks = response.sources
+              .map(
+                (src, i) =>
+                  `<a href="${src.url}" target="_blank" rel="noopener noreferrer">[${i + 1}]</a>`
+              )
+              .join(", ")
+            return {
+              html: `<br><br><span style='font-size: 8px;'>Fonti: ${sourcesLinks}</span>`
+            }
+          }
           if (response && typeof response === "object" && response.text) {
-            logAgentQuery(response)
+            const scrollElement = scrollRef.current
+            if (scrollElement) {
+              scrollElement.scrollIntoView({ behavior: "smooth", block: "end" })
+            }
             const markdown = response.text.answer || response.text
             const htmlContent = marked.parse(markdown)
             const styledHtml = `
@@ -121,24 +146,6 @@ export function ArticleChat() {
                 ${htmlContent}
               </div>
             `
-
-            if (Array.isArray(response.sources)) {
-              const sourcesLinks = response.sources
-                .map(
-                  (src, i) =>
-                    `<a href="${src.url}" target="_blank" rel="noopener noreferrer">[${i + 1}]</a>`
-                )
-                .join(", ")
-              return {
-                html:
-                  styledHtml +
-                  `<br><br><span style='font-size: 8px;'>Fonti: ${sourcesLinks}</span>` +
-                  `<div style="margin-top: 10px; text-align: right;">
-                  <button onclick="navigator.clipboard.writeText(\`${markdown.replace(/`/g, "\\`")}\`)">📋 Copia</button>
-                </div>`
-              }
-            }
-
             return {
               html: `
                 ${styledHtml}
@@ -148,6 +155,7 @@ export function ArticleChat() {
           return { html: "<i>⚠️ Nessuna risposta ricevuta.</i>" }
         }}
       />
+      <div id="scroll-ref" ref={scrollRef}></div>
     </Box>
   )
 }
