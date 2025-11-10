@@ -17,10 +17,8 @@ const crosswordTheme = {
   numberColor: "#5cc9fa",
   focusBackground: "#e3f6ff",
   highlightBackground: "#d0f0ff",
-  columnBreakpoint: "900px"
+  columnBreakpoint: "700px"
 }
-
-import PropTypes from "prop-types"
 
 class CrosswordTab extends Component {
   handleResetCrossword = () => {
@@ -64,7 +62,7 @@ class CrosswordTab extends Component {
         const data = snap.data()
         console.log(data)
         this.setState({
-          crosswordData: data || null,
+          crosswordData: data.crossword || null,
           loading: false
         })
       } else {
@@ -99,6 +97,23 @@ class CrosswordTab extends Component {
         className={styles.main}
         style={{ width: "100%", maxWidth: "900px", margin: "0 auto" }}
       >
+        <div
+          className={styles["responsive-crossword-container"]}
+          style={
+            crosswordCompleted ? { pointerEvents: "none", opacity: 0.9 } : {}
+          }
+        >
+          <Crossword
+            ref={this.crosswordRef}
+            data={crosswordData}
+            theme={crosswordTheme}
+            onCorrect={this.handleClueCorrect}
+            onCrosswordCorrect={this.handleCrosswordComplete}
+            onCellChange={this.handleCellChange}
+            acrossLabel="Orizzontali"
+            downLabel="Verticali"
+          />
+        </div>
         <div
           style={{
             display: "flex",
@@ -139,31 +154,9 @@ class CrosswordTab extends Component {
             Reset
           </button>
         </div>
-
-        <div
-          className={styles["responsive-crossword-container"]}
-          style={
-            crosswordCompleted ? { pointerEvents: "none", opacity: 0.9 } : {}
-          }
-        >
-          <Crossword
-            ref={this.crosswordRef}
-            data={crosswordData}
-            theme={crosswordTheme}
-            onCorrect={this.handleClueCorrect}
-            onCrosswordCorrect={this.handleCrosswordComplete}
-            onCellChange={this.handleCellChange}
-            acrossLabel="Orizzontali"
-            downLabel="Verticali"
-          />
-        </div>
       </main>
     )
   }
-}
-
-CrosswordTab.propTypes = {
-  postId: PropTypes.string.isRequired
 }
 
 export default CrosswordTab

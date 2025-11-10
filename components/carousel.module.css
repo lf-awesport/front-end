@@ -263,9 +263,11 @@
   border-radius: 16px;
   box-shadow: 0 4px 16px rgba(92, 201, 250, 0.08);
   padding: 32px;
-  transition:
-    padding 0.2s,
-    max-width 0.2s;
+  transition: padding 0.2s;
+}
+
+.responsive-crossword-container h3 {
+  margin-top: 32px !important;
 }
 
 @media (max-width: 900px) {

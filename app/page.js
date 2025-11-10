@@ -315,9 +315,7 @@ function Posts() {
                   )}
                   <CardContent>
                     <Typography level="title-lg">
-                      <a href={`/post/${post.id}`} target="_blank">
-                        {post.title}
-                      </a>
+                      <a href={`/post/${post.id}`}>{post.title}</a>
                     </Typography>
                     <Typography level="body-sm" sx={{ mb: 1 }}>
                       {post.date} · {post.author}

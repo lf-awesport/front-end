@@ -113,7 +113,6 @@ export function ArticleChat() {
           }
         }}
         responseInterceptor={(response) => {
-          console.log("Response interceptor:", response)
           // Handle sources chunk at the end of streaming
           if (response && typeof response === "object" && response.sources) {
             // Render sources only (no text)

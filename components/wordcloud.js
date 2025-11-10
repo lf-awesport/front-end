@@ -20,8 +20,8 @@ export function WordCloud({ data }) {
       </main>
     )
 
-  const width = typeof window !== "undefined" ? window.innerWidth * 0.9 : 360
-  const height = width * 0.4
+  const width = typeof window !== "undefined" ? window.innerWidth * 0.7 : 360
+  const height = width * 0.3
 
   const words = wordFreq(data.analysis?.cleanText)
   const colors = ["#0D47A1", "#1976D2", "#2196F3", "#BBDEFB", "#000"]

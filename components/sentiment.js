@@ -8,7 +8,7 @@ import { Typography } from "@mui/joy"
 const chartSetting = {
   width: 340,
   height: 400,
-  disableHover: true,
+  disablehover: "true",
   highlightedItem: -1,
   slotProps: {
     tooltip: { trigger: "none" }
