@@ -1,11 +1,13 @@
 "use client"
 
-import { usePathname } from "next/navigation"
+import { usePathname, useRouter } from "next/navigation"
 import styles from "./post.module.css"
 import { TextAnalysis } from "@/components/textAnalysis"
 import { WordCloud } from "@/components/wordcloud"
 import { Takeaways } from "@/components/takeaways"
 import Loading from "@/components/loading"
+import CrosswordTab from "@/components/crossword"
+import HomeIcon from "@mui/icons-material/Home"
 
 import { useState, useEffect } from "react"
 import {
@@ -25,6 +27,8 @@ export default function Post({ params }) {
   const [data, setData] = useState(null)
   const [getPathname, setPathname] = useState(null)
   const [isLoading, setLoading] = useState(true)
+  const [tabValue, setTabValue] = useState(1)
+  const router = useRouter()
 
   const pathname = usePathname()
 
@@ -58,7 +62,12 @@ export default function Post({ params }) {
     >
       <Tabs
         aria-label="Basic tabs"
-        defaultValue={0}
+        value={tabValue}
+        defaultValue={1}
+        onChange={(e, val) => {
+          if (val === 0) router.push("/")
+          else setTabValue(val)
+        }}
         sx={{
           width: "100%",
           boxSizing: "border-box",
@@ -70,20 +79,46 @@ export default function Post({ params }) {
       >
         <TabList sx={{ width: "100%" }}>
           <Tab
+            value={0}
             color="primary"
             sx={{
               '&[aria-selected="true"]': {
-                backgroundColor: "#5cc9fa", // Replace with your desired color
+                backgroundColor: "#5cc9fa",
+                color: "#fff"
+              }
+            }}
+          >
+            <HomeIcon />
+          </Tab>
+          <Tab
+            value={1}
+            color="primary"
+            sx={{
+              '&[aria-selected="true"]': {
+                backgroundColor: "#5cc9fa",
                 color: "#fff"
               }
             }}
           >
             Info
           </Tab>
+          <Tab
+            value={2}
+            color="primary"
+            sx={{
+              '&[aria-selected="true"]': {
+                backgroundColor: "#5cc9fa",
+                color: "#fff"
+              }
+            }}
+          >
+            Cruciverba
+          </Tab>
         </TabList>
 
-        {/* Tab 1 */}
+        {/* Tab 1: Info */}
         <TabPanel
+          value={1}
           sx={{
             p: 0,
             boxSizing: "border-box",
@@ -99,8 +134,8 @@ export default function Post({ params }) {
               flexWrap: "wrap",
               gap: 2,
               alignItems: "center",
-              overflowX: "hidden", // optional safety net
-              minWidth: 0 // 🛠️ this is key
+              overflowX: "hidden",
+              minWidth: 0
             }}
           >
             <div className={styles.summary}>
@@ -162,6 +197,18 @@ export default function Post({ params }) {
             <Takeaways data={data} />
             <TextAnalysis data={data} />
           </Sheet>
+        </TabPanel>
+
+        {/* Tab 2: Cruciverba */}
+        <TabPanel
+          value={2}
+          sx={{
+            p: 0,
+            boxSizing: "border-box",
+            "--Tabs-spacing": "0px"
+          }}
+        >
+          <CrosswordTab postId={data.id} />
         </TabPanel>
       </Tabs>
     </main>

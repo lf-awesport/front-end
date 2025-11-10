@@ -3,15 +3,11 @@
 "use client"
 
 import React, { Component } from "react"
-import { useParams, useRouter } from "next/navigation"
-import { onAuthStateChanged } from "firebase/auth"
-import { auth } from "@/utils/firebaseConfig"
 import { doc, getDoc } from "firebase/firestore"
 import db from "@/utils/firestore"
 import Loading from "@/components/loading"
 import Crossword from "@jaredreisinger/react-crossword"
-import responsiveStyles from "./crosswordResponsive.module.css"
-import styles from "../../posts.module.css"
+import styles from "./carousel.module.css"
 
 const crosswordTheme = {
   gridBackground: "#f7fafc",
@@ -24,7 +20,9 @@ const crosswordTheme = {
   columnBreakpoint: "900px"
 }
 
-class DailyPageClient extends Component {
+import PropTypes from "prop-types"
+
+class CrosswordTab extends Component {
   handleResetCrossword = () => {
     if (this.crosswordRef.current && this.crosswordRef.current.reset) {
       this.crosswordRef.current.reset()
@@ -32,64 +30,41 @@ class DailyPageClient extends Component {
     }
   }
   state = {
-    user: null,
     crosswordData: null,
-    summary: null,
-    date: null,
     loading: true,
     crosswordCompleted: false
   }
-  // Riempie tutte le risposte corrette nel cruciverba
   handleFillAllAnswers = () => {
     if (this.crosswordRef.current && this.crosswordRef.current.fillAllAnswers) {
       this.crosswordRef.current.fillAllAnswers()
     }
   }
-  // Log ogni lettera digitata nella griglia
   handleCellChange = (row, col, char) => {
     console.log(`Lettera inserita: '${char}' in cella [${row},${col}]`)
   }
   constructor(props) {
     super(props)
     this.state = {
-      user: null,
       crosswordData: null,
-      summary: null,
-      date: null,
       loading: true
     }
     this.crosswordRef = React.createRef()
   }
 
   componentDidMount() {
-    this.unsubscribeAuth = onAuthStateChanged(auth, (currentUser) => {
-      if (!currentUser) {
-        // Next.js router hook is not available in class, fallback to window.location
-        window.location.href = "/login"
-        return
-      }
-      this.setState({ user: currentUser }, this.loadCrossword)
-    })
-  }
-
-  componentWillUnmount() {
-    if (this.unsubscribeAuth) this.unsubscribeAuth()
+    this.loadCrossword()
   }
 
   loadCrossword = () => {
-    const { user } = this.state
-    // Estraggo id dalla url
-    const urlParts = window.location.pathname.split("/")
-    const id = urlParts[urlParts.length - 1]
-    if (!user || !id) return
-    const ref = doc(db, "dailySummaries", id)
+    const { postId } = this.props
+    if (!postId) return
+    const ref = doc(db, "crosswords", postId)
     getDoc(ref).then((snap) => {
       if (snap.exists()) {
         const data = snap.data()
+        console.log(data)
         this.setState({
-          crosswordData: data.crossword || null,
-          summary: data.summary || null,
-          date: data.date || id,
+          crosswordData: data || null,
           loading: false
         })
       } else {
@@ -98,7 +73,6 @@ class DailyPageClient extends Component {
     })
   }
 
-  // Mostra alert e log quando una parola viene indovinata
   handleClueCorrect = (direction, number, answer) => {
     console.log(
       `[onCorrect] Parola indovinata: n. ${number} (${direction}) = ${answer}`
@@ -106,7 +80,6 @@ class DailyPageClient extends Component {
     alert(`Hai indovinato la parola n. ${number} (${direction}): ${answer}`)
   }
 
-  // Logga in console quando il cruciverba è completato
   handleCrosswordComplete = (isCorrect) => {
     if (isCorrect) {
       this.setState({ crosswordCompleted: true })
@@ -118,10 +91,9 @@ class DailyPageClient extends Component {
   }
 
   render() {
-    const { user, crosswordData, summary, date, loading, crosswordCompleted } =
-      this.state
-    if (!user || loading) return <Loading message="Caricamento..." />
-    if (!crosswordData) return <Loading message="Caricamento cruciverba..." />
+    const { crosswordData, loading, crosswordCompleted } = this.state
+    if (loading) return <Loading message="Caricamento cruciverba..." />
+    if (!crosswordData) return <Loading message="Nessun cruciverba trovato." />
     return (
       <main
         className={styles.main}
@@ -167,27 +139,9 @@ class DailyPageClient extends Component {
             Reset
           </button>
         </div>
-        {summary && (
-          <section
-            style={{
-              background: "#e3f6ff",
-              borderRadius: 12,
-              padding: "18px 24px",
-              margin: "0 auto 32px auto",
-              maxWidth: 700,
-              boxShadow: "0 2px 8px rgba(92,201,250,0.08)",
-              color: "#222",
-              fontSize: 18,
-              lineHeight: 1.5
-            }}
-          >
-            <strong>Riassunto della giornata:</strong>
-            <br />
-            {summary}
-          </section>
-        )}
+
         <div
-          className={responsiveStyles["responsive-crossword-container"]}
+          className={styles["responsive-crossword-container"]}
           style={
             crosswordCompleted ? { pointerEvents: "none", opacity: 0.9 } : {}
           }
@@ -208,4 +162,8 @@ class DailyPageClient extends Component {
   }
 }
 
-export default DailyPageClient
+CrosswordTab.propTypes = {
+  postId: PropTypes.string.isRequired
+}
+
+export default CrosswordTab
