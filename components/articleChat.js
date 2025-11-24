@@ -3,7 +3,8 @@
 import { Box } from "@mui/joy"
 import { API_URL } from "@/utils/api"
 import dynamic from "next/dynamic"
-import React, { useRef, useEffect } from "react"
+import React, { useRef } from "react"
+// import { AIChunkAccumulator } from "../utils/aiChunkAccumulator"
 import { marked } from "marked"
 
 const DeepChat = dynamic(
@@ -12,8 +13,8 @@ const DeepChat = dynamic(
 )
 
 export function ArticleChat() {
-  const scrollRef = useRef(null)
-
+  // Simple buffer for concatenating all incoming text
+  const aiTextBufferRef = useRef("")
   return (
     <Box
       sx={{
@@ -105,56 +106,54 @@ export function ArticleChat() {
         introMessage={{
           text: "Ciao! Sono Eddy, il tuo assistente AI dedicato allo sport business. Posso aiutarti ad analizzare trend, capire concetti complessi, scoprire dati economici e finanziari, e rispondere alle tue domande su calcio, eventi, infrastrutture, marketing e molto altro."
         }}
-        onMessage={() => {
-          const scrollElement = scrollRef.current
-          if (scrollElement) {
-            const scrollElement = scrollRef.current
-            scrollElement.scrollIntoView({ behavior: "smooth", block: "end" })
-          }
-        }}
-        responseInterceptor={(response) => {
-          // Handle sources chunk at the end of streaming
-          if (response && typeof response === "object" && response.sources) {
-            // Render sources only (no text)
-            const sourcesLinks = response.sources
-              .map(
-                (src, i) =>
-                  `<a href="${src.url}" target="_blank" rel="noopener noreferrer">[${i + 1}]</a>`
-              )
-              .join(", ")
-            return {
-              html: `<br><br><span style='font-size: 8px;'>Fonti: ${sourcesLinks}</span>`
+        responseInterceptor={(() => {
+          return (response) => {
+            // Skip empty text chunks
+            if (
+              response &&
+              typeof response === "object" &&
+              "text" in response &&
+              (response.text === "" || response.text.trim() === "")
+            ) {
+              return null
             }
-          }
-          if (response && typeof response === "object" && response.text) {
-            const scrollElement = scrollRef.current
-            if (scrollElement) {
-              scrollElement.scrollIntoView({ behavior: "smooth", block: "end" })
-            }
-            const markdown = response.text.answer || response.text
-            const htmlContent = marked.parse(markdown)
-            const styledHtml = `
-              <div style="font-family: 'Inter', sans-serif; font-size: 16px; color: #1a1a1a; line-height: 1.6;">
-                <style>
-                  h1, h2, h3 { font-weight: 600; margin: 1rem 0 0.5rem 0; }
-                  ul, ol { padding-left: 1.25rem; margin-bottom: 1rem; }
-                  li { margin-bottom: 0.25rem; }
-                  p { margin-bottom: 1rem; }
-                  strong { font-weight: 600; }
-                </style>
-                ${htmlContent}
-              </div>
-            `
-            return {
-              html: `
-                ${styledHtml}
+            // Accumulate all chunks, but only render the final answer when the sources chunk arrives
+            if (response && typeof response === "object" && response.sources) {
+              // Render only when the sources chunk (end of message) arrives
+              const htmlContent = marked.parse(aiTextBufferRef.current)
+              const styledHtml = `
+                <div style="font-family: 'Inter', sans-serif; font-size: 16px; color: #1a1a1a; line-height: 1.6;">
+                  <style>
+                    h1, h2, h3 { font-weight: 600; margin: 1rem 0 0.5rem 0; }
+                    ul, ol { padding-left: 1.25rem; margin-bottom: 1rem; }
+                    li { margin-bottom: 0.25rem; }
+                    p { margin-bottom: 1rem; }
+                    strong { font-weight: 600; }
+                  </style>
+                  ${htmlContent}
+                </div>
               `
+              // Reset buffer for next message
+              aiTextBufferRef.current = ""
+              return { html: styledHtml }
             }
+            // Accumulate all incoming text chunks, but do not render until the end
+            let newText = ""
+            if (typeof response === "string") {
+              newText = response
+            } else if (response && typeof response.text === "string") {
+              newText = response.text
+            } else if (response && typeof response.answer === "string") {
+              newText = response.answer
+            }
+            // Log each chunk for debugging
+            if (newText && newText.trim().length > 0) {
+              aiTextBufferRef.current += newText
+            }
+            return null
           }
-          return { html: "<i>⚠️ Nessuna risposta ricevuta.</i>" }
-        }}
+        })()}
       />
-      <div id="scroll-ref" ref={scrollRef}></div>
     </Box>
   )
 }
