@@ -6,6 +6,7 @@ import dynamic from "next/dynamic"
 import React, { useRef } from "react"
 // import { AIChunkAccumulator } from "../utils/aiChunkAccumulator"
 import { marked } from "marked"
+import { useAuth } from "../utils/authContext"
 
 const DeepChat = dynamic(
   () => import("deep-chat-react").then((mod) => mod.DeepChat),
@@ -15,6 +16,8 @@ const DeepChat = dynamic(
 export function ArticleChat() {
   // Simple buffer for concatenating all incoming text
   const aiTextBufferRef = useRef("")
+  const { user } = useAuth()
+
   return (
     <Box
       sx={{
@@ -99,7 +102,8 @@ export function ArticleChat() {
             ...details,
             body: {
               ...details.body,
-              q: lastMessage
+              q: lastMessage,
+              userId: user?.uid || undefined
             }
           }
         }}
