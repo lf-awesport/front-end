@@ -1,6 +1,6 @@
 "use client"
 
-import { usePathname, useRouter } from "next/navigation"
+import { usePathname, useRouter, useParams } from "next/navigation"
 import styles from "./post.module.css"
 import { TextAnalysis } from "@/components/textAnalysis"
 import { WordCloud } from "@/components/wordcloud"
@@ -9,7 +9,7 @@ import Loading from "@/components/loading"
 import CrosswordTab from "@/components/crossword"
 import HomeIcon from "@mui/icons-material/Home"
 
-import { useState, useEffect } from "react"
+import { useState, useEffect, use } from "react"
 import {
   Divider,
   Button,
@@ -29,19 +29,14 @@ export default function Post({ params }) {
   const [isLoading, setLoading] = useState(true)
   const [tabValue, setTabValue] = useState(1)
   const router = useRouter()
-
+  const { id } = useParams()
+  let postId = id
+  console.log("PostId:", postId)
   const pathname = usePathname()
 
+  if (!postId) return <Loading />
+
   useEffect(() => {
-    let postId
-
-    if (!params.id) {
-      setPathname(pathname)
-      postId = pathname.split("/")
-    } else {
-      postId = params.id
-    }
-
     getPost(postId, (res) => {
       setData(res)
       setLoading(false)

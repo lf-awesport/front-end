@@ -37,7 +37,7 @@ import dayjs from "dayjs"
 
 export default function PostsWrapper() {
   return (
-    <Suspense>
+    <Suspense fallback={<Loading />}>
       <Posts />
     </Suspense>
   )
@@ -52,6 +52,7 @@ function Posts() {
   const [searchFilter, setSearchFilter] = useState("")
   const [fromDate, setFromDate] = useState(null)
   const [toDate, setToDate] = useState(null)
+  const [now, setNow] = useState(null)
   const [cursor, setCursor] = useState(null)
   const [hasMore, setHasMore] = useState(true)
   const [tabValue, setTabValue] = useState(1)
@@ -114,11 +115,12 @@ function Posts() {
     setFromDate(null)
     setToDate(null)
     loadInitialPosts()
-    setTabValue(1)
+    setTabValue(0)
   }
 
   useEffect(() => {
     loadInitialPosts()
+    setNow(dayjs())
   }, [])
 
   useEffect(() => {
@@ -285,10 +287,13 @@ function Posts() {
                   setFromDate={setFromDate}
                   setToDate={setToDate}
                   shouldDisableFromDate={(date) =>
-                    date.isAfter(dayjs(), "day") ||
-                    (toDate && date.isAfter(toDate, "day"))
+                    now &&
+                    (date.isAfter(now, "day") ||
+                      (toDate && date.isAfter(toDate, "day")))
                   }
-                  shouldDisableToDate={(date) => date.isAfter(dayjs(), "day")}
+                  shouldDisableToDate={(date) =>
+                    now && date.isAfter(now, "day")
+                  }
                 />
               </Sheet>
 

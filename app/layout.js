@@ -14,11 +14,11 @@ export default function RootLayout({ children }) {
     <html lang="it">
       <body style={{ margin: "0 auto" }}>
         <AuthProvider>
-          <ThemeProvider>
-            <Header />
-            {children}
-            <Footer />
-          </ThemeProvider>
+          {/* <ThemeProvider> */}
+          <Header />
+          {children}
+          {/* <Footer /> */}
+          {/* </ThemeProvider> */}
         </AuthProvider>
       </body>
     </html>
