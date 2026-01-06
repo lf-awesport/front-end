@@ -110,7 +110,7 @@ export function WordCloud({ data }) {
               fontSize={w.size}
               fontWeight={w.size > 40 ? 550 : 250}
               fontFamily={w.font}
-              style={{ cursor: "default" }}
+              style={{ cursor: "pointer" }}
             >
               {w.text}
             </Text>

@@ -157,7 +157,12 @@ function Posts() {
     <ProtectedRoute>
       <main
         className={styles.main}
-        style={{ width: "100%", maxWidth: "1300px", margin: "0 auto" }}
+        style={{
+          width: "100%",
+          maxWidth: "1300px",
+          margin: "0 auto",
+          backgroundColor: "#fff"
+        }}
       >
         <Tabs
           aria-label="Tabs"
@@ -318,60 +323,77 @@ function Posts() {
                   sx={{
                     width: "100%",
                     boxSizing: "border-box",
+                    padding: 0,
                     boxShadow:
                       "0 4px 24px 0 rgba(0, 51, 154, 0.18), 0 1.5px 6px 0 rgba(0,0,0,0.08)",
                     border: "none"
                   }}
                 >
-                  <a href={`/post/${post.id}`}>
-                    <WordCloud data={post} />
-                  </a>
-
-                  <CardContent>
-                    <Typography level="title-lg">
-                      <a href={`/post/${post.id}`}>{post.title}</a>
-                    </Typography>
-                    <Typography level="body-sm" sx={{ mb: 1 }}>
-                      {post.date} · {post.author}
-                    </Typography>
+                  <Typography
+                    level="title-lg"
+                    sx={{
+                      padding: 2,
+                      backgroundColor: "#00339a",
+                      textAlign: "center"
+                    }}
+                  >
+                    <a
+                      style={{
+                        color: "#fff",
+                        fontSize: "1.5rem",
+                        textDecoration: "none",
+                        textAlign: "center"
+                      }}
+                      href={`/post/${post.id}`}
+                    >
+                      {post.title.split("Report del ")[1] || post.title}
+                    </a>
+                  </Typography>
+                  <CardContent sx={{ padding: 1, boxSizing: "border-box" }}>
                     {/* <Typography level="body-md">
                       {post.rerank_summary}
                     </Typography> */}
+                    {/* <Typography level="body-sm">
+                      {post.date} · {post.author}
+                    </Typography> */}
+                    <a href={`/post/${post.id}`} style={{ cursor: "pointer" }}>
+                      <WordCloud data={post} />
+                    </a>
+                    {/* <CardActions
+                      sx={{
+                        justifyContent: "space-around",
+                        flexWrap: "wrap",
+                        p: "1.25rem 1rem"
+                      }}
+                    >
+                      {post.tags.map((tag) => {
+                        const cat = getCategoryDetails(tag)
+                        return cat.acronym !== "UNK" ? (
+                          <Button
+                            key={`${tag}-${post.id}`}
+                            size="sm"
+                            sx={{
+                              mr: 1,
+                              mb: 1,
+                              background: cat.color,
+                              color: "#fff",
+                              pointerEvents: "none",
+                              width: "auto",
+                              minWidth: "fit-content",
+                              maxWidth: "50px"
+                            }}
+                          >
+                            {cat.acronym}
+                          </Button>
+                        ) : null
+                      })}
+                    </CardActions>
+                    {post.similarityScore && (
+                      <Avatar color={color(post.similarityScore)} size="lg">
+                        {post.similarityScore}
+                      </Avatar>
+                    )} */}
                   </CardContent>
-                  <CardActions
-                    sx={{
-                      justifyContent: "flex-start",
-                      flexWrap: "wrap",
-                      p: 0
-                    }}
-                  >
-                    {post.tags.map((tag) => {
-                      const cat = getCategoryDetails(tag)
-                      return cat.acronym !== "UNK" ? (
-                        <Button
-                          key={`${tag}-${post.id}`}
-                          size="sm"
-                          sx={{
-                            mr: 1,
-                            mb: 1,
-                            background: cat.color,
-                            color: "#fff",
-                            pointerEvents: "none",
-                            width: "auto",
-                            minWidth: "fit-content",
-                            maxWidth: "50px"
-                          }}
-                        >
-                          {cat.acronym}
-                        </Button>
-                      ) : null
-                    })}
-                  </CardActions>
-                  {post.similarityScore && (
-                    <Avatar color={color(post.similarityScore)} size="lg">
-                      {post.similarityScore}
-                    </Avatar>
-                  )}
                 </Card>
               ))}
               {hasMore && (
