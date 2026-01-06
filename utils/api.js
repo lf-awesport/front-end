@@ -90,7 +90,7 @@ export const getPosts = async (route, cursor) => {
 
 export const getPost = (id, callback) => {
   let post
-  const docRef = doc(db, "sentiment", id)
+  const docRef = doc(db, "daily", id)
   getDoc(docRef).then((res) => {
     post = res.data()
     callback(post)

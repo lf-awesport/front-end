@@ -1,6 +1,6 @@
 "use client"
 
-import { usePathname, useRouter, useParams } from "next/navigation"
+import { useRouter, useParams } from "next/navigation"
 import styles from "./post.module.css"
 import { TextAnalysis } from "@/components/textAnalysis"
 import { WordCloud } from "@/components/wordcloud"
@@ -25,14 +25,11 @@ import { getCategoryDetails } from "@/utils/helpers"
 
 export default function Post({ params }) {
   const [data, setData] = useState(null)
-  const [getPathname, setPathname] = useState(null)
   const [isLoading, setLoading] = useState(true)
   const [tabValue, setTabValue] = useState(1)
   const router = useRouter()
   const { id } = useParams()
   let postId = id
-  console.log("PostId:", postId)
-  const pathname = usePathname()
 
   if (!postId) return <Loading />
 
@@ -66,9 +63,9 @@ export default function Post({ params }) {
         sx={{
           width: "100%",
           boxSizing: "border-box",
-          boxShadow: "0px 4px 8px rgba(92, 201, 250, 0.5)",
-          border: "1px solid #5cc9fa",
-          borderRadius: "8px",
+          boxShadow:
+            "0 4px 24px 0 rgba(0, 51, 154, 0.18), 0 1.5px 6px 0 rgba(0,0,0,0.08)",
+          border: "none",
           padding: 1
         }}
       >
@@ -78,8 +75,12 @@ export default function Post({ params }) {
             color="primary"
             sx={{
               '&[aria-selected="true"]': {
-                backgroundColor: "#5cc9fa",
+                backgroundColor: "#00339a",
                 color: "#fff"
+              },
+              '&[aria-selected="false"]': {
+                color: "#00339a",
+                backgroundColor: "#fff"
               }
             }}
           >
@@ -90,8 +91,12 @@ export default function Post({ params }) {
             color="primary"
             sx={{
               '&[aria-selected="true"]': {
-                backgroundColor: "#5cc9fa",
+                backgroundColor: "#00339a",
                 color: "#fff"
+              },
+              '&[aria-selected="false"]': {
+                color: "#00339a",
+                backgroundColor: "#fff"
               }
             }}
           >
@@ -102,8 +107,12 @@ export default function Post({ params }) {
             color="primary"
             sx={{
               '&[aria-selected="true"]': {
-                backgroundColor: "#5cc9fa",
+                backgroundColor: "#00339a",
                 color: "#fff"
+              },
+              '&[aria-selected="false"]': {
+                color: "#00339a",
+                backgroundColor: "#fff"
               }
             }}
           >

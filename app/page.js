@@ -63,7 +63,7 @@ function Posts() {
 
   const loadInitialPosts = async () => {
     setLoading(true)
-    const res = await getPosts("sentiment", null)
+    const res = await getPosts("daily", null)
     setDefaultData(res.posts)
     setData(_.orderBy(res.posts, [sortOrder], [sortAsc ? "asc" : "desc"]))
     setCursor(res.lastVisible)
@@ -73,7 +73,7 @@ function Posts() {
 
   const loadMorePosts = async () => {
     if (!hasMore) return
-    const res = await getPosts("sentiment", cursor)
+    const res = await getPosts("daily", cursor)
     const newPosts = res.posts.filter(
       (p) => !defaultData.some((e) => e.id === p.id)
     )
@@ -164,9 +164,9 @@ function Posts() {
           onChange={(e, val) => setTabValue(val)}
           sx={{
             width: "100%",
-            boxShadow: "0px 4px 8px rgba(92, 201, 250, 0.5)",
-            border: "1px solid #5cc9fa",
-            borderRadius: "8px",
+            boxShadow:
+              "0 4px 24px 0 rgba(0, 51, 154, 0.18), 0 1.5px 6px 0 rgba(0,0,0,0.08)",
+            minHeight: "88vh",
             padding: 1,
             flex: 1,
             boxSizing: "border-box"
@@ -176,8 +176,12 @@ function Posts() {
             <Tab
               sx={{
                 '&[aria-selected="true"]': {
-                  backgroundColor: "#5cc9fa",
+                  backgroundColor: "#00339a",
                   color: "#fff"
+                },
+                '&[aria-selected="false"]': {
+                  color: "#00339a",
+                  backgroundColor: "#fff"
                 }
               }}
               color="primary"
@@ -187,8 +191,12 @@ function Posts() {
             <Tab
               sx={{
                 '&[aria-selected="true"]': {
-                  backgroundColor: "#5cc9fa",
+                  backgroundColor: "#00339a",
                   color: "#fff"
+                },
+                '&[aria-selected="false"]': {
+                  color: "#00339a",
+                  backgroundColor: "#fff"
                 }
               }}
               color="primary"
@@ -198,8 +206,12 @@ function Posts() {
             <Tab
               sx={{
                 '&[aria-selected="true"]': {
-                  backgroundColor: "#5cc9fa",
+                  backgroundColor: "#00339a",
                   color: "#fff"
+                },
+                '&[aria-selected="false"]': {
+                  color: "#00339a",
+                  backgroundColor: "#fff"
                 }
               }}
               color="primary"
@@ -216,7 +228,8 @@ function Posts() {
                 flexWrap: "wrap",
                 gap: 2,
                 alignItems: "center",
-                flex: 1
+                flex: 1,
+                backgroundColor: "white"
               }}
             >
               <ArticleChat data={data} />
@@ -237,7 +250,7 @@ function Posts() {
                 gap: 2
               }}
             >
-              {/* Filters */}
+              {/* TODO fix css Filters
               <Sheet
                 sx={{
                   gridColumn: "1 / -1",
@@ -295,13 +308,19 @@ function Posts() {
                     now && date.isAfter(now, "day")
                   }
                 />
-              </Sheet>
+              </Sheet> */}
 
               {data.map((post) => (
                 <Card
                   key={post.id}
                   variant="outlined"
-                  sx={{ width: "100%", boxSizing: "border-box" }}
+                  sx={{
+                    width: "100%",
+                    boxSizing: "border-box",
+                    boxShadow:
+                      "0 4px 24px 0 rgba(0, 51, 154, 0.18), 0 1.5px 6px 0 rgba(0,0,0,0.08)",
+                    border: "none"
+                  }}
                 >
                   {post.imgLink && (
                     <a href={`/post/${post.id}`}>
@@ -366,7 +385,11 @@ function Posts() {
               {hasMore && (
                 <Button
                   onClick={loadMorePosts}
-                  sx={{ gridColumn: "1 / -1", mt: 3 }}
+                  sx={{
+                    gridColumn: "1 / -1",
+                    mt: 3,
+                    backgroundColor: "#00339a"
+                  }}
                 >
                   Carica altri
                 </Button>
@@ -394,7 +417,13 @@ function Posts() {
                   <Card
                     key={mod.id}
                     variant="outlined"
-                    sx={{ width: "100%", boxSizing: "border-box" }}
+                    sx={{
+                      width: "100%",
+                      boxSizing: "border-box",
+                      boxShadow:
+                        "0 4px 24px 0 rgba(0, 51, 154, 0.18), 0 1.5px 6px 0 rgba(0,0,0,0.08)",
+                      border: "none"
+                    }}
                   >
                     {mod.cover && (
                       <a href={`/module/${mod.id}`}>

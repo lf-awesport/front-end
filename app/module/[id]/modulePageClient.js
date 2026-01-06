@@ -145,8 +145,12 @@ export default function ModulePageClient() {
             color="primary"
             sx={{
               '&[aria-selected="true"]': {
-                backgroundColor: "#5cc9fa",
+                backgroundColor: "#00339a",
                 color: "#fff"
+              },
+              '&[aria-selected="false"]': {
+                color: "#00339a",
+                backgroundColor: "#fff"
               }
             }}
           >
@@ -160,8 +164,12 @@ export default function ModulePageClient() {
               color="primary"
               sx={{
                 '&[aria-selected="true"]': {
-                  backgroundColor: "#5cc9fa",
+                  backgroundColor: "#00339a",
                   color: "#fff"
+                },
+                '&[aria-selected="false"]': {
+                  color: "#00339a",
+                  backgroundColor: "#fff"
                 }
               }}
             >
@@ -173,8 +181,12 @@ export default function ModulePageClient() {
             color="primary"
             sx={{
               '&[aria-selected="true"]': {
-                backgroundColor: "#5cc9fa",
+                backgroundColor: "#00339a",
                 color: "#fff"
+              },
+              '&[aria-selected="false"]': {
+                color: "#00339a",
+                backgroundColor: "#fff"
               }
             }}
           >
@@ -241,7 +253,12 @@ export default function ModulePageClient() {
                         <Card
                           key={index}
                           variant="outlined"
-                          sx={{ borderRadius: 3, boxShadow: "sm" }}
+                          sx={{
+                            borderRadius: 3,
+                            boxShadow:
+                              "0 4px 24px 0 rgba(0, 51, 154, 0.18), 0 1.5px 6px 0 rgba(0,0,0,0.08)",
+                            border: "none"
+                          }}
                         >
                           <CardContent>
                             <Typography
