@@ -31,6 +31,7 @@ import Loading from "@/components/loading"
 import ProtectedRoute from "@/components/protectedRoute"
 import DateFilterPanel from "@/components/dateFilterPanel"
 import { ArticleChat } from "@/components/articleChat"
+import { WordCloud } from "@/components/wordcloud"
 import { onAuthStateChanged } from "firebase/auth"
 import { auth } from "@/utils/firebaseConfig"
 import dayjs from "dayjs"
@@ -322,21 +323,10 @@ function Posts() {
                     border: "none"
                   }}
                 >
-                  {post.imgLink && (
-                    <a href={`/post/${post.id}`}>
-                      <img
-                        src={post.imgLink}
-                        alt={post.title}
-                        style={{
-                          width: "100%",
-                          height: "auto",
-                          objectFit: "cover",
-                          borderTopLeftRadius: "8px",
-                          borderTopRightRadius: "8px"
-                        }}
-                      />
-                    </a>
-                  )}
+                  <a href={`/post/${post.id}`}>
+                    <WordCloud data={post} />
+                  </a>
+
                   <CardContent>
                     <Typography level="title-lg">
                       <a href={`/post/${post.id}`}>{post.title}</a>
@@ -344,7 +334,9 @@ function Posts() {
                     <Typography level="body-sm" sx={{ mb: 1 }}>
                       {post.date} · {post.author}
                     </Typography>
-                    <Typography level="body-md">{post.excerpt}</Typography>
+                    {/* <Typography level="body-md">
+                      {post.rerank_summary}
+                    </Typography> */}
                   </CardContent>
                   <CardActions
                     sx={{

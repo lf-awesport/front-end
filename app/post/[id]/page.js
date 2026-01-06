@@ -143,13 +143,32 @@ export default function Post({ params }) {
             }}
           >
             <div className={styles.summary}>
-              <a href={data.url} target="_blank">
-                <Typography level="h2" color="fff" style={{ marginBottom: 20 }}>
-                  {data.title}
-                </Typography>
-              </a>
+              <Typography level="h2" color="fff" style={{ marginBottom: 20 }}>
+                {data.title}
+              </Typography>
+              <WordCloud data={data} />
+              <div className={styles.tags}>
+                {data.tags.map((tag) => {
+                  const cat = getCategoryDetails(tag)
+                  return cat.acronym !== "UNK" ? (
+                    <Button
+                      key={`${tag}-${data.id}`}
+                      size="sm"
+                      sx={{
+                        color: "#fff",
+                        background: cat.color,
+                        pointerEvents: "none",
+                        margin: "20px 20px 0 20px"
+                      }}
+                    >
+                      {cat.acronym}
+                    </Button>
+                  ) : null
+                })}
+              </div>
+
               <div className={styles.subSummary}>
-                <img className={styles.img} src={data.imgLink} />
+                {/* <img className={styles.img} src={data.imgLink} /> */}
                 <div className={styles.summaryText}>
                   <Typography
                     level="body-sm"
@@ -172,32 +191,11 @@ export default function Post({ params }) {
                     color="fff"
                     style={{ margin: "20px 0" }}
                   >
-                    {data.excerpt}
+                    {data.rerank_summary}
                   </Typography>
-                  <Divider />
-                  <div className={styles.tags}>
-                    {data.tags.map((tag) => {
-                      const cat = getCategoryDetails(tag)
-                      return cat.acronym !== "UNK" ? (
-                        <Button
-                          key={`${tag}-${data.id}`}
-                          size="sm"
-                          sx={{
-                            color: "#fff",
-                            background: cat.color,
-                            pointerEvents: "none",
-                            margin: "20px 20px 0 20px"
-                          }}
-                        >
-                          {cat.acronym}
-                        </Button>
-                      ) : null
-                    })}
-                  </div>
                 </div>
               </div>
             </div>
-            <WordCloud data={data} />
             <Takeaways data={data} />
             <TextAnalysis data={data} />
           </Sheet>

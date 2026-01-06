@@ -1,110 +1,90 @@
 "use client"
 
-import styles from "./carousel.module.css"
-import { useState } from "react"
-import { Typography, Divider } from "@mui/joy"
+import { useMemo, useState, useEffect, useRef } from "react"
 import { Text } from "@visx/text"
-import { scaleLog } from "@visx/scale"
+import { scaleLinear } from "@visx/scale"
 import Wordcloud from "@visx/wordcloud/lib/Wordcloud"
 
 export function WordCloud({ data }) {
-  const [spiralType, setSpiralType] = useState("archimedean")
-  const [withRotation, setWithRotation] = useState(false)
+  const containerRef = useRef(null)
+  const [dims, setDims] = useState({ width: 0, height: 0 })
 
-  if (!data)
-    return (
-      <main className={styles.loading}>
-        <Typography level="h1" color="fff" style={{ marginBottom: 20 }}>
-          NOT FOUND
-        </Typography>
-      </main>
-    )
+  // Monitoriamo la grandezza del componente genitore
+  useEffect(() => {
+    if (!containerRef.current) return
 
-  const width = typeof window !== "undefined" ? window.innerWidth * 0.7 : 360
-  const height = width * 0.3
+    const updateSize = () => {
+      setDims({
+        width: containerRef.current.offsetWidth,
+        height: containerRef.current.offsetHeight || 400 // Altezza di fallback
+      })
+    }
 
-  const words = wordFreq(data.analysis?.cleanText)
-  const colors = ["#0D47A1", "#1976D2", "#2196F3", "#BBDEFB", "#000"]
-  function wordFreq(text) {
-    const words = text.replace(/\./g, "").split(/\s/)
+    updateSize()
+    window.addEventListener("resize", updateSize)
+    return () => window.removeEventListener("resize", updateSize)
+  }, [])
+
+  const words = useMemo(() => {
+    const text = data?.analysis?.cleanText || ""
+    if (!text) return []
+    const rawWords = text.split(/\s+/)
     const freqMap = {}
-
-    for (const w of words) {
-      if (!freqMap[w]) freqMap[w] = 0
-      freqMap[w] += 1
+    for (const w of rawWords) {
+      if (w.length < 3) continue
+      freqMap[w] = (freqMap[w] || 0) + 1
     }
     return Object.keys(freqMap).map((word) => ({
       text: word,
       value: freqMap[word]
     }))
-  }
-  function getRotationDegree() {
-    const rand = Math.random()
-    const degree = rand > 0.5 ? 60 : -60
-    return rand * degree
-  }
-  const fontScale = scaleLog({
-    domain: [
-      Math.min(...words.map((w) => w.value)),
-      Math.max(...words.map((w) => w.value))
-    ],
-    range: [10, 100]
-  })
-  const fontSizeSetter = (datum) => fontScale(datum.value)
-  const fixedValueGenerator = () => 0.5
+  }, [data])
+
+  const fontScale = useMemo(() => {
+    if (words.length === 0) return null
+    return scaleLinear({
+      domain: [
+        Math.min(...words.map((w) => w.value)),
+        Math.max(...words.map((w) => w.value))
+      ],
+      range: [12, dims.width > 500 ? 80 : 40] // Font più piccolo se il contenitore è stretto
+    })
+  }, [words, dims.width])
+
+  if (words.length === 0 || dims.width === 0)
+    return <div ref={containerRef} style={{ width: "100%", height: "100%" }} />
 
   return (
-    <div style={{ width: "100%" }}>
-      <Divider />
-      <div className={styles.sentiment}>
-        <Typography level="h2" color="fff" style={{ marginBottom: 20 }}>
-          WordCloud
-        </Typography>
-        <div className="wordcloud" style={{ width: "100%", overflowX: "auto" }}>
-          <Wordcloud
-            words={words}
-            width={width}
-            height={height}
-            fontSize={fontSizeSetter}
-            font={"Inter"}
-            padding={2}
-            spiral={spiralType}
-            rotate={withRotation ? getRotationDegree : 0}
-            random={fixedValueGenerator}
-          >
-            {(cloudWords) =>
-              cloudWords.map((w, i) => (
-                <Text
-                  key={w.text}
-                  fill={colors[i % colors.length]}
-                  textAnchor={"middle"}
-                  transform={`translate(${w.x}, ${w.y}) rotate(${w.rotate})`}
-                  fontSize={w.size}
-                  fontFamily={w.font}
-                >
-                  {w.text}
-                </Text>
-              ))
-            }
-          </Wordcloud>
-          <style jsx>{`
-            .wordcloud {
-              display: flex;
-              flex-direction: column;
-              user-select: none;
-            }
-            .wordcloud label {
-              display: inline-flex;
-              align-items: center;
-              font-size: 14px;
-              margin-right: 8px;
-            }
-            .wordcloud textarea {
-              min-height: 100px;
-            }
-          `}</style>
-        </div>
-      </div>
+    <div
+      ref={containerRef}
+      style={{ width: "100%", height: "100%", minHeight: "300px" }}
+    >
+      <Wordcloud
+        words={words}
+        width={dims.width}
+        height={dims.height}
+        fontSize={(d) => fontScale(d.value)}
+        font={"Inter, sans-serif"}
+        padding={2}
+        spiral="archimedean"
+        rotate={0}
+        random={() => 0.5}
+      >
+        {(cloudWords) =>
+          cloudWords.map((w, i) => (
+            <Text
+              key={`${w.text}-${i}`}
+              fill={["#0D47A1", "#1976D2", "#2196F3"][i % 3]}
+              textAnchor={"middle"}
+              transform={`translate(${w.x}, ${w.y})`}
+              fontSize={w.size}
+              fontFamily={w.font}
+            >
+              {w.text}
+            </Text>
+          ))
+        }
+      </Wordcloud>
     </div>
   )
 }
