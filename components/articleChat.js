@@ -4,7 +4,6 @@ import { Box } from "@mui/joy"
 import { API_URL } from "@/utils/api"
 import dynamic from "next/dynamic"
 import React, { useRef } from "react"
-// import { AIChunkAccumulator } from "../utils/aiChunkAccumulator"
 import { marked } from "marked"
 import { useAuth } from "../utils/authContext"
 
@@ -88,7 +87,7 @@ export function ArticleChat() {
           user: { styles: { position: "right" } }
         }}
         textInput={{ placeholder: { text: "Scrivi la tua domanda qui..." } }}
-        connect={{ url: `${API_URL}/askAgent`, method: "POST", stream: true }}
+        connect={{ url: `${API_URL}/askAgent`, method: "POST" }}
         requestBodyLimits={{ maxMessages: 1 }}
         requestInterceptor={(details) => {
           const lastMessage = details.body?.messages?.at(-1)?.text
@@ -110,53 +109,29 @@ export function ArticleChat() {
         introMessage={{
           text: "Ciao! Sono Eddy, il tuo assistente AI dedicato allo sport business. Posso aiutarti ad analizzare trend, capire concetti complessi, scoprire dati economici e finanziari, e rispondere alle tue domande su calcio, eventi, infrastrutture, marketing e molto altro."
         }}
-        responseInterceptor={(() => {
-          return (response) => {
-            // Skip empty text chunks
-            if (
-              response &&
-              typeof response === "object" &&
-              "text" in response &&
-              (response.text === "" || response.text.trim() === "")
-            ) {
-              return null
-            }
-            // Accumulate all chunks, but only render the final answer when the sources chunk arrives
-            if (response && typeof response === "object" && response.sources) {
-              // Render only when the sources chunk (end of message) arrives
-              const htmlContent = marked.parse(aiTextBufferRef.current)
-              const styledHtml = `
-                <div style="font-family: 'Inter', sans-serif; font-size: 16px; color: #1a1a1a; line-height: 1.6;">
-                  <style>
-                    h1, h2, h3 { font-weight: 600; margin: 1rem 0 0.5rem 0; }
-                    ul, ol { padding-left: 1.25rem; margin-bottom: 1rem; }
-                    li { margin-bottom: 0.25rem; }
-                    p { margin-bottom: 1rem; }
-                    strong { font-weight: 600; }
-                  </style>
-                  ${htmlContent}
-                </div>
-              `
-              // Reset buffer for next message
-              aiTextBufferRef.current = ""
-              return { html: styledHtml }
-            }
-            // Accumulate all incoming text chunks, but do not render until the end
-            let newText = ""
-            if (typeof response === "string") {
-              newText = response
-            } else if (response && typeof response.text === "string") {
-              newText = response.text
-            } else if (response && typeof response.answer === "string") {
-              newText = response.answer
-            }
-            // Log each chunk for debugging
-            if (newText && newText.trim().length > 0) {
-              aiTextBufferRef.current += newText
-            }
-            return null
+        responseInterceptor={(response) => {
+          // Mostra direttamente la risposta text come HTML
+          let text = ""
+          if (typeof response === "string") {
+            text = response
+          } else if (response && typeof response.text === "string") {
+            text = response.text
           }
-        })()}
+          if (!text || text.trim() === "") return null
+          const htmlContent = marked.parse(text)
+          return {
+            html: `<div style="font-family: 'Inter', sans-serif; font-size: 16px; color: #1a1a1a; line-height: 1.6;">
+              <style>
+                h1, h2, h3 { font-weight: 600; margin: 1rem 0 0.5rem 0; }
+                ul, ol { padding-left: 1.25rem; margin-bottom: 1rem; }
+                li { margin-bottom: 0.25rem; }
+                p { margin-bottom: 1rem; }
+                strong { font-weight: 600; }
+              </style>
+              ${htmlContent}
+            </div>`
+          }
+        }}
       />
     </Box>
   )
