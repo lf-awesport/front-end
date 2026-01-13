@@ -110,28 +110,47 @@ export function ArticleChat() {
           text: "Ciao! Sono Eddy, il tuo assistente AI dedicato allo sport business. Posso aiutarti ad analizzare trend, capire concetti complessi, scoprire dati economici e finanziari, e rispondere alle tue domande su calcio, eventi, infrastrutture, marketing e molto altro."
         }}
         responseInterceptor={(response) => {
-          // Mostra direttamente la risposta text come HTML
-          let text = ""
-          if (typeof response === "string") {
-            text = response
-          } else if (response && typeof response.text === "string") {
-            text = response.text
+          if (response && typeof response === "object" && response.text) {
+            const markdown = response.text.answer || response.text
+
+            const htmlContent = marked.parse(markdown)
+            const styledHtml = `
+              <div style="font-family: 'Inter', sans-serif; font-size: 16px; color: #1a1a1a; line-height: 1.6;">
+                <style>
+                  h1, h2, h3 { font-weight: 600; margin: 1rem 0 0.5rem 0; }
+                  ul, ol { padding-left: 1.25rem; margin-bottom: 1rem; }
+                  li { margin-bottom: 0.25rem; }
+                  p { margin-bottom: 1rem; }
+                  strong { font-weight: 600; }
+                </style>
+                ${htmlContent}
+              </div>
+            `
+
+            if (Array.isArray(response.sources)) {
+              const sourcesLinks = response.sources
+                .map(
+                  (src, i) =>
+                    `<a href="${src.url}" target="_blank" rel="noopener noreferrer">[${i + 1}]</a>`
+                )
+                .join(", ")
+              return {
+                html:
+                  styledHtml +
+                  `<br><br><span style='font-size: 8px;'>Fonti: ${sourcesLinks}</span>` +
+                  `<div style="margin-top: 10px; text-align: right;">
+                  <button onclick="navigator.clipboard.writeText(\`${markdown.replace(/`/g, "\\`")}\`)">📋 Copia</button>
+                </div>`
+              }
+            }
+
+            return {
+              html: `
+                ${styledHtml}
+              `
+            }
           }
-          if (!text || text.trim() === "") return null
-          const htmlContent = marked.parse(text)
-          return {
-            html: `<div style="font-family: 'Inter', sans-serif; font-size: 16px; color: #1a1a1a; line-height: 1.6;">
-              <style>
-                h1, h2, h3 { font-weight: 600; margin: 1rem 0 0.5rem 0; }
-                ul, ol { padding-left: 1.25rem; margin-bottom: 1rem; }
-                li { margin-bottom: 0.25rem; }
-                p { margin-bottom: 1rem; }
-                strong { font-weight: 600; }
-              </style>
-              ${htmlContent}
-            </div>`
-          }
-        }}
+          return { html: "<i>⚠️ Nessuna risposta ricevuta.</i>" }}}
       />
     </Box>
   )
