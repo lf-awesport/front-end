@@ -127,7 +127,7 @@ export function ArticleChat() {
               </div>
             `
 
-            if (Array.isArray(response.sources)) {
+            if (Array.isArray(response.sources) && response.sources.length > 0) {
               const sourcesLinks = response.sources
                 .map(
                   (src, i) =>
