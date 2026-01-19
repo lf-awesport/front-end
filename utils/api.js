@@ -111,3 +111,17 @@ export async function fetchSearchResults(params) {
   const data = await response.json()
   return data.sources
 }
+
+export async function registerZepUser(userData) {
+  const response = await fetch(`${API_URL}/users`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(userData)
+  })
+
+  if (!response.ok) {
+    throw new Error("Failed to register user in Zep")
+  }
+
+  return response.json()
+}
