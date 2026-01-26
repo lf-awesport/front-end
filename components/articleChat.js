@@ -13,8 +13,15 @@ const DeepChat = dynamic(
 )
 
 export function ArticleChat() {
-  // Simple buffer for concatenating all incoming text
+  // Buffer for concatenating streaming text
   const aiTextBufferRef = useRef("")
+  const escapeHtml = (value) =>
+    value
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;")
   const { user } = useAuth()
 
   return (
@@ -87,7 +94,11 @@ export function ArticleChat() {
           user: { styles: { position: "right" } }
         }}
         textInput={{ placeholder: { text: "Scrivi la tua domanda qui..." } }}
-        connect={{ url: `${API_URL}/askAgent`, method: "POST" }}
+        connect={{
+          url: `${API_URL}/askAgent/stream`,
+          method: "POST",
+          stream: { partialRender: true }
+        }}
         requestBodyLimits={{ maxMessages: 1 }}
         requestInterceptor={(details) => {
           const lastMessage = details.body?.messages?.at(-1)?.text
@@ -97,6 +108,7 @@ export function ArticleChat() {
           ) {
             document.activeElement.blur()
           }
+          aiTextBufferRef.current = ""
           return {
             ...details,
             body: {
@@ -111,8 +123,16 @@ export function ArticleChat() {
         }}
         responseInterceptor={(response) => {
           if (response && typeof response === "object" && response.text) {
-            const markdown = response.text.answer || response.text
+            const chunkText = response.text.answer || response.text
+            const isFinal = response.overwrite === true
 
+            if (isFinal) {
+              aiTextBufferRef.current = chunkText
+            } else {
+              aiTextBufferRef.current += chunkText
+            }
+
+            const markdown = aiTextBufferRef.current
             const htmlContent = marked.parse(markdown)
             const styledHtml = `
               <div style="font-family: 'Inter', sans-serif; font-size: 16px; color: #1a1a1a; line-height: 1.6;">
@@ -127,30 +147,27 @@ export function ArticleChat() {
               </div>
             `
 
-            if (Array.isArray(response.sources) && response.sources.length > 0) {
-              const sourcesLinks = response.sources
-                .map(
-                  (src, i) =>
-                    `<a href="${src.url}" target="_blank" rel="noopener noreferrer">[${i + 1}]</a>`
-                )
-                .join(", ")
-              return {
-                html:
-                  styledHtml +
-                  `<br><br><span style='font-size: 8px;'>Fonti: ${sourcesLinks}</span>` +
-                  `<div style="margin-top: 10px; text-align: right;">
-                  <button onclick="navigator.clipboard.writeText(\`${markdown.replace(/`/g, "\\`")}\`)">📋 Copia</button>
-                </div>`
-              }
+            if (!response.sources || response.sources.length === 0) {
+              return { html: styledHtml, overwrite: true }
             }
 
-            return {
-              html: `
-                ${styledHtml}
-              `
-            }
+            const sourcesLinks = response.sources
+              .map(
+                (src, i) =>
+                  `<a href="${src.url}" target="_blank" rel="noopener noreferrer">[${i + 1}]</a>`
+              )
+              .join(", ")
+
+            const finalHtml =
+              styledHtml +
+              `<br><br><span style='font-size: 8px;'>Fonti: ${sourcesLinks}</span>` +
+              `<div style="margin-top: 10px; text-align: right;">
+                  <button onclick="navigator.clipboard.writeText(\`${markdown.replace(/`/g, "\\`")}\`)">📋 Copia</button>
+                </div>`
+
+            return { html: finalHtml, overwrite: true }
           }
-          return { html: "<i>⚠️ Nessuna risposta ricevuta.</i>" }}}
+        }}
       />
     </Box>
   )
