@@ -160,11 +160,7 @@ export function ArticleChat() {
 
             const finalHtml =
               styledHtml +
-              `<br><br><span style='font-size: 8px;'>Fonti: ${sourcesLinks}</span>` +
-              `<div style="margin-top: 10px; text-align: right;">
-                  <button onclick="navigator.clipboard.writeText(\`${markdown.replace(/`/g, "\\`")}\`)">📋 Copia</button>
-                </div>`
-
+              `<br><br><span style='font-size: 8px;'>Fonti: ${sourcesLinks}</span>`
             return { html: finalHtml, overwrite: true }
           }
         }}
