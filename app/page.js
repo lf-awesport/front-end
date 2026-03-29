@@ -125,7 +125,7 @@ function Posts() {
   }, [])
 
   useEffect(() => {
-    if (tabValue === 2) {
+    if (tabValue === 1) {
       onAuthStateChanged(auth, async (currentUser) => {
         if (currentUser) {
           setUser(currentUser)
@@ -207,21 +207,6 @@ function Posts() {
               }}
               color="primary"
             >
-              Feed
-            </Tab>
-            <Tab
-              sx={{
-                '&[aria-selected="true"]': {
-                  backgroundColor: "#00339a",
-                  color: "#fff"
-                },
-                '&[aria-selected="false"]': {
-                  color: "#00339a",
-                  backgroundColor: "#fff"
-                }
-              }}
-              color="primary"
-            >
               Lezioni
             </Tab>
           </TabList>
@@ -243,175 +228,6 @@ function Posts() {
           </TabPanel>
 
           <TabPanel value={1}>
-            <Sheet
-              sx={{
-                mb: 4,
-                p: 0,
-                display: "grid",
-                gridTemplateColumns: {
-                  xs: "1fr",
-                  sm: "1fr 1fr",
-                  md: "1fr 1fr 1fr"
-                },
-                gap: 2
-              }}
-            >
-              {/* TODO fix css Filters
-              <Sheet
-                sx={{
-                  gridColumn: "1 / -1",
-                  display: "flex",
-                  flexWrap: "wrap",
-                  gap: 2,
-                  alignItems: "center"
-                }}
-              >
-                <Input
-                  placeholder="Cerca articoli..."
-                  value={searchFilter}
-                  onChange={(e) => setSearchFilter(e.target.value)}
-                  onKeyDown={(e) => e.key === "Enter" && filterPosts()}
-                  sx={{ flex: 1, minWidth: 200 }}
-                />
-                <Button disabled={!searchFilter} onClick={filterPosts}>
-                  Cerca
-                </Button>
-                <Button variant="outlined" onClick={resetFilters}>
-                  Reset
-                </Button>
-                <Select
-                  value={sortOrder}
-                  onChange={(e, value) => sortPosts(value)}
-                  size="sm"
-                >
-                  <Option value="date">Data</Option>
-                  <Option value="title">Titolo</Option>
-                  <Option value="author">Autore</Option>
-                </Select>
-                <Button
-                  variant="outlined"
-                  size="sm"
-                  onClick={() => {
-                    setSortAsc(!sortAsc)
-                    setData(
-                      _.orderBy(data, [sortOrder], [!sortAsc ? "asc" : "desc"])
-                    )
-                  }}
-                >
-                  {sortAsc ? "⬆️ ASC" : "⬇️ DESC"}
-                </Button>
-                <DateFilterPanel
-                  fromDate={fromDate}
-                  toDate={toDate}
-                  setFromDate={setFromDate}
-                  setToDate={setToDate}
-                  shouldDisableFromDate={(date) =>
-                    now &&
-                    (date.isAfter(now, "day") ||
-                      (toDate && date.isAfter(toDate, "day")))
-                  }
-                  shouldDisableToDate={(date) =>
-                    now && date.isAfter(now, "day")
-                  }
-                />
-              </Sheet> */}
-
-              {data.map((post) => (
-                <Card
-                  key={post.id}
-                  variant="outlined"
-                  sx={{
-                    width: "100%",
-                    boxSizing: "border-box",
-                    padding: 0,
-                    boxShadow:
-                      "0 4px 24px 0 rgba(0, 51, 154, 0.18), 0 1.5px 6px 0 rgba(0,0,0,0.08)",
-                    border: "none"
-                  }}
-                >
-                  <Typography
-                    level="title-lg"
-                    sx={{
-                      padding: 2,
-                      backgroundColor: "#00339a",
-                      textAlign: "center"
-                    }}
-                  >
-                    <a
-                      style={{
-                        color: "#fff",
-                        fontSize: "1.5rem",
-                        textDecoration: "none",
-                        textAlign: "center"
-                      }}
-                      href={`/post/${post.id}`}
-                    >
-                      {post.title.split("Report del ")[1] || post.title}
-                    </a>
-                  </Typography>
-                  <CardContent sx={{ padding: 1, boxSizing: "border-box" }}>
-                    {/* <Typography level="body-md">
-                      {post.rerank_summary}
-                    </Typography> */}
-                    {/* <Typography level="body-sm">
-                      {post.date} · {post.author}
-                    </Typography> */}
-                    <a href={`/post/${post.id}`} style={{ cursor: "pointer" }}>
-                      <WordCloud data={post} />
-                    </a>
-                    {/* <CardActions
-                      sx={{
-                        justifyContent: "space-around",
-                        flexWrap: "wrap",
-                        p: "1.25rem 1rem"
-                      }}
-                    >
-                      {post.tags.map((tag) => {
-                        const cat = getCategoryDetails(tag)
-                        return cat.acronym !== "UNK" ? (
-                          <Button
-                            key={`${tag}-${post.id}`}
-                            size="sm"
-                            sx={{
-                              mr: 1,
-                              mb: 1,
-                              background: cat.color,
-                              color: "#fff",
-                              pointerEvents: "none",
-                              width: "auto",
-                              minWidth: "fit-content",
-                              maxWidth: "50px"
-                            }}
-                          >
-                            {cat.acronym}
-                          </Button>
-                        ) : null
-                      })}
-                    </CardActions>
-                    {post.similarityScore && (
-                      <Avatar color={color(post.similarityScore)} size="lg">
-                        {post.similarityScore}
-                      </Avatar>
-                    )} */}
-                  </CardContent>
-                </Card>
-              ))}
-              {hasMore && (
-                <Button
-                  onClick={loadMorePosts}
-                  sx={{
-                    gridColumn: "1 / -1",
-                    mt: 3,
-                    backgroundColor: "#00339a"
-                  }}
-                >
-                  Carica altri
-                </Button>
-              )}
-            </Sheet>
-          </TabPanel>
-
-          <TabPanel value={2}>
             <Sheet
               sx={{
                 mb: 4,
@@ -461,35 +277,6 @@ function Posts() {
                       <Typography level="body-sm" sx={{ mb: 1 }}>
                         {mod.materia}
                       </Typography>
-                      <Sheet
-                        sx={{
-                          display: "flex",
-                          gap: 1,
-                          flexWrap: "wrap",
-                          mt: 1
-                        }}
-                      >
-                        {[1, 2, 3].map((lvl) => {
-                          const isDone =
-                            progressMap?.[mod.id]?.[`level${lvl}Completed`]
-                          return (
-                            <Button
-                              key={`badge-${lvl}`}
-                              size="sm"
-                              variant="soft"
-                              sx={{
-                                backgroundColor: isDone ? "#2ecc71" : "#ccc",
-                                color: "#fff",
-                                pointerEvents: "none",
-                                minWidth: 50,
-                                fontWeight: "bold"
-                              }}
-                            >
-                              LVL {lvl}
-                            </Button>
-                          )
-                        })}
-                      </Sheet>
                     </CardContent>
                     <CardActions
                       sx={{
