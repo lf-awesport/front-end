@@ -6,7 +6,6 @@ import {
   onAuthStateChanged
 } from "firebase/auth"
 import { auth } from "@/utils/firebaseConfig"
-import { registerZepUser } from "@/utils/api"
 import { useRouter } from "next/navigation"
 import {
   Box,
@@ -41,11 +40,6 @@ export default function SignupPage() {
         email,
         password
       )
-      await registerZepUser({
-        userId: userCredential.user.uid,
-        email: userCredential.user.email,
-        name: email.split("@")[0]
-      })
       router.push("/")
     } catch (err) {
       setError(err.message)
