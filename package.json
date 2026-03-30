@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@antv/infographic": "^0.2.16",
     "@emotion/react": "^11.13.0",
     "@emotion/styled": "^11.13.0",
     "@firebase/firestore": "^4.6.5",

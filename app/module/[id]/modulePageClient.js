@@ -7,6 +7,7 @@ import { auth } from "@/utils/firebaseConfig"
 import { doc, getDoc, setDoc, onSnapshot } from "firebase/firestore"
 import db from "@/utils/firestore"
 import Loading from "@/components/loading"
+import LessonMindmap from "@/components/lessonMindmap"
 import {
   Typography,
   Card,
@@ -456,7 +457,7 @@ export default function ModulePageClient() {
                     ) : null}
 
                     {analysisParagraphs.length > 0 ? (
-                      <div className={styles.analysisBlock}>
+                      <Sheet className={styles.analysisCard} variant="plain">
                         <Typography className={styles.contextLabel}>Analisi</Typography>
                         <div className={styles.cardBody}>
                           {analysisParagraphs.map((paragraph, paragraphIndex) => (
@@ -465,9 +466,16 @@ export default function ModulePageClient() {
                             </Typography>
                           ))}
                         </div>
-                      </div>
+                      </Sheet>
                     ) : null}
+
                   </Box>
+
+                  <LessonMindmap
+                    card={currentCard}
+                    cardIndex={cardIndex}
+                    selectedAnswer={answers[cardIndex] || ""}
+                  />
 
                   <Sheet className={styles.quizBlock} variant="soft">
                     <Typography className={styles.sectionEyebrow}>
