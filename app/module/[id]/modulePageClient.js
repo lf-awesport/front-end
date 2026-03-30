@@ -1,18 +1,13 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { onAuthStateChanged } from "firebase/auth"
-import { marked } from "marked"
 import { auth } from "@/utils/firebaseConfig"
 import { doc, getDoc, setDoc, onSnapshot } from "firebase/firestore"
 import db from "@/utils/firestore"
 import Loading from "@/components/loading"
 import {
-  Tabs,
-  TabList,
-  Tab,
-  TabPanel,
   Typography,
   Card,
   CardContent,
@@ -20,10 +15,31 @@ import {
   RadioGroup,
   Radio,
   Box,
-  LinearProgress
+  LinearProgress,
+  Button,
+  Chip
 } from "@mui/joy"
-import styles from "../../posts.module.css"
+import styles from "./modulePageClient.module.css"
 import HomeIcon from "@mui/icons-material/Home"
+import WestRoundedIcon from "@mui/icons-material/WestRounded"
+import EastRoundedIcon from "@mui/icons-material/EastRounded"
+import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded"
+import LocalFireDepartmentRoundedIcon from "@mui/icons-material/LocalFireDepartmentRounded"
+
+const EXIT_ANIMATION_MS = 220
+const HIGHLIGHT_PATTERN =
+  /(\b(?:ricavi|margini|investimenti|sponsorizzazioni|sponsor|diritti tv|streaming|audience|marketing|brand|licensing|ticketing|biglietteria|partnership|finanza|debito|fatturato|crescita|acquisizione|strategia|valutazione|mercato|media|stadio|infrastrutture|broadcast|fanbase|monetizzazione|business|revenue)\b|€\s?\d+[\d.,]*\s?(?:milioni|miliardi|mln|mld)?|\b\d+[\d.,]*%)/gi
+const HIGHLIGHT_CHECK_PATTERN = new RegExp(HIGHLIGHT_PATTERN.source, "i")
+const INTERACTIVE_SELECTOR = [
+  "button",
+  "input",
+  "label",
+  "textarea",
+  "select",
+  "a",
+  "[role='radio']",
+  "[role='button']"
+].join(",")
 
 export default function ModulePageClient() {
   const { id } = useParams()
@@ -32,7 +48,15 @@ export default function ModulePageClient() {
   const [user, setUser] = useState(null)
   const [moduleData, setModuleData] = useState(null)
   const [progress, setProgress] = useState(null)
-  const [tabValue, setTabValue] = useState(1)
+  const [cardIndex, setCardIndex] = useState(0)
+  const [dragOffset, setDragOffset] = useState(0)
+  const [isDragging, setIsDragging] = useState(false)
+  const [isCardTransitioning, setIsCardTransitioning] = useState(false)
+  const touchStartXRef = useRef(null)
+  const pointerStartXRef = useRef(null)
+  const dragPointerIdRef = useRef(null)
+  const autoAdvanceTimeoutRef = useRef(null)
+  const animationTimeoutRef = useRef(null)
 
   // Gestione autenticazione
   useEffect(() => {
@@ -67,6 +91,18 @@ export default function ModulePageClient() {
     return () => unsubscribe()
   }, [user, id])
 
+  useEffect(() => {
+    return () => {
+      if (autoAdvanceTimeoutRef.current) {
+        clearTimeout(autoAdvanceTimeoutRef.current)
+      }
+
+      if (animationTimeoutRef.current) {
+        clearTimeout(animationTimeoutRef.current)
+      }
+    }
+  }, [])
+
   const updateProgress = async (level, index, answer) => {
     if (!moduleData || !progress) return
 
@@ -100,186 +136,439 @@ export default function ModulePageClient() {
       updated,
       { merge: true }
     )
+
+    const isCorrectAnswer = cards[index]?.quiz.correctAnswer === answer
+    const canAdvance = index < cards.length - 1
+
+    if (isCorrectAnswer && canAdvance) {
+      if (autoAdvanceTimeoutRef.current) {
+        clearTimeout(autoAdvanceTimeoutRef.current)
+      }
+
+      autoAdvanceTimeoutRef.current = setTimeout(() => {
+        if (cardIndex === index) {
+          handleMoveCard("next")
+        }
+      }, 650)
+    }
   }
 
   if (!user || !moduleData || !progress)
     return <Loading message="Caricamento modulo..." />
 
-  const isUnlocked = (lvl) => lvl === 1 || progress[`level${lvl - 1}Completed`]
+  const cards = moduleData.levels?.easy?.cards || []
+  const answers = progress.answers?.[1] || {}
+  const currentCard = cards[cardIndex]
+  const upcomingCards = cards.slice(cardIndex + 1, cardIndex + 3)
+  const contentParagraphs = (currentCard?.content || "")
+    .split(/\n+/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean)
+  const contextParagraph = contentParagraphs[0] || ""
+  const analysisParagraphs = contentParagraphs.slice(1)
+  const correctCount = Object.entries(answers).filter(
+    ([i, val]) => val === cards[i]?.quiz.correctAnswer
+  ).length
+  const answeredCount = Object.keys(answers).length
+  const progressValue = cards.length ? (correctCount / cards.length) * 100 : 0
+  const cardTransform = `translate3d(${dragOffset}px, 0, 0) rotate(${dragOffset * 0.04}deg)`
+  const swipeOpacity = Math.max(0.72, 1 - Math.abs(dragOffset) / 420)
+  const cardTransition = isDragging
+    ? "none"
+    : `transform ${EXIT_ANIMATION_MS}ms ease, opacity ${EXIT_ANIMATION_MS}ms ease, box-shadow 180ms ease`
+
+  const handleMoveCard = (direction) => {
+    if (isCardTransitioning || cards.length === 0) return
+
+    const nextIndex =
+      direction === "next"
+        ? Math.min(cardIndex + 1, Math.max(cards.length - 1, 0))
+        : Math.max(cardIndex - 1, 0)
+
+    if (nextIndex === cardIndex) {
+      setDragOffset(0)
+      return
+    }
+
+    const exitDistance =
+      typeof window === "undefined"
+        ? 960
+        : Math.max(window.innerWidth * 0.92, 540)
+
+    setIsCardTransitioning(true)
+    setDragOffset(direction === "next" ? -exitDistance : exitDistance)
+
+    if (animationTimeoutRef.current) {
+      clearTimeout(animationTimeoutRef.current)
+    }
+
+    animationTimeoutRef.current = setTimeout(() => {
+      setCardIndex(nextIndex)
+      setDragOffset(0)
+      setIsCardTransitioning(false)
+    }, EXIT_ANIMATION_MS)
+  }
+
+  const isInteractiveTarget = (target) => {
+    if (!(target instanceof Element)) return false
+    return Boolean(target.closest(INTERACTIVE_SELECTOR))
+  }
+
+  const renderHighlightedText = (text) => {
+    if (!text) return null
+
+    const parts = text.split(HIGHLIGHT_PATTERN)
+
+    return parts
+      .filter(Boolean)
+      .map((part, index) =>
+        HIGHLIGHT_CHECK_PATTERN.test(part) ? (
+          <span key={`${part}-${index}`} className={styles.highlightText}>
+            {part}
+          </span>
+        ) : (
+          <span key={`${part}-${index}`}>{part}</span>
+        )
+      )
+  }
+
+  const handleTouchStart = (event) => {
+    if (isCardTransitioning) return
+    if (isInteractiveTarget(event.target)) return
+
+    setIsDragging(true)
+    touchStartXRef.current = event.touches[0]?.clientX ?? null
+  }
+
+  const handleTouchMove = (event) => {
+    if (touchStartXRef.current == null) return
+
+    const currentX = event.touches[0]?.clientX ?? touchStartXRef.current
+    setDragOffset(currentX - touchStartXRef.current)
+  }
+
+  const handleTouchEnd = (event) => {
+    if (touchStartXRef.current == null) return
+
+    const touchEndX = event.changedTouches[0]?.clientX ?? touchStartXRef.current
+    const deltaX = touchEndX - touchStartXRef.current
+    touchStartXRef.current = null
+    setIsDragging(false)
+
+    if (Math.abs(deltaX) < 50) {
+      setDragOffset(0)
+      return
+    }
+
+    if (deltaX < 0) {
+      handleMoveCard("next")
+      return
+    }
+
+    handleMoveCard("prev")
+  }
+
+  const handlePointerDown = (event) => {
+    if (isCardTransitioning) return
+    if (isInteractiveTarget(event.target)) return
+
+    setIsDragging(true)
+    pointerStartXRef.current = event.clientX
+    dragPointerIdRef.current = event.pointerId
+    event.currentTarget.setPointerCapture(event.pointerId)
+  }
+
+  const handlePointerMove = (event) => {
+    if (pointerStartXRef.current == null) return
+    if (dragPointerIdRef.current !== event.pointerId) return
+
+    setDragOffset(event.clientX - pointerStartXRef.current)
+  }
+
+  const handlePointerEnd = (event) => {
+    if (dragPointerIdRef.current !== event.pointerId) return
+
+    const deltaX =
+      pointerStartXRef.current == null ? 0 : event.clientX - pointerStartXRef.current
+
+    pointerStartXRef.current = null
+    dragPointerIdRef.current = null
+    setIsDragging(false)
+
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId)
+    }
+
+    if (Math.abs(deltaX) < 90) {
+      setDragOffset(0)
+      return
+    }
+
+    if (deltaX < 0) {
+      handleMoveCard("next")
+      return
+    }
+
+    handleMoveCard("prev")
+  }
 
   return (
-    <main
-      className={styles.main}
-      style={{ width: "100%", maxWidth: "1300px", margin: "0 auto" }}
-    >
-      <Tabs
-        value={tabValue}
-        onChange={(e, val) => {
-          if (val === 0) router.push("/")
-          else setTabValue(val)
-        }}
-        sx={{
-          position: "sticky",
-          top: 0,
-          zIndex: 10,
-          background: "#fff",
-          mb: 2,
-          borderRadius: 2,
-          boxShadow: "0 4px 10px rgba(0,0,0,0.1)",
-          p: 1
-        }}
-      >
-        <TabList>
-          <Tab
-            value={0}
+    <main className={styles.page}>
+      <div className={styles.backdrop} />
+
+      <Box className={styles.shell}>
+        <Box className={styles.topbar}>
+          <Button
+            variant="soft"
             color="primary"
-            sx={{
-              '&[aria-selected="true"]': {
-                backgroundColor: "#00339a",
-                color: "#fff"
-              },
-              '&[aria-selected="false"]': {
-                color: "#00339a",
-                backgroundColor: "#fff"
-              }
-            }}
+            startDecorator={<HomeIcon />}
+            onClick={() => router.push("/")}
+            sx={{ borderRadius: 999 }}
           >
-            <HomeIcon />
-          </Tab>
-          <Tab
-            value={1}
-            color="primary"
-            sx={{
-              '&[aria-selected="true"]': {
-                backgroundColor: "#00339a",
-                color: "#fff"
-              },
-              '&[aria-selected="false"]': {
-                color: "#00339a",
-                backgroundColor: "#fff"
-              }
-            }}
-          >
+            Home
+          </Button>
+
+          <Chip color="primary" variant="soft" sx={{ borderRadius: 999 }}>
             News
-          </Tab>
-        </TabList>
+          </Chip>
+        </Box>
 
-        <TabPanel value={1}>
-          {(() => {
-            const levelKey = "easy"
-            const cards = moduleData.levels?.[levelKey]?.cards || []
-            const answers = progress.answers[1] || {}
+        <Box className={styles.hero}>
+          <Box>
+            <Typography className={styles.eyebrow}>Daily Press Review</Typography>
+            <Typography level="h1" className={styles.title}>
+              {moduleData.levels?.easy?.levelTitle.split("Daily Press Review: ")[1] || moduleData.topic || "News Deck"}
+            </Typography>
+          </Box>
 
-            return (
-              <>
-                <Typography level="h2" sx={{ mb: 1, fontWeight: 700 }}>
-                  {moduleData.levels[levelKey]?.levelTitle || "Daily Press Review"}
-                </Typography>
+          <Sheet className={styles.statsPanel} variant="soft">
+            <Box className={styles.statRow}>
+              <span className={styles.statLabel}>Card viste</span>
+              <strong>{Math.min(cardIndex + 1, cards.length)} / {cards.length}</strong>
+            </Box>
+            <Box className={styles.statRow}>
+              <span className={styles.statLabel}>Quiz risolti</span>
+              <strong>{answeredCount} / {cards.length}</strong>
+            </Box>
+            <Box className={styles.statRow}>
+              <span className={styles.statLabel}>Risposte corrette</span>
+              <strong>{correctCount} / {cards.length}</strong>
+            </Box>
+            <LinearProgress determinate value={progressValue} sx={{ mt: 1.5 }} />
+          </Sheet>
+        </Box>
 
-                <Box sx={{ mb: 3 }}>
-                  <Typography level="body-sm" sx={{ mb: 0.5 }}>
-                    Progresso:{" "}
-                    {
-                      Object.entries(answers).filter(
-                        ([i, val]) => val === cards[i]?.quiz.correctAnswer
-                      ).length
-                    }
-                    / {cards.length}
-                  </Typography>
-                  <LinearProgress
-                    determinate
-                    value={
-                      cards.length
-                        ? (Object.entries(answers).filter(
-                            ([i, val]) => val === cards[i]?.quiz.correctAnswer
-                          ).length /
-                            cards.length) *
-                          100
-                        : 0
-                    }
-                  />
-                </Box>
+        {cards.length === 0 ? (
+          <Card className={styles.emptyState} variant="outlined">
+            <CardContent>
+              <Typography level="title-lg">Nessuna card disponibile</Typography>
+              <Typography>
+                La lezione non contiene ancora contenuti da mostrare per questa giornata.
+              </Typography>
+            </CardContent>
+          </Card>
+        ) : (
+          <Box className={styles.deckSection}>
+            <Box className={styles.deckMeta}>
+              <Chip variant="solid" color="primary" sx={{ borderRadius: 999 }}>
+                Card {cardIndex + 1}
+              </Chip>
+            </Box>
 
-                <Sheet
-                  sx={{
-                    mb: 4,
-                    display: "grid",
-                    gridTemplateColumns: { xs: "1fr", sm: "1fr 1fr" },
-                    gap: 3
-                  }}
+            <Box className={styles.deckWrap}>
+              <div className={styles.stackShadowOne} />
+              <div className={styles.stackShadowTwo} />
+
+              {upcomingCards.map((previewCard, previewIndex) => (
+                <div
+                  key={`${cardIndex + previewIndex + 1}-${previewCard.title}`}
+                  className={
+                    previewIndex === 0
+                      ? styles.previewCardPrimary
+                      : styles.previewCardSecondary
+                  }
                 >
-                  {cards.map((card, index) => {
-                    const selected = answers[index]
-                    const isCorrect = selected === card.quiz.correctAnswer
+                  <div className={styles.previewGlow} />
+                  <div className={styles.previewInner}>
+                    <span className={styles.previewIndex}>
+                      {String(cardIndex + previewIndex + 2).padStart(2, "0")}
+                    </span>
+                    <strong className={styles.previewTitle}>{previewCard.title}</strong>
+                  </div>
+                </div>
+              ))}
 
-                    return (
-                      <Card
-                        key={index}
-                        variant="outlined"
+              <Card
+                key={cardIndex}
+                className={styles.lessonCard}
+                variant="outlined"
+                onTouchStart={handleTouchStart}
+                onTouchMove={handleTouchMove}
+                onTouchEnd={handleTouchEnd}
+                onPointerDown={handlePointerDown}
+                onPointerMove={handlePointerMove}
+                onPointerUp={handlePointerEnd}
+                onPointerCancel={handlePointerEnd}
+                style={{
+                  transform: cardTransform,
+                  opacity: swipeOpacity,
+                  transition: cardTransition
+                }}
+              >
+                <CardContent className={styles.lessonCardContent}>
+                  <Box className={styles.cardHeader}>
+                    <Chip
+                      startDecorator={<LocalFireDepartmentRoundedIcon />}
+                      color="warning"
+                      variant="soft"
+                      sx={{ borderRadius: 999 }}
+                    >
+                      Topic {cardIndex + 1}
+                    </Chip>
+                    {answers[cardIndex] === currentCard?.quiz.correctAnswer ? (
+                      <Chip
+                        startDecorator={<CheckCircleRoundedIcon />}
+                        color="success"
+                        variant="soft"
+                        sx={{ borderRadius: 999 }}
+                      >
+                        Completata
+                      </Chip>
+                    ) : null}
+                  </Box>
+
+                  <Box className={styles.readingBlock}>
+                    <Typography className={styles.sectionEyebrow}>
+                      Briefing
+                    </Typography>
+
+                    <Typography level="h2" className={styles.cardTitle}>
+                      {currentCard?.title}
+                    </Typography>
+
+                    {contextParagraph ? (
+                      <Sheet className={styles.contextBlock} variant="plain">
+                        <Typography className={styles.contextLabel}>Contesto</Typography>
+                        <Typography className={styles.contextParagraph}>
+                          {renderHighlightedText(contextParagraph)}
+                        </Typography>
+                      </Sheet>
+                    ) : null}
+
+                    {analysisParagraphs.length > 0 ? (
+                      <div className={styles.analysisBlock}>
+                        <Typography className={styles.contextLabel}>Analisi</Typography>
+                        <div className={styles.cardBody}>
+                          {analysisParagraphs.map((paragraph, paragraphIndex) => (
+                            <Typography key={paragraphIndex} className={styles.cardParagraph}>
+                              {renderHighlightedText(paragraph)}
+                            </Typography>
+                          ))}
+                        </div>
+                      </div>
+                    ) : null}
+                  </Box>
+
+                  <Sheet className={styles.quizBlock} variant="soft">
+                    <Typography className={styles.sectionEyebrow}>
+                      Quick Quiz
+                    </Typography>
+
+                    <Typography level="title-md" className={styles.quizTitle}>
+                      {currentCard?.quiz?.question}
+                    </Typography>
+
+                    <RadioGroup
+                      value={answers[cardIndex] || ""}
+                      onChange={(event) =>
+                        updateProgress(1, cardIndex, event.target.value)
+                      }
+                      sx={{ mt: 1.5, gap: 1.25 }}
+                    >
+                      {currentCard?.quiz?.options?.map((option, optionIndex) => (
+                        <Radio
+                          key={optionIndex}
+                          value={option}
+                          label={option}
+                          disableIcon
+                          disabled={answers[cardIndex] === currentCard?.quiz?.correctAnswer}
+                          sx={{
+                            p: 1.4,
+                            borderRadius: "18px",
+                            border: "1px solid rgba(19, 53, 145, 0.12)",
+                            background: "rgba(255,255,255,0.82)",
+                            transition: "none",
+                            "&:hover": {
+                              background: "rgba(255,255,255,0.82)"
+                            },
+                            "&::before": {
+                              display: "none"
+                            }
+                          }}
+                        />
+                      ))}
+                    </RadioGroup>
+
+                    {answers[cardIndex] ? (
+                      <Typography
+                        className={styles.answerState}
                         sx={{
-                          borderRadius: 3,
-                          boxShadow:
-                            "0 4px 24px 0 rgba(0, 51, 154, 0.18), 0 1.5px 6px 0 rgba(0,0,0,0.08)",
-                          border: "none"
+                          color:
+                            answers[cardIndex] === currentCard?.quiz?.correctAnswer
+                              ? "#0b8f5a"
+                              : "#c2410c"
                         }}
                       >
-                        <CardContent>
-                          <Typography
-                            level="title-md"
-                            sx={{ fontWeight: 600 }}
-                          >
-                            {card.title}
-                          </Typography>
-                          <Typography level="body-sm" sx={{ mt: 1, mb: 2 }}>
-                            {card.content}
-                          </Typography>
-                          <Typography
-                            level="body-sm"
-                            sx={{ fontWeight: "bold" }}
-                          >
-                            Quiz: {card.quiz.question}
-                          </Typography>
-                          <RadioGroup
-                            value={selected || ""}
-                            onChange={(e) =>
-                              updateProgress(1, index, e.target.value)
-                            }
-                            sx={{ mt: 1 }}
-                          >
-                            {card.quiz.options.map((opt, i) => (
-                              <Radio
-                                key={i}
-                                value={opt}
-                                label={opt}
-                                disabled={
-                                  selected === card.quiz.correctAnswer
-                                }
-                              />
-                            ))}
-                          </RadioGroup>
-                          {selected && (
-                            <Typography
-                              level="body-sm"
-                              sx={{
-                                mt: 1,
-                                color: isCorrect ? "green" : "red"
-                              }}
-                            >
-                              {isCorrect
-                                ? "✅ Risposta corretta"
-                                : "❌ Risposta errata"}
-                            </Typography>
-                          )}
-                        </CardContent>
-                      </Card>
-                    )
-                  })}
-                </Sheet>
-              </>
-            )
-          })()}
-        </TabPanel>
-      </Tabs>
+                        {answers[cardIndex] === currentCard?.quiz?.correctAnswer
+                          ? cardIndex === cards.length - 1
+                            ? "Risposta corretta. Hai completato l'ultima card."
+                            : "Risposta corretta. Avanzo automaticamente alla prossima card."
+                          : "Risposta errata. Rileggi la card e riprova."}
+                      </Typography>
+                    ) : null}
+                  </Sheet>
+                </CardContent>
+              </Card>
+            </Box>
+
+            <Box className={styles.controls}>
+              <Button
+                variant="soft"
+                color="neutral"
+                startDecorator={<WestRoundedIcon />}
+                onClick={() => handleMoveCard("prev")}
+                disabled={cardIndex === 0 || isCardTransitioning}
+                sx={{ borderRadius: 999 }}
+              >
+                Precedente
+              </Button>
+
+              <div className={styles.pagination}>
+                {cards.map((_, index) => (
+                  <button
+                    key={index}
+                    type="button"
+                    aria-label={`Vai alla card ${index + 1}`}
+                    className={index === cardIndex ? styles.paginationDotActive : styles.paginationDot}
+                    onClick={() => setCardIndex(index)}
+                  />
+                ))}
+              </div>
+
+              <Button
+                variant="solid"
+                color="primary"
+                endDecorator={<EastRoundedIcon />}
+                onClick={() => handleMoveCard("next")}
+                disabled={cardIndex === cards.length - 1 || isCardTransitioning}
+                sx={{ borderRadius: 999 }}
+              >
+                Successiva
+              </Button>
+            </Box>
+          </Box>
+        )}
+      </Box>
     </main>
   )
 }
