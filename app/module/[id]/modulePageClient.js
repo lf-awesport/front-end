@@ -28,9 +28,6 @@ import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded"
 import LocalFireDepartmentRoundedIcon from "@mui/icons-material/LocalFireDepartmentRounded"
 
 const EXIT_ANIMATION_MS = 220
-const HIGHLIGHT_PATTERN =
-  /(\b(?:ricavi|margini|investimenti|sponsorizzazioni|sponsor|diritti tv|streaming|audience|marketing|brand|licensing|ticketing|biglietteria|partnership|finanza|debito|fatturato|crescita|acquisizione|strategia|valutazione|mercato|media|stadio|infrastrutture|broadcast|fanbase|monetizzazione|business|revenue)\b|€\s?\d+[\d.,]*\s?(?:milioni|miliardi|mln|mld)?|\b\d+[\d.,]*%)/gi
-const HIGHLIGHT_CHECK_PATTERN = new RegExp(HIGHLIGHT_PATTERN.source, "i")
 const INTERACTIVE_SELECTOR = [
   "button",
   "input",
@@ -41,6 +38,35 @@ const INTERACTIVE_SELECTOR = [
   "[role='radio']",
   "[role='button']"
 ].join(",")
+
+function escapeRegExp(value) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
+}
+
+function splitCardContent(content) {
+  const paragraphs = (content || "")
+    .split(/\n+/)
+    .map((paragraph) => paragraph.trim())
+    .filter(Boolean)
+
+  return {
+    contextParagraph: paragraphs[0] || "",
+    analysisParagraphs: paragraphs.slice(1)
+  }
+}
+
+function buildHighlightPatterns(keywords) {
+  if (!keywords?.length) {
+    return { highlightPattern: null, highlightCheckPattern: null }
+  }
+
+  const source = keywords.map(escapeRegExp).join("|")
+
+  return {
+    highlightPattern: new RegExp(`(${source})`, "gi"),
+    highlightCheckPattern: new RegExp(source, "i")
+  }
+}
 
 export default function ModulePageClient() {
   const { id } = useParams()
@@ -161,12 +187,9 @@ export default function ModulePageClient() {
   const answers = progress.answers?.[1] || {}
   const currentCard = cards[cardIndex]
   const upcomingCards = cards.slice(cardIndex + 1, cardIndex + 3)
-  const contentParagraphs = (currentCard?.content || "")
-    .split(/\n+/)
-    .map((paragraph) => paragraph.trim())
-    .filter(Boolean)
-  const contextParagraph = contentParagraphs[0] || ""
-  const analysisParagraphs = contentParagraphs.slice(1)
+  const { contextParagraph, analysisParagraphs } = splitCardContent(
+    currentCard?.content
+  )
   const correctCount = Object.entries(answers).filter(
     ([i, val]) => val === cards[i]?.quiz.correctAnswer
   ).length
@@ -215,15 +238,21 @@ export default function ModulePageClient() {
     return Boolean(target.closest(INTERACTIVE_SELECTOR))
   }
 
+  const lessonTitle = moduleData.levels?.easy?.levelTitle || moduleData.topic || "News Deck"
+  const { highlightPattern, highlightCheckPattern } = buildHighlightPatterns(
+    currentCard?.keywords
+  )
+
   const renderHighlightedText = (text) => {
     if (!text) return null
+    if (!highlightPattern || !highlightCheckPattern) return text
 
-    const parts = text.split(HIGHLIGHT_PATTERN)
+    const parts = text.split(highlightPattern)
 
     return parts
       .filter(Boolean)
       .map((part, index) =>
-        HIGHLIGHT_CHECK_PATTERN.test(part) ? (
+        highlightCheckPattern.test(part) ? (
           <span key={`${part}-${index}`} className={styles.highlightText}>
             {part}
           </span>
@@ -338,7 +367,7 @@ export default function ModulePageClient() {
           <Box>
             <Typography className={styles.eyebrow}>Daily Press Review</Typography>
             <Typography level="h1" className={styles.title}>
-              {moduleData.levels?.easy?.levelTitle.split("Daily Press Review: ")[1] || moduleData.topic || "News Deck"}
+              {lessonTitle}
             </Typography>
           </Box>
 
@@ -447,19 +476,19 @@ export default function ModulePageClient() {
                       {currentCard?.title}
                     </Typography>
 
-                    {contextParagraph ? (
-                      <Sheet className={styles.contextBlock} variant="plain">
-                        <Typography className={styles.contextLabel}>Contesto</Typography>
-                        <Typography className={styles.contextParagraph}>
-                          {renderHighlightedText(contextParagraph)}
+                    {contextParagraph || analysisParagraphs.length > 0 ? (
+                      <Sheet className={styles.contentCard} variant="plain">
+                        <Typography className={styles.contextLabel}>
+                          Analisi
                         </Typography>
-                      </Sheet>
-                    ) : null}
 
-                    {analysisParagraphs.length > 0 ? (
-                      <Sheet className={styles.analysisCard} variant="plain">
-                        <Typography className={styles.contextLabel}>Analisi</Typography>
                         <div className={styles.cardBody}>
+                          {contextParagraph ? (
+                            <Typography className={styles.contextParagraph}>
+                              {renderHighlightedText(contextParagraph)}
+                            </Typography>
+                          ) : null}
+
                           {analysisParagraphs.map((paragraph, paragraphIndex) => (
                             <Typography key={paragraphIndex} className={styles.cardParagraph}>
                               {renderHighlightedText(paragraph)}

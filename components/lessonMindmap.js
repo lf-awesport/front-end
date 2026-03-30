@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useRef, useState } from "react"
-import { Chip, Typography } from "@mui/joy"
+import { Chip } from "@mui/joy"
 import GridViewRoundedIcon from "@mui/icons-material/GridViewRounded"
 import styles from "./lessonMindmap.module.css"
 
@@ -32,6 +32,13 @@ const DEFAULT_QUADRANTS = [
   }
 ]
 
+const STUDY_SUPPORT_ORDER = [
+  "what_happened",
+  "business_move",
+  "impact",
+  "remember"
+]
+
 const INFOGRAPHIC_THEME = {
   colorBg: "#00000000",
   palette: ["#0a2f8f", "#1397d6", "#1fb383", "#f59f00"],
@@ -40,11 +47,15 @@ const INFOGRAPHIC_THEME = {
   base: {
     text: {
       "font-family": "Inter, sans-serif",
+      "font-size": 9,
       fill: "#10204f",
       color: "#10204f"
     }
   }
 }
+
+const MAX_DIAGRAM_TITLE_LENGTH = 24
+const MAX_DIAGRAM_DESC_LENGTH = 96
 
 function clampText(text, maxLength) {
   if (!text) return ""
@@ -67,7 +78,7 @@ function sanitizeSyntaxText(text, maxLength = 120) {
     .trim()
 }
 
-function getStudySnippet(text, maxLength = 72) {
+function getStudySnippet(text, maxLength = MAX_DIAGRAM_DESC_LENGTH) {
   const normalized = (text || "").replace(/[\n\r]+/g, " ").trim()
   if (!normalized) return ""
 
@@ -75,21 +86,39 @@ function getStudySnippet(text, maxLength = 72) {
   return sanitizeSyntaxText(sentence, maxLength)
 }
 
+function toQuadrantItem(item, fallback, includeIllus = false) {
+  return {
+    label: sanitizeSyntaxText(item.label || fallback.label, MAX_DIAGRAM_TITLE_LENGTH),
+    desc: getStudySnippet(item.desc || item.description || fallback.fallback),
+    value: typeof item.value === "number" ? item.value : fallback.value,
+    icon: item.icon || fallback.icon,
+    ...(includeIllus ? { illus: item.illus || "" } : {})
+  }
+}
+
 function getQuadrantItems(card, selectedAnswer) {
   if (!card) return []
 
+  const studySupportQuadrants = card.studySupport?.quadrants
   const paragraphs = getParagraphs(card.content)
   const rawNodes = card.diagramSpec?.nodes || []
 
+  if (studySupportQuadrants?.length === 4) {
+    return [...studySupportQuadrants]
+      .sort(
+        (left, right) =>
+          STUDY_SUPPORT_ORDER.indexOf(left.slot) -
+          STUDY_SUPPORT_ORDER.indexOf(right.slot)
+      )
+      .map((quadrant, index) =>
+        toQuadrantItem(quadrant, DEFAULT_QUADRANTS[index], true)
+      )
+  }
+
   if (rawNodes.length >= 4) {
-    return rawNodes.slice(0, 4).map((node, index) => ({
-      label: sanitizeSyntaxText(node.label || DEFAULT_QUADRANTS[index].label, 40),
-      desc: getStudySnippet(node.description || "", 76),
-      value:
-        typeof node.value === "number" ? node.value : DEFAULT_QUADRANTS[index].value,
-      icon: node.icon || DEFAULT_QUADRANTS[index].icon,
-      illus: node.illus || ""
-    }))
+    return rawNodes
+      .slice(0, 4)
+      .map((node, index) => toQuadrantItem(node, DEFAULT_QUADRANTS[index], true))
   }
 
   return DEFAULT_QUADRANTS.map((item, index) => {
@@ -100,26 +129,23 @@ function getQuadrantItems(card, selectedAnswer) {
         : paragraph || item.fallback
 
     return {
-      label: item.label,
-      desc: getStudySnippet(fallbackText, 76),
-      value: item.value,
-      icon: item.icon
+      ...toQuadrantItem({ desc: fallbackText }, item),
+      label: item.label
     }
   })
 }
 
-function buildInfographicSyntax(title, items) {
+function buildInfographicSyntax(items) {
   if (!items.length) return ""
 
   return [
     "infographic quadrant-quarter-circular",
     "data",
-    `  title ${sanitizeSyntaxText(title || "Study quadrants", 80)}`,
     "  compares",
     ...items.flatMap((item) => [
-      `    - label ${sanitizeSyntaxText(item.label, 44)}`,
+      `    - label ${sanitizeSyntaxText(item.label, MAX_DIAGRAM_TITLE_LENGTH)}`,
       `      value ${item.value}`,
-      `      desc ${sanitizeSyntaxText(item.desc, 76)}`,
+      `      desc ${sanitizeSyntaxText(item.desc, MAX_DIAGRAM_DESC_LENGTH)}`,
       `      icon ${item.icon}`,
       ...(item.illus ? [`      illus ${item.illus}`] : [])
     ])
@@ -153,12 +179,7 @@ export default function LessonMindmap({ card, cardIndex, selectedAnswer }) {
     [card, selectedAnswer]
   )
 
-  const title = card?.diagramSpec?.title || "Study quadrants"
-
-  const syntax = useMemo(
-    () => buildInfographicSyntax(title, quadrantItems),
-    [title, quadrantItems]
-  )
+  const syntax = useMemo(() => buildInfographicSyntax(quadrantItems), [quadrantItems])
 
   useEffect(() => {
     let disposed = false
@@ -211,17 +232,6 @@ export default function LessonMindmap({ card, cardIndex, selectedAnswer }) {
 
   return (
     <section className={styles.wrapper}>
-      <div className={styles.header}>
-        <Chip
-          startDecorator={<GridViewRoundedIcon />}
-          color="primary"
-          variant="soft"
-          sx={{ borderRadius: 999 }}
-        >
-          Quadrants • Card {cardIndex + 1}
-        </Chip>
-      </div>
-
       <div className={styles.mapSurface}>
         <div className={styles.diagramCanvas}>
           <div
