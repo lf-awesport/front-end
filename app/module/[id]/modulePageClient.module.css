@@ -3,32 +3,33 @@
   min-height: 100vh;
   overflow: hidden;
   background:
-    radial-gradient(circle at top left, rgba(38, 194, 255, 0.24), transparent 28%),
-    radial-gradient(circle at top right, rgba(10, 57, 166, 0.2), transparent 22%),
-    linear-gradient(180deg, #f6fbff 0%, #edf3ff 48%, #e7eefc 100%);
+    radial-gradient(circle at top left, rgba(255, 210, 124, 0.22), transparent 24%),
+    radial-gradient(circle at 90% 0%, rgba(20, 130, 255, 0.24), transparent 20%),
+    linear-gradient(180deg, #f7fbff 0%, #eef4ff 38%, #e8efff 100%);
 }
 
 .backdrop {
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(135deg, rgba(15, 53, 145, 0.04) 0%, transparent 40%),
+    linear-gradient(135deg, rgba(15, 53, 145, 0.05) 0%, transparent 40%),
     repeating-linear-gradient(
       135deg,
-      rgba(255, 255, 255, 0.22) 0,
-      rgba(255, 255, 255, 0.22) 1px,
+      rgba(255, 255, 255, 0.24) 0,
+      rgba(255, 255, 255, 0.24) 1px,
       transparent 1px,
       transparent 22px
-    );
+    ),
+    radial-gradient(circle at center, rgba(255, 255, 255, 0.26), transparent 42%);
   pointer-events: none;
 }
 
 .shell {
   position: relative;
   z-index: 1;
-  width: min(1180px, calc(100% - 32px));
+  width: min(1320px, calc(100% - 32px));
   margin: 0 auto;
-  padding: 24px 0 56px;
+  padding: 28px 0 64px;
 }
 
 .topbar {
@@ -41,10 +42,53 @@
 
 .hero {
   display: grid;
-  grid-template-columns: minmax(0, 1.5fr) minmax(280px, 0.8fr);
+  grid-template-columns: minmax(0, 1.3fr) minmax(320px, 0.85fr);
   gap: 24px;
-  align-items: end;
-  margin-bottom: 24px;
+  align-items: stretch;
+  margin-bottom: 28px;
+}
+
+.heroPrimary,
+.heroSecondary {
+  padding: 24px;
+  border-radius: 32px;
+  border: 1px solid rgba(19, 53, 145, 0.08);
+  backdrop-filter: blur(18px);
+}
+
+.heroPrimary {
+  position: relative;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at top right, rgba(255, 201, 96, 0.18), transparent 28%),
+    linear-gradient(135deg, rgba(255, 255, 255, 0.82), rgba(247, 250, 255, 0.92));
+  box-shadow: 0 20px 60px rgba(10, 47, 143, 0.1);
+}
+
+.heroSecondary {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  background:
+    linear-gradient(180deg, rgba(10, 40, 116, 0.95), rgba(17, 87, 167, 0.96)),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0));
+  box-shadow: 0 24px 70px rgba(10, 47, 143, 0.18);
+}
+
+.heroSecondary,
+.hookCard,
+.railPanel {
+  color: #f5f9ff;
+}
+
+.heroSecondary .signalLabel {
+  color: rgba(236, 244, 255, 0.84) !important;
+}
+
+.heroSecondary :global(.MuiTypography-root),
+.hookCard :global(.MuiTypography-root),
+.railPanel :global(.MuiTypography-root) {
+  color: inherit;
 }
 
 .eyebrow {
@@ -57,10 +101,10 @@
 }
 
 .title {
-  max-width: 12ch;
+  max-width: 11ch;
   margin: 0;
   font-size: clamp(2.4rem, 5vw, 4.8rem);
-  line-height: 0.94;
+  line-height: 0.92;
   font-weight: 900;
   letter-spacing: -0.05em;
   color: #0a2f8f;
@@ -69,31 +113,82 @@
 .subtitle {
   max-width: 62ch;
   margin-top: 14px;
-  font-size: 1rem;
-  line-height: 1.6;
-  color: rgba(14, 27, 78, 0.72);
+  font-size: 1.03rem;
+  line-height: 1.65;
+  color: rgba(14, 27, 78, 0.74);
 }
 
-.statsPanel {
-  padding: 20px;
-  border-radius: 28px;
-  background: rgba(255, 255, 255, 0.68);
-  backdrop-filter: blur(18px);
-  box-shadow: 0 18px 48px rgba(10, 47, 143, 0.12);
+.heroMetaRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
 }
 
-.statRow {
+.heroSpotlightHeader {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 10px;
-  color: #10204f;
+  gap: 12px;
 }
 
-.statLabel {
-  font-size: 0.92rem;
-  color: rgba(16, 32, 79, 0.7);
+.heroSpotlightIndex {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 42px;
+  height: 42px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.12);
+  color: #fff;
+  font-size: 0.88rem;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+.heroSpotlightTitle {
+  margin: 0;
+  font-size: 1.45rem;
+  line-height: 1.1;
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.98) !important;
+}
+
+.heroSpotlightText {
+  margin: 0;
+  font-size: 0.98rem;
+  line-height: 1.65;
+  color: rgba(236, 244, 255, 0.92) !important;
+}
+
+.heroMetricGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.heroMetricCard {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.1);
+  color: #fff !important;
+}
+
+.heroMetricCard strong {
+  font-size: 1.08rem;
+  font-weight: 900;
+  color: #ffffff !important;
+}
+
+.heroMetricLabel {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: rgba(224, 239, 255, 0.8) !important;
 }
 
 .deckSection {
@@ -116,7 +211,7 @@
 
 .deckWrap {
   position: relative;
-  width: min(860px, 100%);
+  width: min(1180px, 100%);
   margin: 0 auto;
   padding: 18px 0 22px;
   perspective: 1600px;
@@ -149,30 +244,31 @@
 .lessonCard {
   position: relative;
   z-index: 5;
-  min-height: 640px;
+  min-height: 760px;
   border: none;
-  border-radius: 36px;
+  border-radius: 38px;
   background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.94) 0%, rgba(247, 250, 255, 0.96) 100%),
-    linear-gradient(135deg, rgba(38, 194, 255, 0.1), rgba(10, 47, 143, 0.08));
-  box-shadow: 0 28px 80px rgba(10, 47, 143, 0.16);
+    radial-gradient(circle at top right, rgba(255, 198, 92, 0.14), transparent 22%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.95) 0%, rgba(245, 249, 255, 0.97) 100%),
+    linear-gradient(135deg, rgba(38, 194, 255, 0.08), rgba(10, 47, 143, 0.08));
+  box-shadow: 0 28px 84px rgba(10, 47, 143, 0.16);
   animation: cardIn 220ms ease;
   touch-action: pan-y;
-  cursor: grab;
-  user-select: none;
+  cursor: default;
+  user-select: text;
+  -webkit-user-select: text;
   will-change: transform, opacity;
 }
 
 .lessonCard:active {
-  cursor: grabbing;
   box-shadow: 0 34px 92px rgba(10, 47, 143, 0.2);
 }
 
 .lessonCardContent {
   display: flex;
   flex-direction: column;
-  gap: 28px;
-  padding: 34px 34px 30px;
+  gap: 22px;
+  padding: 30px 30px 28px;
 }
 
 .previewCardPrimary,
@@ -243,10 +339,108 @@
   flex-wrap: wrap;
 }
 
+.cardHeaderMeta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.dragHandle {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 38px;
+  padding: 0 14px;
+  border-radius: 999px;
+  background: rgba(10, 47, 143, 0.07);
+  border: 1px solid rgba(10, 47, 143, 0.12);
+  color: rgba(10, 47, 143, 0.74);
+  cursor: grab;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.dragHandle:active {
+  cursor: grabbing;
+}
+
+.dragHandleDots {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  background-image: radial-gradient(circle, currentColor 1.1px, transparent 1.2px);
+  background-size: 6px 6px;
+  background-position: 0 0;
+  opacity: 0.78;
+}
+
+.dragHandleLabel {
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
 .readingBlock {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 18px;
+}
+
+.cardCanvas {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.8fr);
+  gap: 18px;
+  align-items: start;
+}
+
+.mainColumn,
+.sideColumn {
+  min-width: 0;
+}
+
+.sideColumn {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.titleCluster {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.titleMetaRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.metaPill,
+.metaPillMuted {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.metaPill {
+  background: rgba(10, 47, 143, 0.08);
+  color: #0a2f8f;
+}
+
+.metaPillMuted {
+  background: rgba(255, 197, 82, 0.18);
+  color: #9c5f00;
 }
 
 .sectionEyebrow {
@@ -260,9 +454,9 @@
 
 .cardTitle {
   margin: 0;
-  max-width: 16ch;
-  font-size: clamp(2rem, 3vw, 3.2rem);
-  line-height: 1.08;
+  max-width: 15ch;
+  font-size: clamp(2.1rem, 3vw, 3.45rem);
+  line-height: 1.02;
   font-weight: 900;
   letter-spacing: -0.045em;
   color: #091f63;
@@ -279,10 +473,243 @@
 
 .contentCard {
   margin-bottom: 8px;
+  padding: 18px 18px 20px;
+  border-radius: 24px;
+  background:
+    linear-gradient(180deg, rgba(233, 246, 255, 0.9), rgba(248, 251, 255, 0.98));
+  border: 1px solid rgba(22, 111, 180, 0.1);
+}
+
+.hookCard {
+  padding: 18px 18px 20px;
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at top right, rgba(255, 195, 73, 0.14), transparent 34%),
+    linear-gradient(180deg, rgba(12, 43, 125, 0.96), rgba(17, 86, 166, 0.94));
+  box-shadow: 0 20px 44px rgba(10, 47, 143, 0.16);
+}
+
+.hookCard .contextLabel {
+  color: rgba(232, 243, 255, 0.84) !important;
+}
+
+.hookCard .contextParagraph {
+  color: rgba(255, 255, 255, 0.99) !important;
+}
+
+.signalGrid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.signalCard {
   padding: 16px;
-  border-radius: 20px;
-  background: linear-gradient(180deg, rgba(233, 246, 255, 0.88), rgba(247, 251, 255, 0.96));
-  border: 1px solid rgba(22, 111, 180, 0.12);
+  border-radius: 22px;
+  background: rgba(255, 255, 255, 0.8);
+  border: 1px solid rgba(19, 53, 145, 0.1);
+  box-shadow: 0 12px 32px rgba(10, 47, 143, 0.08);
+}
+
+.signalLabel {
+  margin: 0 0 6px;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: rgba(10, 47, 143, 0.54);
+}
+
+.signalMeta {
+  margin: 0 0 8px;
+  font-size: 0.84rem;
+  font-weight: 700;
+  color: rgba(16, 32, 79, 0.66);
+}
+
+.signalValue {
+  margin: 0;
+  font-size: 1rem;
+  line-height: 1.7;
+  color: rgba(12, 43, 125, 0.86);
+}
+
+.keywordRow,
+.keywordRowCompact {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.railPanel,
+.railPanelSoft {
+  padding: 16px;
+  border-radius: 24px;
+  border: 1px solid rgba(19, 53, 145, 0.08);
+}
+
+.railPanel {
+  background:
+    radial-gradient(circle at top right, rgba(255, 198, 92, 0.16), transparent 32%),
+    linear-gradient(180deg, rgba(12, 43, 125, 0.96), rgba(17, 86, 166, 0.94));
+  box-shadow: 0 20px 48px rgba(10, 47, 143, 0.18);
+}
+
+.railPanel .signalLabel {
+  color: rgba(232, 243, 255, 0.84) !important;
+}
+
+.railPanelSoft {
+  background: rgba(255, 255, 255, 0.84);
+  box-shadow: 0 14px 34px rgba(10, 47, 143, 0.08);
+}
+
+.railHeadline {
+  margin: 0;
+  font-size: 1.08rem;
+  line-height: 1.35;
+  font-weight: 900;
+  color: rgba(255, 255, 255, 0.99) !important;
+}
+
+.railBody {
+  margin-top: 8px;
+  font-size: 0.96rem;
+  line-height: 1.66;
+  color: rgba(244, 248, 255, 0.98) !important;
+}
+
+.railPanelSoft .railBody {
+  color: rgba(16, 32, 79, 0.82);
+}
+
+.sourceDisclosure {
+  overflow: hidden;
+  border-radius: 24px;
+  border: 1px solid rgba(19, 53, 145, 0.08);
+  background: rgba(255, 255, 255, 0.84);
+  box-shadow: 0 14px 34px rgba(10, 47, 143, 0.08);
+}
+
+.sourceDisclosure summary {
+  list-style: none;
+}
+
+.sourceDisclosure summary::-webkit-details-marker {
+  display: none;
+}
+
+.sourceSummaryButton {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 16px;
+  cursor: pointer;
+}
+
+.sourceSummaryText {
+  margin-top: 4px;
+  font-size: 0.96rem;
+  line-height: 1.4;
+  font-weight: 800;
+  color: #0c2b7d;
+}
+
+.sourceSummaryAction {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: 999px;
+  background: rgba(10, 47, 143, 0.08);
+  color: #0a2f8f;
+  font-size: 0.74rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sourceDisclosure[open] .sourceSummaryAction::after {
+  content: "chiudi";
+}
+
+.sourceDisclosure:not([open]) .sourceSummaryAction::after {
+  content: "apri";
+}
+
+.sourceSummaryAction {
+  color: transparent;
+  font-size: 0;
+}
+
+.sourceCompactGrid {
+  display: grid;
+  gap: 10px;
+  padding: 0 16px 16px;
+}
+
+.sourceCompactItem {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+  align-items: start;
+  padding: 12px;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(242, 248, 255, 0.94), rgba(255, 255, 255, 0.98));
+  border: 1px solid rgba(19, 53, 145, 0.06);
+}
+
+.sourceTypeBadge,
+.sourceTypeBadgeNews {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 58px;
+  height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.sourceTypeBadge {
+  background: rgba(10, 47, 143, 0.1);
+  color: #0a2f8f;
+}
+
+.sourceTypeBadgeNews {
+  background: rgba(255, 186, 70, 0.18);
+  color: #8a5500;
+}
+
+.sourceCompactBody {
+  min-width: 0;
+}
+
+.sourceCompactTitle,
+.sourceCompactLink {
+  display: block;
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.35;
+  font-weight: 800;
+  color: #0c2b7d;
+  text-decoration: none;
+}
+
+.sourceCompactLink:hover {
+  text-decoration: underline;
+}
+
+.sourceCompactMeta {
+  margin-top: 4px;
+  font-size: 0.8rem;
+  line-height: 1.4;
+  color: rgba(16, 32, 79, 0.66);
 }
 
 .contextLabel {
@@ -318,12 +745,23 @@
   font-weight: 700;
 }
 
+.hookCard .highlightText,
+.heroSecondary .highlightText,
+.railPanel .highlightText {
+  padding: 0.08em 0.34em;
+  background: linear-gradient(180deg, rgba(255, 214, 120, 0.98), rgba(255, 187, 64, 0.94));
+  color: #08255f !important;
+  box-shadow: 0 8px 18px rgba(255, 185, 59, 0.22);
+}
+
 .quizBlock {
   margin-top: auto;
   margin-top: 14px;
-  padding: 16px;
-  border-radius: 20px;
-  background: linear-gradient(180deg, rgba(224, 244, 255, 0.58), rgba(255, 255, 255, 0.92));
+  padding: 18px 18px 20px;
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at top right, rgba(255, 198, 92, 0.12), transparent 26%),
+    linear-gradient(180deg, rgba(224, 244, 255, 0.66), rgba(255, 255, 255, 0.94));
   cursor: default;
   user-select: text;
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
@@ -335,7 +773,12 @@
   }
 
   .contentCard,
-  .quizBlock {
+  .quizBlock,
+  .hookCard,
+  .signalCard,
+  .railPanel,
+  .railPanelSoft,
+  .sourceDisclosure {
     padding: 18px 20px;
     border-radius: 22px;
   }
@@ -349,6 +792,14 @@
   .quizBlock {
     padding: 24px;
     border-radius: 28px;
+  }
+
+  .hookCard,
+  .signalCard,
+  .railPanel,
+  .railPanelSoft,
+  .sourceDisclosure {
+    border-radius: 24px;
   }
 }
 
@@ -427,6 +878,14 @@
     grid-template-columns: 1fr;
   }
 
+  .heroMetricGrid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .cardCanvas {
+    grid-template-columns: 1fr;
+  }
+
   .title {
     max-width: none;
   }
@@ -446,6 +905,16 @@
     padding-top: 16px;
   }
 
+  .heroPrimary,
+  .heroSecondary {
+    padding: 20px;
+    border-radius: 28px;
+  }
+
+  .heroMetricGrid {
+    grid-template-columns: 1fr;
+  }
+
   .controls {
     display: none;
   }
@@ -456,12 +925,20 @@
     flex-direction: column;
   }
 
+  .cardHeader {
+    align-items: flex-start;
+  }
+
+  .dragHandle {
+    display: none;
+  }
+
   .swipeHint {
     text-align: left;
   }
 
   .lessonCard {
-    min-height: 580px;
+    min-height: 620px;
     border-radius: 28px;
   }
 
@@ -478,6 +955,10 @@
   .lessonCardContent {
     gap: 22px;
     padding: 22px 20px 20px;
+  }
+
+  .signalGrid {
+    grid-template-columns: 1fr;
   }
 
   .cardBody {
@@ -500,6 +981,14 @@
 
   .quizBlock {
     padding: 18px;
+  }
+
+  .sourceSummaryButton {
+    padding: 14px;
+  }
+
+  .sourceCompactGrid {
+    padding: 0 14px 14px;
   }
 
   .stackShadowOne,

@@ -1,11 +1,9 @@
 "use client"
 
 import { useEffect, useMemo, useRef, useState } from "react"
-import { Chip } from "@mui/joy"
-import GridViewRoundedIcon from "@mui/icons-material/GridViewRounded"
 import styles from "./lessonMindmap.module.css"
 
-const DEFAULT_QUADRANTS = [
+const DEFAULT_V2_QUADRANTS = [
   {
     label: "Cosa succede",
     fallback: "Il contesto chiave della notizia.",
@@ -32,12 +30,41 @@ const DEFAULT_QUADRANTS = [
   }
 ]
 
+const DEFAULT_V3_CHECKPOINTS = [
+  {
+    label: "Meccanismo",
+    fallback: "Isola il framework che governa il caso.",
+    value: 86,
+    icon: "mingcute/diamond-2-fill"
+  },
+  {
+    label: "Perche conta",
+    fallback: "Traduci il framework in implicazione manageriale.",
+    value: 89,
+    icon: "mingcute/chart-line-line"
+  },
+  {
+    label: "Rischio",
+    fallback: "Metti a fuoco il costo o il limite della scelta.",
+    value: 84,
+    icon: "mingcute/flash-fill"
+  },
+  {
+    label: "Cue esame",
+    fallback: "Porta il concetto su un altro caso o sul quiz.",
+    value: 82,
+    icon: "mingcute/rocket-line"
+  }
+]
+
 const STUDY_SUPPORT_ORDER = [
   "what_happened",
   "business_move",
   "impact",
   "remember"
 ]
+
+const V3_CHECKPOINT_ORDER = ["Meccanismo", "Perche conta", "Rischio", "Cue esame"]
 
 const INFOGRAPHIC_THEME = {
   colorBg: "#00000000",
@@ -89,7 +116,7 @@ function getStudySnippet(text, maxLength = MAX_DIAGRAM_DESC_LENGTH) {
 function toQuadrantItem(item, fallback, includeIllus = false) {
   return {
     label: sanitizeSyntaxText(item.label || fallback.label, MAX_DIAGRAM_TITLE_LENGTH),
-    desc: getStudySnippet(item.desc || item.description || fallback.fallback),
+    desc: getStudySnippet(item.text || item.desc || item.description || fallback.fallback),
     value: typeof item.value === "number" ? item.value : fallback.value,
     icon: item.icon || fallback.icon,
     ...(includeIllus ? { illus: item.illus || "" } : {})
@@ -99,9 +126,18 @@ function toQuadrantItem(item, fallback, includeIllus = false) {
 function getQuadrantItems(card, selectedAnswer) {
   if (!card) return []
 
+  const isV3 = Boolean(card.explanation || card.theoryAnchor)
+  const v3Checkpoints = card.studySupport?.checkpoints
   const studySupportQuadrants = card.studySupport?.quadrants
-  const paragraphs = getParagraphs(card.content)
+  const paragraphs = getParagraphs(card.explanation || card.content)
   const rawNodes = card.diagramSpec?.nodes || []
+
+  if (v3Checkpoints?.length === 4) {
+    return V3_CHECKPOINT_ORDER.map((label, index) => {
+      const checkpoint = v3Checkpoints.find((item) => item.label === label) || {}
+      return toQuadrantItem(checkpoint, DEFAULT_V3_CHECKPOINTS[index], true)
+    })
+  }
 
   if (studySupportQuadrants?.length === 4) {
     return [...studySupportQuadrants]
@@ -111,20 +147,31 @@ function getQuadrantItems(card, selectedAnswer) {
           STUDY_SUPPORT_ORDER.indexOf(right.slot)
       )
       .map((quadrant, index) =>
-        toQuadrantItem(quadrant, DEFAULT_QUADRANTS[index], true)
+        toQuadrantItem(quadrant, DEFAULT_V2_QUADRANTS[index], true)
       )
   }
 
   if (rawNodes.length >= 4) {
     return rawNodes
       .slice(0, 4)
-      .map((node, index) => toQuadrantItem(node, DEFAULT_QUADRANTS[index], true))
+      .map((node, index) => toQuadrantItem(node, DEFAULT_V2_QUADRANTS[index], true))
   }
 
-  return DEFAULT_QUADRANTS.map((item, index) => {
+  const fallbacks = isV3 ? DEFAULT_V3_CHECKPOINTS : DEFAULT_V2_QUADRANTS
+
+  return fallbacks.map((item, index) => {
     const paragraph = paragraphs[index]
-    const fallbackText =
-      index === DEFAULT_QUADRANTS.length - 1 && selectedAnswer
+    const v3Fallbacks = [
+      card.theoryAnchor?.concept || card.decisionFocus,
+      card.managerLens || card.businessImplication,
+      card.applicabilityLimits || card.tradeOff,
+      selectedAnswer
+        ? `Risposta scelta: ${selectedAnswer}`
+        : card.learningObjective || card.quiz?.question
+    ]
+    const fallbackText = isV3
+      ? v3Fallbacks[index] || paragraph || item.fallback
+      : index === DEFAULT_V2_QUADRANTS.length - 1 && selectedAnswer
         ? `Risposta scelta: ${selectedAnswer}`
         : paragraph || item.fallback
 

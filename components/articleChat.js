@@ -12,16 +12,69 @@ const DeepChat = dynamic(
   { ssr: false }
 )
 
+const escapeHtml = (value) =>
+  value
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;")
+
+function renderSourceItem(source) {
+  const text = escapeHtml(
+    source.displayLabel || source.detail || source.title || source.label || "Fonte"
+  )
+
+  if (source.url) {
+    return `<a href="${source.url}" target="_blank" rel="noopener noreferrer">${text}</a>`
+  }
+
+  return `<span>${text}</span>`
+}
+
+function renderSourceSection(title, sources) {
+  if (sources.length === 0) {
+    return ""
+  }
+
+  return `<div><strong>${title}</strong>: ${sources.map(renderSourceItem).join("; ")}</div>`
+}
+
+function renderSourcesHtml(sources) {
+  const theorySources = sources.filter((source) => source.type === "theory")
+  const newsSources = sources.filter((source) => source.type === "sentiment")
+  const sections = [
+    renderSourceSection("Theory", theorySources),
+    renderSourceSection("News", newsSources)
+  ].filter(Boolean)
+
+  if (sections.length === 0) {
+    return ""
+  }
+
+  return `<br><br><div style='font-size: 11px; color: #5f6b7a; border-top: 1px solid #e5e7eb; padding-top: 10px;'>${sections.join("")}</div>`
+}
+
+function renderStyledMarkdown(markdown) {
+  const htmlContent = marked.parse(markdown)
+
+  return `
+    <div style="font-family: 'Inter', sans-serif; font-size: 16px; color: #1a1a1a; line-height: 1.6;">
+      <style>
+        h1, h2, h3 { font-weight: 600; margin: 1rem 0 0.5rem 0; }
+        ul, ol { padding-left: 1.25rem; margin-bottom: 1rem; }
+        li { margin-bottom: 0.25rem; }
+        p { margin-bottom: 1rem; }
+        strong { font-weight: 600; }
+      </style>
+      ${htmlContent}
+    </div>
+  `
+}
+
 export function ArticleChat() {
   // Buffer for concatenating streaming text
   const aiTextBufferRef = useRef("")
-  const escapeHtml = (value) =>
-    value
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;")
   const { user } = useAuth()
 
   return (
@@ -48,8 +101,7 @@ export function ArticleChat() {
           backgroundColor: "#fff",
           borderStyle: "hidden",
           border: "0px",
-          boxShadow: "none",
-          flex: 1
+          boxShadow: "none"
         }}
         messageStyles={{
           default: {
@@ -102,12 +154,7 @@ export function ArticleChat() {
         requestBodyLimits={{ maxMessages: 1 }}
         requestInterceptor={(details) => {
           const lastMessage = details.body?.messages?.at(-1)?.text
-          if (
-            document.activeElement &&
-            typeof document.activeElement.blur === "function"
-          ) {
-            document.activeElement.blur()
-          }
+          document.activeElement?.blur?.()
           aiTextBufferRef.current = ""
           return {
             ...details,
@@ -133,34 +180,13 @@ export function ArticleChat() {
             }
 
             const markdown = aiTextBufferRef.current
-            const htmlContent = marked.parse(markdown)
-            const styledHtml = `
-              <div style="font-family: 'Inter', sans-serif; font-size: 16px; color: #1a1a1a; line-height: 1.6;">
-                <style>
-                  h1, h2, h3 { font-weight: 600; margin: 1rem 0 0.5rem 0; }
-                  ul, ol { padding-left: 1.25rem; margin-bottom: 1rem; }
-                  li { margin-bottom: 0.25rem; }
-                  p { margin-bottom: 1rem; }
-                  strong { font-weight: 600; }
-                </style>
-                ${htmlContent}
-              </div>
-            `
+            const styledHtml = renderStyledMarkdown(markdown)
 
             if (!response.sources || response.sources.length === 0) {
               return { html: styledHtml, overwrite: true }
             }
 
-            const sourcesLinks = response.sources
-              .map(
-                (src, i) =>
-                  `<a href="${src.url}" target="_blank" rel="noopener noreferrer">[${i + 1}]</a>`
-              )
-              .join(", ")
-
-            const finalHtml =
-              styledHtml +
-              `<br><br><span style='font-size: 8px;'>Fonti: ${sourcesLinks}</span>`
+            const finalHtml = styledHtml + renderSourcesHtml(response.sources)
             return { html: finalHtml, overwrite: true }
           }
         }}

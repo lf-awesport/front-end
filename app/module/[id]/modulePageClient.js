@@ -28,6 +28,7 @@ import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded"
 import LocalFireDepartmentRoundedIcon from "@mui/icons-material/LocalFireDepartmentRounded"
 
 const EXIT_ANIMATION_MS = 220
+const DRAG_HANDLE_SELECTOR = "[data-drag-handle='true']"
 const INTERACTIVE_SELECTOR = [
   "button",
   "input",
@@ -43,15 +44,97 @@ function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
 }
 
-function splitCardContent(content) {
-  const paragraphs = (content || "")
+function splitParagraphs(content) {
+  return (content || "")
     .split(/\n+/)
     .map((paragraph) => paragraph.trim())
     .filter(Boolean)
+}
+
+function getModuleCards(moduleData) {
+  if (Array.isArray(moduleData?.cards)) {
+    return moduleData.cards
+  }
+
+  return moduleData?.levels?.easy?.cards || []
+}
+
+function getLessonTitle(moduleData) {
+  return (
+    moduleData?.title ||
+    moduleData?.levels?.easy?.levelTitle ||
+    moduleData?.topic ||
+    "News Deck"
+  )
+}
+
+function getLessonEyebrow(moduleData) {
+  return moduleData?.lessonType === "daily-edge"
+    ? "Daily Edge"
+    : "Daily Press Review"
+}
+
+function getLessonModeLabel(moduleData) {
+  return moduleData?.framework === "theory-first" ? "Theory-first" : "News"
+}
+
+function getLessonSubtitle(moduleData) {
+  if (moduleData?.framework === "theory-first") {
+    return "Framework first, case second: ogni card parte dal principio manageriale, poi lo traduce nel caso del giorno, poi chiarisce implicazione e trade-off."
+  }
+
+  return ""
+}
+
+function formatLessonDate(dateString) {
+  if (!dateString) return ""
+
+  const date = new Date(`${dateString}T00:00:00`)
+  if (Number.isNaN(date.getTime())) return dateString
+
+  return new Intl.DateTimeFormat("it-IT", {
+    day: "numeric",
+    month: "short",
+    year: "numeric"
+  }).format(date)
+}
+
+function getSourceGroups(card) {
+  return {
+    theory: card?.sources?.theory || [],
+    news: card?.sources?.news || []
+  }
+}
+
+function getSourceCountLabel(sourceGroups) {
+  const segments = []
+
+  if (sourceGroups.theory.length > 0) {
+    segments.push(`${sourceGroups.theory.length} theory`)
+  }
+
+  if (sourceGroups.news.length > 0) {
+    segments.push(`${sourceGroups.news.length} case`)
+  }
+
+  return segments.join(" + ") || "Nessuna fonte"
+}
+
+function getCardDisplayModel(card) {
+  const explanationParagraphs = splitParagraphs(card?.explanation || card?.content)
 
   return {
-    contextParagraph: paragraphs[0] || "",
-    analysisParagraphs: paragraphs.slice(1)
+    isV3: Boolean(card?.explanation || card?.theoryAnchor),
+    hook: card?.hook || "",
+    explanationParagraphs,
+    theoryAnchor: card?.theoryAnchor || null,
+    caseBrief: card?.caseBrief || "",
+    businessImplication: card?.businessImplication || "",
+    tradeOff: card?.tradeOff || "",
+    decisionFocus: card?.decisionFocus || "",
+    managerLens: card?.managerLens || "",
+    applicabilityLimits: card?.applicabilityLimits || "",
+    learningObjective: card?.learningObjective || ""
   }
 }
 
@@ -138,8 +221,7 @@ export default function ModulePageClient() {
       [level]: { ...progress.answers[level], [index]: answer }
     }
 
-    const levelKey = ["easy", "medium", "hard"][level - 1]
-    const cards = moduleData.levels?.[levelKey]?.cards || []
+    const cards = level === 1 ? getModuleCards(moduleData) : []
 
     const isFullyAnswered =
       Object.keys(newAnswers[level]).length === cards.length
@@ -183,13 +265,11 @@ export default function ModulePageClient() {
   if (!user || !moduleData || !progress)
     return <Loading message="Caricamento modulo..." />
 
-  const cards = moduleData.levels?.easy?.cards || []
+  const cards = getModuleCards(moduleData)
   const answers = progress.answers?.[1] || {}
   const currentCard = cards[cardIndex]
   const upcomingCards = cards.slice(cardIndex + 1, cardIndex + 3)
-  const { contextParagraph, analysisParagraphs } = splitCardContent(
-    currentCard?.content
-  )
+  const cardDisplay = getCardDisplayModel(currentCard)
   const correctCount = Object.entries(answers).filter(
     ([i, val]) => val === cards[i]?.quiz.correctAnswer
   ).length
@@ -238,7 +318,18 @@ export default function ModulePageClient() {
     return Boolean(target.closest(INTERACTIVE_SELECTOR))
   }
 
-  const lessonTitle = moduleData.levels?.easy?.levelTitle || moduleData.topic || "News Deck"
+  const isDragHandleTarget = (target) => {
+    if (!(target instanceof Element)) return false
+    return Boolean(target.closest(DRAG_HANDLE_SELECTOR))
+  }
+
+  const lessonTitle = getLessonTitle(moduleData)
+  const lessonEyebrow = getLessonEyebrow(moduleData)
+  const lessonModeLabel = getLessonModeLabel(moduleData)
+  const lessonSubtitle = getLessonSubtitle(moduleData)
+  const lessonDateLabel = formatLessonDate(moduleData?.lessonDate)
+  const sourceGroups = getSourceGroups(currentCard)
+  const sourceCountLabel = getSourceCountLabel(sourceGroups)
   const { highlightPattern, highlightCheckPattern } = buildHighlightPatterns(
     currentCard?.keywords
   )
@@ -301,6 +392,9 @@ export default function ModulePageClient() {
   const handlePointerDown = (event) => {
     if (isCardTransitioning) return
     if (isInteractiveTarget(event.target)) return
+    if (event.pointerType === "mouse" && !isDragHandleTarget(event.target)) {
+      return
+    }
 
     setIsDragging(true)
     pointerStartXRef.current = event.clientX
@@ -359,31 +453,68 @@ export default function ModulePageClient() {
           </Button>
 
           <Chip color="primary" variant="soft" sx={{ borderRadius: 999 }}>
-            News
+            {lessonModeLabel}
           </Chip>
         </Box>
 
         <Box className={styles.hero}>
-          <Box>
-            <Typography className={styles.eyebrow}>Daily Press Review</Typography>
+          <Sheet className={styles.heroPrimary} variant="plain">
+            <Typography className={styles.eyebrow}>{lessonEyebrow}</Typography>
             <Typography level="h1" className={styles.title}>
               {lessonTitle}
             </Typography>
-          </Box>
 
-          <Sheet className={styles.statsPanel} variant="soft">
-            <Box className={styles.statRow}>
-              <span className={styles.statLabel}>Card viste</span>
-              <strong>{Math.min(cardIndex + 1, cards.length)} / {cards.length}</strong>
-            </Box>
-            <Box className={styles.statRow}>
-              <span className={styles.statLabel}>Quiz risolti</span>
-              <strong>{answeredCount} / {cards.length}</strong>
-            </Box>
-            <Box className={styles.statRow}>
-              <span className={styles.statLabel}>Risposte corrette</span>
-              <strong>{correctCount} / {cards.length}</strong>
-            </Box>
+            {lessonSubtitle ? (
+              <Typography className={styles.subtitle}>{lessonSubtitle}</Typography>
+            ) : null}
+
+            <div className={styles.heroMetaRow}>
+              {lessonDateLabel ? (
+                <Chip variant="soft" color="neutral" sx={{ borderRadius: 999 }}>
+                  {lessonDateLabel}
+                </Chip>
+              ) : null}
+              {moduleData?.voiceProfile ? (
+                <Chip variant="soft" color="warning" sx={{ borderRadius: 999 }}>
+                  Eddy Mode
+                </Chip>
+              ) : null}
+              <Chip variant="soft" color="primary" sx={{ borderRadius: 999 }}>
+                {cards.length} cards curate
+              </Chip>
+            </div>
+          </Sheet>
+
+          <Sheet className={styles.heroSecondary} variant="soft">
+            <div className={styles.heroSpotlightHeader}>
+              <Typography className={styles.signalLabel}>Now Reading</Typography>
+              <span className={styles.heroSpotlightIndex}>
+                {String(cardIndex + 1).padStart(2, "0")}
+              </span>
+            </div>
+            <Typography className={styles.heroSpotlightTitle}>
+              {currentCard?.title}
+            </Typography>
+            {cardDisplay.decisionFocus ? (
+              <Typography className={styles.heroSpotlightText}>
+                {cardDisplay.decisionFocus}
+              </Typography>
+            ) : null}
+
+            <div className={styles.heroMetricGrid}>
+              <div className={styles.heroMetricCard}>
+                <span className={styles.heroMetricLabel}>Completamento</span>
+                <strong>{Math.round(progressValue)}%</strong>
+              </div>
+              <div className={styles.heroMetricCard}>
+                <span className={styles.heroMetricLabel}>Quiz risolti</span>
+                <strong>{answeredCount} / {cards.length}</strong>
+              </div>
+              <div className={styles.heroMetricCard}>
+                <span className={styles.heroMetricLabel}>Corrette</span>
+                <strong>{correctCount} / {cards.length}</strong>
+              </div>
+            </div>
             <LinearProgress determinate value={progressValue} sx={{ mt: 1.5 }} />
           </Sheet>
         </Box>
@@ -447,64 +578,256 @@ export default function ModulePageClient() {
               >
                 <CardContent className={styles.lessonCardContent}>
                   <Box className={styles.cardHeader}>
-                    <Chip
-                      startDecorator={<LocalFireDepartmentRoundedIcon />}
-                      color="warning"
-                      variant="soft"
-                      sx={{ borderRadius: 999 }}
-                    >
-                      Topic {cardIndex + 1}
-                    </Chip>
-                    {answers[cardIndex] === currentCard?.quiz.correctAnswer ? (
+                    <div className={styles.cardHeaderMeta}>
                       <Chip
-                        startDecorator={<CheckCircleRoundedIcon />}
-                        color="success"
+                        startDecorator={<LocalFireDepartmentRoundedIcon />}
+                        color="warning"
                         variant="soft"
                         sx={{ borderRadius: 999 }}
                       >
-                        Completata
+                        Topic {cardIndex + 1}
                       </Chip>
-                    ) : null}
+                      {answers[cardIndex] === currentCard?.quiz.correctAnswer ? (
+                        <Chip
+                          startDecorator={<CheckCircleRoundedIcon />}
+                          color="success"
+                          variant="soft"
+                          sx={{ borderRadius: 999 }}
+                        >
+                          Completata
+                        </Chip>
+                      ) : null}
+                    </div>
+
+                    <div
+                      className={styles.dragHandle}
+                      data-drag-handle="true"
+                      aria-label="Trascina la card"
+                      title="Trascina la card"
+                    >
+                      <span className={styles.dragHandleDots} aria-hidden="true" />
+                      <span className={styles.dragHandleLabel}>Drag</span>
+                    </div>
                   </Box>
 
-                  <Box className={styles.readingBlock}>
-                    <Typography className={styles.sectionEyebrow}>
-                      Briefing
-                    </Typography>
+                  <div className={styles.cardCanvas}>
+                    <Box className={styles.mainColumn}>
+                      <Box className={styles.readingBlock}>
+                        <div className={styles.titleCluster}>
+                          <Typography className={styles.sectionEyebrow}>
+                            Briefing
+                          </Typography>
+                          <Typography level="h2" className={styles.cardTitle}>
+                            {currentCard?.title}
+                          </Typography>
 
-                    <Typography level="h2" className={styles.cardTitle}>
-                      {currentCard?.title}
-                    </Typography>
-
-                    {contextParagraph || analysisParagraphs.length > 0 ? (
-                      <Sheet className={styles.contentCard} variant="plain">
-                        <Typography className={styles.contextLabel}>
-                          Analisi
-                        </Typography>
-
-                        <div className={styles.cardBody}>
-                          {contextParagraph ? (
-                            <Typography className={styles.contextParagraph}>
-                              {renderHighlightedText(contextParagraph)}
-                            </Typography>
-                          ) : null}
-
-                          {analysisParagraphs.map((paragraph, paragraphIndex) => (
-                            <Typography key={paragraphIndex} className={styles.cardParagraph}>
-                              {renderHighlightedText(paragraph)}
-                            </Typography>
-                          ))}
+                          <div className={styles.titleMetaRow}>
+                            <span className={styles.metaPill}>{sourceCountLabel}</span>
+                            {cardDisplay.learningObjective ? (
+                              <span className={styles.metaPillMuted}>Focus didattico attivo</span>
+                            ) : null}
+                          </div>
                         </div>
+
+                        {cardDisplay.hook ? (
+                          <Sheet className={styles.hookCard} variant="plain">
+                            <Typography className={styles.contextLabel}>Hook</Typography>
+                            <Typography className={styles.contextParagraph}>
+                              {renderHighlightedText(cardDisplay.hook)}
+                            </Typography>
+                          </Sheet>
+                        ) : null}
+
+                        {cardDisplay.isV3 ? (
+                          <div className={styles.signalGrid}>
+                            {cardDisplay.theoryAnchor ? (
+                              <Sheet className={styles.signalCard} variant="plain">
+                                <Typography className={styles.signalLabel}>
+                                  Theory Anchor
+                                </Typography>
+                                <Typography className={styles.signalMeta}>
+                                  {cardDisplay.theoryAnchor.subjectName}
+                                </Typography>
+                                <Typography className={styles.signalValue}>
+                                  {renderHighlightedText(cardDisplay.theoryAnchor.concept)}
+                                </Typography>
+                                {cardDisplay.theoryAnchor.whyItApplies ? (
+                                  <Typography className={styles.cardParagraph}>
+                                    {renderHighlightedText(
+                                      cardDisplay.theoryAnchor.whyItApplies
+                                    )}
+                                  </Typography>
+                                ) : null}
+                              </Sheet>
+                            ) : null}
+
+                            {cardDisplay.caseBrief ? (
+                              <Sheet className={styles.signalCard} variant="plain">
+                                <Typography className={styles.signalLabel}>
+                                  Case Brief
+                                </Typography>
+                                <Typography className={styles.signalValue}>
+                                  {renderHighlightedText(cardDisplay.caseBrief)}
+                                </Typography>
+                              </Sheet>
+                            ) : null}
+
+                            {cardDisplay.businessImplication ? (
+                              <Sheet className={styles.signalCard} variant="plain">
+                                <Typography className={styles.signalLabel}>
+                                  Business Implication
+                                </Typography>
+                                <Typography className={styles.signalValue}>
+                                  {renderHighlightedText(cardDisplay.businessImplication)}
+                                </Typography>
+                              </Sheet>
+                            ) : null}
+
+                            {cardDisplay.tradeOff ? (
+                              <Sheet className={styles.signalCard} variant="plain">
+                                <Typography className={styles.signalLabel}>
+                                  Trade-off
+                                </Typography>
+                                <Typography className={styles.signalValue}>
+                                  {renderHighlightedText(cardDisplay.tradeOff)}
+                                </Typography>
+                              </Sheet>
+                            ) : null}
+                          </div>
+                        ) : null}
+
+                        {cardDisplay.explanationParagraphs.length > 0 ? (
+                          <Sheet className={styles.contentCard} variant="plain">
+                            <Typography className={styles.contextLabel}>
+                              {cardDisplay.isV3 ? "Explanation" : "Analisi"}
+                            </Typography>
+
+                            <div className={styles.cardBody}>
+                              {cardDisplay.explanationParagraphs.map((paragraph, paragraphIndex) => (
+                                <Typography key={paragraphIndex} className={styles.cardParagraph}>
+                                  {renderHighlightedText(paragraph)}
+                                </Typography>
+                              ))}
+                            </div>
+                          </Sheet>
+                        ) : null}
+                      </Box>
+                    </Box>
+
+                    <aside className={styles.sideColumn}>
+                      <Sheet className={styles.railPanel} variant="plain">
+                        <Typography className={styles.signalLabel}>Decision Focus</Typography>
+                        <Typography className={styles.railHeadline}>
+                          {cardDisplay.decisionFocus || "Manca ancora un focus esplicito."}
+                        </Typography>
+                        {cardDisplay.managerLens ? (
+                          <Typography className={styles.railBody}>
+                            {renderHighlightedText(cardDisplay.managerLens)}
+                          </Typography>
+                        ) : null}
                       </Sheet>
-                    ) : null}
 
-                  </Box>
+                      {cardDisplay.learningObjective ? (
+                        <Sheet className={styles.railPanelSoft} variant="plain">
+                          <Typography className={styles.signalLabel}>Learning Objective</Typography>
+                          <Typography className={styles.railBody}>
+                            {renderHighlightedText(cardDisplay.learningObjective)}
+                          </Typography>
+                        </Sheet>
+                      ) : null}
 
-                  <LessonMindmap
-                    card={currentCard}
-                    cardIndex={cardIndex}
-                    selectedAnswer={answers[cardIndex] || ""}
-                  />
+                      {currentCard?.keywords?.length ? (
+                        <Sheet className={styles.railPanelSoft} variant="plain">
+                          <Typography className={styles.signalLabel}>Key Signals</Typography>
+                          <div className={styles.keywordRowCompact}>
+                            {currentCard.keywords.map((keyword, keywordIndex) => (
+                              <Chip
+                                key={`${keyword}-${keywordIndex}`}
+                                variant="soft"
+                                color="primary"
+                                sx={{ borderRadius: 999 }}
+                              >
+                                {keyword}
+                              </Chip>
+                            ))}
+                          </div>
+                        </Sheet>
+                      ) : null}
+
+                      {cardDisplay.isV3 && (sourceGroups.theory.length > 0 || sourceGroups.news.length > 0) ? (
+                        <details className={styles.sourceDisclosure}>
+                          <summary className={styles.sourceSummaryButton}>
+                            <div>
+                              <Typography className={styles.signalLabel}>Sources</Typography>
+                              <Typography className={styles.sourceSummaryText}>
+                                {sourceCountLabel}
+                              </Typography>
+                            </div>
+                            <span className={styles.sourceSummaryAction}>Apri</span>
+                          </summary>
+
+                          <div className={styles.sourceCompactGrid}>
+                            {sourceGroups.theory.map((source) => (
+                              <div key={source.sourceId} className={styles.sourceCompactItem}>
+                                <span className={styles.sourceTypeBadge}>Theory</span>
+                                <div className={styles.sourceCompactBody}>
+                                  <Typography className={styles.sourceCompactTitle}>
+                                    {source.subjectName}
+                                  </Typography>
+                                  <Typography className={styles.sourceCompactMeta}>
+                                    {[source.lessonCode, source.title].filter(Boolean).join(" · ")}
+                                  </Typography>
+                                </div>
+                              </div>
+                            ))}
+
+                            {sourceGroups.news.map((source) => (
+                              <div key={source.sourceId} className={styles.sourceCompactItem}>
+                                <span className={styles.sourceTypeBadgeNews}>Case</span>
+                                <div className={styles.sourceCompactBody}>
+                                  {source.url ? (
+                                    <a
+                                      className={styles.sourceCompactLink}
+                                      href={source.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                    >
+                                      {source.title || "News source"}
+                                    </a>
+                                  ) : (
+                                    <Typography className={styles.sourceCompactTitle}>
+                                      {source.title || "News source"}
+                                    </Typography>
+                                  )}
+                                  {source.date ? (
+                                    <Typography className={styles.sourceCompactMeta}>
+                                      {formatLessonDate(source.date)}
+                                    </Typography>
+                                  ) : null}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </details>
+                      ) : null}
+
+                      {cardDisplay.applicabilityLimits &&
+                      cardDisplay.applicabilityLimits !== cardDisplay.tradeOff ? (
+                        <Sheet className={styles.railPanelSoft} variant="plain">
+                          <Typography className={styles.signalLabel}>Applicability Limits</Typography>
+                          <Typography className={styles.railBody}>
+                            {renderHighlightedText(cardDisplay.applicabilityLimits)}
+                          </Typography>
+                        </Sheet>
+                      ) : null}
+
+                      <LessonMindmap
+                        card={currentCard}
+                        cardIndex={cardIndex}
+                        selectedAnswer={answers[cardIndex] || ""}
+                      />
+                    </aside>
+                  </div>
 
                   <Sheet className={styles.quizBlock} variant="soft">
                     <Typography className={styles.sectionEyebrow}>
