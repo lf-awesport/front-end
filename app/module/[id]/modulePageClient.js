@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { useParams, useRouter } from "next/navigation"
+import { useParams, useRouter, useSearchParams } from "next/navigation"
 import { onAuthStateChanged } from "firebase/auth"
 import { auth } from "@/utils/firebaseConfig"
 import { doc, getDoc, setDoc, onSnapshot } from "firebase/firestore"
@@ -28,6 +28,17 @@ import CheckCircleRoundedIcon from "@mui/icons-material/CheckCircleRounded"
 import LocalFireDepartmentRoundedIcon from "@mui/icons-material/LocalFireDepartmentRounded"
 
 const EXIT_ANIMATION_MS = 220
+const LESSON_COLLECTION = "lessons"
+const CASE_STUDY_LESSON_COLLECTION = "caseStudyLessons"
+const MODULE_COLLECTIONS = [LESSON_COLLECTION, CASE_STUDY_LESSON_COLLECTION]
+const PREVIEW_USER = { uid: "preview-user" }
+const CASE_STUDY_SECTION_CONFIG = [
+  { key: "whatHappened", label: "What Happened" },
+  { key: "whyThisMatters", label: "Why This Matters" },
+  { key: "theRealDecision", label: "The Real Decision" },
+  { key: "whatCouldBreak", label: "What Could Break" },
+  { key: "whatToWatch", label: "What To Watch" }
+]
 const DRAG_HANDLE_SELECTOR = "[data-drag-handle='true']"
 const INTERACTIVE_SELECTOR = [
   "button",
@@ -39,6 +50,33 @@ const INTERACTIVE_SELECTOR = [
   "[role='radio']",
   "[role='button']"
 ].join(",")
+
+function createEmptyProgress() {
+  return {
+    answers: { 1: {}, 2: {}, 3: {} },
+    completedLevels: []
+  }
+}
+
+function getArrayOrEmpty(value) {
+  return Array.isArray(value) ? value : []
+}
+
+function getLearningModuleRef(moduleId, collectionName) {
+  return doc(db, "learningModules", "Sport Management", collectionName, moduleId)
+}
+
+async function getModuleData(moduleId) {
+  for (const collectionName of MODULE_COLLECTIONS) {
+    const moduleSnap = await getDoc(getLearningModuleRef(moduleId, collectionName))
+
+    if (moduleSnap.exists()) {
+      return moduleSnap.data()
+    }
+  }
+
+  return null
+}
 
 function escapeRegExp(value) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
@@ -86,6 +124,24 @@ function getLessonSubtitle(moduleData) {
   return ""
 }
 
+function getCaseStudyFrameworks(moduleData) {
+  return getArrayOrEmpty(moduleData?.theoryBlend?.frameworksInPlay)
+}
+
+function getCaseStudyTheorySources(moduleData) {
+  return getArrayOrEmpty(moduleData?.meta?.theoryPack)
+}
+
+function getCaseStudySections(moduleData) {
+  return CASE_STUDY_SECTION_CONFIG
+    .map(({ key, label }) => ({
+      key,
+      label,
+      content: moduleData?.caseStudy?.[key] || ""
+    }))
+    .filter((section) => section.content)
+}
+
 function formatLessonDate(dateString) {
   if (!dateString) return ""
 
@@ -122,6 +178,12 @@ function getSourceCountLabel(sourceGroups) {
 
 function getCardDisplayModel(card) {
   const explanationParagraphs = splitParagraphs(card?.explanation || card?.content)
+  const decisionFocus =
+    card?.decisionFocus || card?.businessImplication || card?.hook || ""
+  const managerLens =
+    card?.managerLens || card?.theoryAnchor?.whyItApplies || ""
+  const learningObjective =
+    card?.learningObjective || card?.quiz?.question || ""
 
   return {
     isV3: Boolean(card?.explanation || card?.theoryAnchor),
@@ -131,10 +193,10 @@ function getCardDisplayModel(card) {
     caseBrief: card?.caseBrief || "",
     businessImplication: card?.businessImplication || "",
     tradeOff: card?.tradeOff || "",
-    decisionFocus: card?.decisionFocus || "",
-    managerLens: card?.managerLens || "",
+    decisionFocus,
+    managerLens,
     applicabilityLimits: card?.applicabilityLimits || "",
-    learningObjective: card?.learningObjective || ""
+    learningObjective
   }
 }
 
@@ -151,9 +213,244 @@ function buildHighlightPatterns(keywords) {
   }
 }
 
+function CaseStudyLessonView({ moduleData, isPreview, onHome }) {
+  const frameworkCards = getCaseStudyFrameworks(moduleData)
+  const theorySources = getCaseStudyTheorySources(moduleData)
+  const sourceArticles = getArrayOrEmpty(moduleData?.sourceArticles)
+  const lessonDateLabel = formatLessonDate(moduleData?.lessonDate)
+  const frameworkCountLabel = `${frameworkCards.length} framework${
+    frameworkCards.length === 1 ? "" : "s"
+  }`
+  const sourceArticleCount = sourceArticles.length
+  const caseStudySections = getCaseStudySections(moduleData)
+  const topicTitle = moduleData?.sourceShortlist?.topicTitle || moduleData?.title
+  const reviewLabel = moduleData?.meta?.review?.passed ? "Pass" : "Draft"
+
+  return (
+    <main className={styles.page}>
+      <div className={styles.backdrop} />
+
+      <Box className={styles.shell}>
+        <Box className={styles.topbar}>
+          <Button
+            variant="soft"
+            color="primary"
+            startDecorator={<HomeIcon />}
+            onClick={onHome}
+            sx={{ borderRadius: 999 }}
+          >
+            Home
+          </Button>
+
+          <Chip color="primary" variant="soft" sx={{ borderRadius: 999 }}>
+            Case Study
+          </Chip>
+
+          {isPreview ? (
+            <Chip color="warning" variant="soft" sx={{ borderRadius: 999 }}>
+              Preview Mode
+            </Chip>
+          ) : null}
+        </Box>
+
+        <Box className={styles.hero}>
+          <Sheet className={styles.heroPrimary} variant="plain">
+            <Typography className={styles.eyebrow}>Case Study Lesson</Typography>
+            <Typography level="h1" className={styles.caseStudyTitle}>
+              {moduleData?.title}
+            </Typography>
+
+            {moduleData?.standfirst ? (
+              <Typography className={styles.subtitle}>{moduleData.standfirst}</Typography>
+            ) : null}
+
+            <div className={styles.heroMetaRow}>
+              {lessonDateLabel ? (
+                <Chip variant="soft" color="neutral" sx={{ borderRadius: 999 }}>
+                  {lessonDateLabel}
+                </Chip>
+              ) : null}
+              {moduleData?.sourceShortlist?.candidateRank ? (
+                <Chip variant="soft" color="warning" sx={{ borderRadius: 999 }}>
+                  Rank {moduleData.sourceShortlist.candidateRank}
+                </Chip>
+              ) : null}
+              <Chip variant="soft" color="primary" sx={{ borderRadius: 999 }}>
+                {frameworkCountLabel}
+              </Chip>
+            </div>
+          </Sheet>
+
+          <Sheet className={styles.heroSecondary} variant="soft">
+            <div className={styles.heroSpotlightHeader}>
+              <Typography className={styles.signalLabel}>Editorial Angle</Typography>
+              <span className={styles.heroSpotlightIndex}>CS</span>
+            </div>
+            <Typography className={styles.heroSpotlightTitle}>{topicTitle}</Typography>
+            {moduleData?.sourceShortlist?.editorialAngle ? (
+              <Typography className={styles.heroSpotlightText}>
+                {moduleData.sourceShortlist.editorialAngle}
+              </Typography>
+            ) : null}
+
+            <div className={styles.heroMetricGrid}>
+              <div className={styles.heroMetricCard}>
+                <span className={styles.heroMetricLabel}>Case Sources</span>
+                <strong>{sourceArticleCount}</strong>
+              </div>
+              <div className={styles.heroMetricCard}>
+                <span className={styles.heroMetricLabel}>Theory Sources</span>
+                <strong>{theorySources.length}</strong>
+              </div>
+              <div className={styles.heroMetricCard}>
+                <span className={styles.heroMetricLabel}>Review</span>
+                <strong>{reviewLabel}</strong>
+              </div>
+            </div>
+          </Sheet>
+        </Box>
+
+        <Box className={styles.deckSection}>
+          <div className={styles.cardCanvas}>
+            <Box className={styles.mainColumn}>
+              <Box className={styles.readingBlock}>
+                {moduleData?.caseStudy?.hook ? (
+                  <Sheet className={styles.hookCard} variant="plain">
+                    <Typography className={styles.contextLabel}>Hook</Typography>
+                    <Typography className={styles.contextParagraph}>
+                      {moduleData.caseStudy.hook}
+                    </Typography>
+                  </Sheet>
+                ) : null}
+
+                {caseStudySections.map((section) => (
+                  <Sheet key={section.key} className={styles.contentCard} variant="plain">
+                    <Typography className={styles.contextLabel}>{section.label}</Typography>
+                    <Typography className={styles.cardParagraph}>
+                      {section.content}
+                    </Typography>
+                  </Sheet>
+                ))}
+              </Box>
+            </Box>
+
+            <aside className={styles.sideColumn}>
+              {moduleData?.theoryBlend?.theorySignalsIntro ? (
+                <Sheet className={styles.railPanel} variant="plain">
+                  <Typography className={styles.signalLabel}>Theory Signal</Typography>
+                  <Typography className={styles.railHeadline}>
+                    La lente che tiene insieme il caso
+                  </Typography>
+                  <Typography className={styles.railBody}>
+                    {moduleData.theoryBlend.theorySignalsIntro}
+                  </Typography>
+                </Sheet>
+              ) : null}
+
+              {frameworkCards.length > 0 ? (
+                <Sheet className={styles.railPanelSoft} variant="plain">
+                  <Typography className={styles.signalLabel}>Frameworks In Play</Typography>
+                  <div className={styles.caseStudyFrameworkGrid}>
+                    {frameworkCards.map((framework, index) => (
+                      <div
+                        key={`${framework.label}-${index}`}
+                        className={styles.caseStudyFrameworkItem}
+                      >
+                        <span className={styles.sourceTypeBadge}>Lens</span>
+                        <div className={styles.sourceCompactBody}>
+                          <Typography className={styles.caseStudyFrameworkTitle}>
+                            {framework.label}
+                          </Typography>
+                          <Typography className={styles.caseStudyFrameworkText}>
+                            {framework.explanation}
+                          </Typography>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </Sheet>
+              ) : null}
+
+              {moduleData?.meta?.selectionRationale ? (
+                <Sheet className={styles.railPanelSoft} variant="plain">
+                  <Typography className={styles.signalLabel}>Why This Case</Typography>
+                  <Typography className={styles.caseStudySoftBody}>
+                    {moduleData.meta.selectionRationale}
+                  </Typography>
+                </Sheet>
+              ) : null}
+
+              {sourceArticleCount > 0 || theorySources.length > 0 ? (
+                <details className={styles.sourceDisclosure}>
+                  <summary className={styles.sourceSummaryButton}>
+                    <div>
+                      <Typography className={styles.signalLabel}>Sources</Typography>
+                      <Typography className={styles.sourceSummaryText}>
+                        {sourceArticleCount} case + {theorySources.length} theory
+                      </Typography>
+                    </div>
+                    <span className={styles.sourceSummaryAction}>Apri</span>
+                  </summary>
+
+                  <div className={styles.sourceCompactGrid}>
+                    {theorySources.map((source) => (
+                      <div key={source.sourceId} className={styles.sourceCompactItem}>
+                        <span className={styles.sourceTypeBadge}>Theory</span>
+                        <div className={styles.sourceCompactBody}>
+                          <Typography className={styles.sourceCompactTitle}>
+                            {source.lensTitle || source.lessonTitle}
+                          </Typography>
+                          <Typography className={styles.sourceCompactMeta}>
+                            {[source.subjectName, source.lessonTitle]
+                              .filter(Boolean)
+                              .join(" · ")}
+                          </Typography>
+                        </div>
+                      </div>
+                    ))}
+
+                    {sourceArticles.map((source) => (
+                      <div key={source.sourceId} className={styles.sourceCompactItem}>
+                        <span className={styles.sourceTypeBadgeNews}>Case</span>
+                        <div className={styles.sourceCompactBody}>
+                          {source.url ? (
+                            <a
+                              className={styles.sourceCompactLink}
+                              href={source.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                            >
+                              {source.title || "News source"}
+                            </a>
+                          ) : (
+                            <Typography className={styles.sourceCompactTitle}>
+                              {source.title || "News source"}
+                            </Typography>
+                          )}
+                          {source.date ? (
+                            <Typography className={styles.sourceCompactMeta}>
+                              {formatLessonDate(source.date)}
+                            </Typography>
+                          ) : null}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </details>
+              ) : null}
+            </aside>
+          </div>
+        </Box>
+      </Box>
+    </main>
+  )
+}
+
 export default function ModulePageClient() {
   const { id } = useParams()
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const isPreview = searchParams.get("preview") === "1"
 
   const [user, setUser] = useState(null)
   const [moduleData, setModuleData] = useState(null)
@@ -170,36 +467,54 @@ export default function ModulePageClient() {
 
   // Gestione autenticazione
   useEffect(() => {
+    if (isPreview) {
+      setUser(PREVIEW_USER)
+      return undefined
+    }
+
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (!currentUser) return router.push("/login")
       setUser(currentUser)
     })
     return () => unsubscribe()
-  }, [router])
+  }, [isPreview, router])
 
   // Caricamento dati modulo + progresso
   useEffect(() => {
-    if (!user || !id) return
+    if ((!user && !isPreview) || !id) return
 
-    const ref = doc(db, "learningModules", "Sport Management", "lessons", id)
-    getDoc(ref).then((snap) => {
-      if (snap.exists()) setModuleData(snap.data())
-    })
+    let isMounted = true
+
+    const loadModule = async () => {
+      const nextModuleData = await getModuleData(id)
+
+      if (nextModuleData && isMounted) {
+        setModuleData(nextModuleData)
+      }
+    }
+
+    loadModule()
+
+    if (isPreview) {
+      setProgress(createEmptyProgress())
+
+      return () => {
+        isMounted = false
+      }
+    }
 
     const progressRef = doc(db, "learningProgress", user.uid, "modules", id)
     const unsubscribe = onSnapshot(progressRef, (snap) => {
       setProgress(
-        snap.exists()
-          ? snap.data()
-          : {
-              answers: { 1: {}, 2: {}, 3: {} },
-              completedLevels: []
-            }
+        snap.exists() ? snap.data() : createEmptyProgress()
       )
     })
 
-    return () => unsubscribe()
-  }, [user, id])
+    return () => {
+      isMounted = false
+      unsubscribe()
+    }
+  }, [user, id, isPreview])
 
   useEffect(() => {
     return () => {
@@ -262,8 +577,18 @@ export default function ModulePageClient() {
     }
   }
 
-  if (!user || !moduleData || !progress)
+  if ((!user && !isPreview) || !moduleData || !progress)
     return <Loading message="Caricamento modulo..." />
+
+  if (moduleData?.type === "case-study-lesson") {
+    return (
+      <CaseStudyLessonView
+        moduleData={moduleData}
+        isPreview={isPreview}
+        onHome={() => router.push("/")}
+      />
+    )
+  }
 
   const cards = getModuleCards(moduleData)
   const answers = progress.answers?.[1] || {}
