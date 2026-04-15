@@ -4,37 +4,33 @@ import { Suspense, useEffect, useState } from "react"
 import styles from "./posts.module.css"
 import {
   Sheet,
-  Input,
   Button,
   Typography,
-  Select,
-  Option,
   Tabs,
   TabList,
   Tab,
   TabPanel,
   Card,
   CardContent,
-  CardActions,
-  Avatar
+  CardActions
 } from "@mui/joy"
 import { getCategoryDetails } from "@/utils/helpers"
-import {
-  getPosts,
-  fetchSearchResults,
-  getUserModuleProgress,
-  getModulesFromFirestore
-} from "@/utils/api"
-import { useRouter } from "next/navigation"
-import _ from "lodash"
+import { getPosts, getModulesFromFirestore } from "@/utils/api"
 import Loading from "@/components/loading"
 import ProtectedRoute from "@/components/protectedRoute"
-import DateFilterPanel from "@/components/dateFilterPanel"
 import { ArticleChat } from "@/components/articleChat"
-import { WordCloud } from "@/components/wordcloud"
-import { onAuthStateChanged } from "firebase/auth"
-import { auth } from "@/utils/firebaseConfig"
-import dayjs from "dayjs"
+
+const LESSON_SUBJECT = "Sport Management"
+const TAB_STYLES = {
+  '&[aria-selected="true"]': {
+    backgroundColor: "#00339a",
+    color: "#fff"
+  },
+  '&[aria-selected="false"]': {
+    color: "#00339a",
+    backgroundColor: "#fff"
+  }
+}
 
 export default function PostsWrapper() {
   return (
@@ -45,111 +41,38 @@ export default function PostsWrapper() {
 }
 
 function Posts() {
-  const [defaultData, setDefaultData] = useState(null)
   const [data, setData] = useState(null)
   const [isLoading, setLoading] = useState(true)
-  const [sortOrder, setSortOrder] = useState("date")
-  const [sortAsc, setSortAsc] = useState(false)
-  const [searchFilter, setSearchFilter] = useState("")
-  const [fromDate, setFromDate] = useState(null)
-  const [toDate, setToDate] = useState(null)
-  const [now, setNow] = useState(null)
-  const [cursor, setCursor] = useState(null)
-  const [hasMore, setHasMore] = useState(true)
   const [tabValue, setTabValue] = useState(1)
   const [modules, setModules] = useState([])
-  const [user, setUser] = useState(null)
-  const [progressMap, setProgressMap] = useState({})
-  const router = useRouter()
 
-  const loadInitialPosts = async () => {
-    setLoading(true)
-    const res = await getPosts("daily", null)
-    setDefaultData(res.posts)
-    setData(_.orderBy(res.posts, [sortOrder], [sortAsc ? "asc" : "desc"]))
-    setCursor(res.lastVisible)
-    setHasMore(res.posts.length === 25)
-    setLoading(false)
-  }
-
-  const loadMorePosts = async () => {
-    if (!hasMore) return
-    const res = await getPosts("daily", cursor)
-    const newPosts = res.posts.filter(
-      (p) => !defaultData.some((e) => e.id === p.id)
-    )
-    const updated = [...defaultData, ...newPosts]
-    setDefaultData(updated)
-    setData(_.orderBy(updated, [sortOrder], [sortAsc ? "asc" : "desc"]))
-    setCursor(res.lastVisible)
-    setHasMore(res.posts.length === 25)
-  }
-
-  const filterPosts = async () => {
+  const loadPosts = async () => {
     setLoading(true)
 
-    const filters = {
-      query: searchFilter.trim(),
-      fromYear: fromDate?.year(),
-      fromMonth: fromDate ? fromDate.month() + 1 : undefined,
-      fromDay: fromDate?.date(),
-      toYear: toDate?.year(),
-      toMonth: toDate ? toDate.month() + 1 : undefined,
-      toDay: toDate?.date()
+    try {
+      const res = await getPosts("daily", null)
+      setData(res.posts)
+    } catch (error) {
+      console.error(error)
+      setData([])
+    } finally {
+      setLoading(false)
     }
-
-    const results = await fetchSearchResults(filters)
-    setDefaultData(results)
-    setData(_.orderBy(results, [sortOrder], [sortAsc ? "asc" : "desc"]))
-    setHasMore(false)
-    setLoading(false)
-    setTabValue(1)
-  }
-
-  const sortPosts = (newField) => {
-    setSortOrder(newField)
-    setData(_.orderBy(data, [newField], [sortAsc ? "asc" : "desc"]))
-  }
-
-  const resetFilters = () => {
-    setSearchFilter("")
-    setFromDate(null)
-    setToDate(null)
-    loadInitialPosts()
-    setTabValue(0)
   }
 
   useEffect(() => {
-    loadInitialPosts()
-    setNow(dayjs())
+    loadPosts()
   }, [])
 
   useEffect(() => {
-    if (tabValue === 1) {
-      onAuthStateChanged(auth, async (currentUser) => {
-        if (currentUser) {
-          setUser(currentUser)
-          const progresses = await getUserModuleProgress(
-            currentUser.uid,
-            "Sport Management"
-          )
-          setProgressMap(progresses)
-        }
-      })
-
-      if (modules.length === 0) {
-        getModulesFromFirestore("Sport Management")
-          .then(setModules)
-          .catch(console.error)
-      }
+    if (tabValue !== 1 || modules.length > 0) {
+      return
     }
-  }, [tabValue])
 
-  const color = (punteggio) => {
-    if (punteggio > 70) return "success"
-    if (punteggio > 40) return "warning"
-    if (punteggio > 0) return "danger"
-  }
+    getModulesFromFirestore(LESSON_SUBJECT)
+      .then(setModules)
+      .catch(console.error)
+  }, [modules.length, tabValue])
 
   if (isLoading || !data) return <Loading />
 
@@ -179,34 +102,10 @@ function Posts() {
           }}
         >
           <TabList>
-            <Tab
-              sx={{
-                '&[aria-selected="true"]': {
-                  backgroundColor: "#00339a",
-                  color: "#fff"
-                },
-                '&[aria-selected="false"]': {
-                  color: "#00339a",
-                  backgroundColor: "#fff"
-                }
-              }}
-              color="primary"
-            >
+            <Tab sx={TAB_STYLES} color="primary">
               Chat
             </Tab>
-            <Tab
-              sx={{
-                '&[aria-selected="true"]': {
-                  backgroundColor: "#00339a",
-                  color: "#fff"
-                },
-                '&[aria-selected="false"]': {
-                  color: "#00339a",
-                  backgroundColor: "#fff"
-                }
-              }}
-              color="primary"
-            >
+            <Tab sx={TAB_STYLES} color="primary">
               Lezioni
             </Tab>
           </TabList>
@@ -242,7 +141,7 @@ function Posts() {
               }}
             >
               {modules.map((mod) => {
-                const levels = mod.levels || {}
+                const coverSrc = mod.cover || "/testcover.jpeg"
                 return (
                   <Card
                     key={mod.id}
@@ -252,24 +151,48 @@ function Posts() {
                       boxSizing: "border-box",
                       boxShadow:
                         "0 4px 24px 0 rgba(0, 51, 154, 0.18), 0 1.5px 6px 0 rgba(0,0,0,0.08)",
-                      border: "none"
+                      border: "none",
+                      overflow: "hidden"
                     }}
                   >
-                    {mod.cover && (
-                      <a href={`/module/${mod.id}`}>
+                    <a
+                      href={`/module/${mod.id}`}
+                      style={{
+                        display: "block",
+                        textDecoration: "none",
+                        background:
+                          "linear-gradient(180deg, rgba(237, 244, 255, 0.98), rgba(230, 239, 255, 0.92))"
+                      }}
+                    >
+                      <div
+                        style={{
+                          width: "100%",
+                          height: "300px",
+                          padding: "12px",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          boxSizing: "border-box"
+                        }}
+                      >
                         <img
-                          src={mod.cover}
-                          alt={mod.topic}
+                          src={coverSrc}
+                          alt={mod.topic || "Lesson cover"}
                           style={{
                             width: "100%",
-                            height: "auto",
+                            height: "100%",
                             borderTopLeftRadius: "8px",
                             borderTopRightRadius: "8px",
-                            objectFit: "cover"
+                            borderBottomLeftRadius: "8px",
+                            borderBottomRightRadius: "8px",
+                            objectFit: "contain",
+                            objectPosition: "center top",
+                            display: "block",
+                            filter: "drop-shadow(0 16px 28px rgba(10, 47, 143, 0.14))"
                           }}
                         />
-                      </a>
-                    )}
+                      </div>
+                    </a>
                     <CardContent>
                       <Typography level="title-lg">
                         <a href={`/module/${mod.id}`}>{mod.topic}</a>

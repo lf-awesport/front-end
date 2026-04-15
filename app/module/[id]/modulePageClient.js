@@ -1,5 +1,6 @@
 "use client"
 
+import Image from "next/image"
 import { useEffect, useRef, useState } from "react"
 import { useParams, useRouter, useSearchParams } from "next/navigation"
 import { onAuthStateChanged } from "firebase/auth"
@@ -218,13 +219,22 @@ function CaseStudyLessonView({ moduleData, isPreview, onHome }) {
   const theorySources = getCaseStudyTheorySources(moduleData)
   const sourceArticles = getArrayOrEmpty(moduleData?.sourceArticles)
   const lessonDateLabel = formatLessonDate(moduleData?.lessonDate)
-  const frameworkCountLabel = `${frameworkCards.length} framework${
-    frameworkCards.length === 1 ? "" : "s"
+  const frameworkCountLabel = `${frameworkCards.length} lens${
+    frameworkCards.length === 1 ? "" : "es"
   }`
   const sourceArticleCount = sourceArticles.length
   const caseStudySections = getCaseStudySections(moduleData)
-  const topicTitle = moduleData?.sourceShortlist?.topicTitle || moduleData?.title
-  const reviewLabel = moduleData?.meta?.review?.passed ? "Pass" : "Draft"
+  const hasSources = sourceArticleCount > 0 || theorySources.length > 0
+  const sourceSummaryLabel = [
+    sourceArticleCount
+      ? `${sourceArticleCount} article`
+      : null,
+    theorySources.length
+      ? `${theorySources.length} theory`
+      : null
+  ]
+    .filter(Boolean)
+    .join(" + ")
 
   return (
     <main className={styles.page}>
@@ -253,143 +263,143 @@ function CaseStudyLessonView({ moduleData, isPreview, onHome }) {
           ) : null}
         </Box>
 
-        <Box className={styles.hero}>
-          <Sheet className={styles.heroPrimary} variant="plain">
-            <Typography className={styles.eyebrow}>Case Study Lesson</Typography>
-            <Typography level="h1" className={styles.caseStudyTitle}>
-              {moduleData?.title}
-            </Typography>
-
-            {moduleData?.standfirst ? (
-              <Typography className={styles.subtitle}>{moduleData.standfirst}</Typography>
-            ) : null}
-
-            <div className={styles.heroMetaRow}>
-              {lessonDateLabel ? (
-                <Chip variant="soft" color="neutral" sx={{ borderRadius: 999 }}>
-                  {lessonDateLabel}
-                </Chip>
-              ) : null}
-              {moduleData?.sourceShortlist?.candidateRank ? (
-                <Chip variant="soft" color="warning" sx={{ borderRadius: 999 }}>
-                  Rank {moduleData.sourceShortlist.candidateRank}
-                </Chip>
-              ) : null}
-              <Chip variant="soft" color="primary" sx={{ borderRadius: 999 }}>
-                {frameworkCountLabel}
-              </Chip>
-            </div>
-          </Sheet>
-
-          <Sheet className={styles.heroSecondary} variant="soft">
-            <div className={styles.heroSpotlightHeader}>
-              <Typography className={styles.signalLabel}>Editorial Angle</Typography>
-              <span className={styles.heroSpotlightIndex}>CS</span>
-            </div>
-            <Typography className={styles.heroSpotlightTitle}>{topicTitle}</Typography>
-            {moduleData?.sourceShortlist?.editorialAngle ? (
-              <Typography className={styles.heroSpotlightText}>
-                {moduleData.sourceShortlist.editorialAngle}
-              </Typography>
-            ) : null}
-
-            <div className={styles.heroMetricGrid}>
-              <div className={styles.heroMetricCard}>
-                <span className={styles.heroMetricLabel}>Case Sources</span>
-                <strong>{sourceArticleCount}</strong>
-              </div>
-              <div className={styles.heroMetricCard}>
-                <span className={styles.heroMetricLabel}>Theory Sources</span>
-                <strong>{theorySources.length}</strong>
-              </div>
-              <div className={styles.heroMetricCard}>
-                <span className={styles.heroMetricLabel}>Review</span>
-                <strong>{reviewLabel}</strong>
-              </div>
-            </div>
-          </Sheet>
-        </Box>
-
         <Box className={styles.deckSection}>
-          <div className={styles.cardCanvas}>
-            <Box className={styles.mainColumn}>
-              <Box className={styles.readingBlock}>
-                {moduleData?.caseStudy?.hook ? (
-                  <Sheet className={styles.hookCard} variant="plain">
-                    <Typography className={styles.contextLabel}>Hook</Typography>
-                    <Typography className={styles.contextParagraph}>
-                      {moduleData.caseStudy.hook}
-                    </Typography>
-                  </Sheet>
-                ) : null}
-
-                {caseStudySections.map((section) => (
-                  <Sheet key={section.key} className={styles.contentCard} variant="plain">
-                    <Typography className={styles.contextLabel}>{section.label}</Typography>
-                    <Typography className={styles.cardParagraph}>
-                      {section.content}
-                    </Typography>
-                  </Sheet>
-                ))}
-              </Box>
-            </Box>
-
-            <aside className={styles.sideColumn}>
-              {moduleData?.theoryBlend?.theorySignalsIntro ? (
-                <Sheet className={styles.railPanel} variant="plain">
-                  <Typography className={styles.signalLabel}>Theory Signal</Typography>
-                  <Typography className={styles.railHeadline}>
-                    La lente che tiene insieme il caso
+          <div className={`${styles.cardCanvas} ${styles.caseStudyCanvas}`}>
+            <Box className={`${styles.mainColumn} ${styles.caseStudyMainColumn}`}>
+              <Box className={`${styles.hero} ${styles.caseStudyHero}`}>
+                <Sheet
+                  className={`${styles.heroPrimary} ${styles.caseStudyHeroPrimary}`}
+                  variant="plain"
+                >
+                  <Typography level="h1" className={styles.caseStudyTitle}>
+                    {moduleData?.title}
                   </Typography>
-                  <Typography className={styles.railBody}>
-                    {moduleData.theoryBlend.theorySignalsIntro}
-                  </Typography>
-                </Sheet>
-              ) : null}
 
-              {frameworkCards.length > 0 ? (
-                <Sheet className={styles.railPanelSoft} variant="plain">
-                  <Typography className={styles.signalLabel}>Frameworks In Play</Typography>
-                  <div className={styles.caseStudyFrameworkGrid}>
-                    {frameworkCards.map((framework, index) => (
-                      <div
-                        key={`${framework.label}-${index}`}
-                        className={styles.caseStudyFrameworkItem}
-                      >
-                        <span className={styles.sourceTypeBadge}>Lens</span>
-                        <div className={styles.sourceCompactBody}>
-                          <Typography className={styles.caseStudyFrameworkTitle}>
-                            {framework.label}
-                          </Typography>
-                          <Typography className={styles.caseStudyFrameworkText}>
-                            {framework.explanation}
-                          </Typography>
-                        </div>
-                      </div>
-                    ))}
+                  {moduleData?.standfirst ? (
+                    <Typography className={styles.subtitle}>{moduleData.standfirst}</Typography>
+                  ) : null}
+
+                  <div className={styles.heroMetaRow}>
+                    {lessonDateLabel ? (
+                      <Chip variant="soft" color="neutral" sx={{ borderRadius: 999 }}>
+                        {lessonDateLabel}
+                      </Chip>
+                    ) : null}
+                    {moduleData?.sourceShortlist?.candidateRank ? (
+                      <Chip variant="soft" color="warning" sx={{ borderRadius: 999 }}>
+                        Rank {moduleData.sourceShortlist.candidateRank}
+                      </Chip>
+                    ) : null}
+                    {frameworkCards.length > 0 ? (
+                      <Chip variant="soft" color="primary" sx={{ borderRadius: 999 }}>
+                        {frameworkCountLabel}
+                      </Chip>
+                    ) : null}
                   </div>
-                </Sheet>
-              ) : null}
 
-              {moduleData?.meta?.selectionRationale ? (
-                <Sheet className={styles.railPanelSoft} variant="plain">
-                  <Typography className={styles.signalLabel}>Why This Case</Typography>
-                  <Typography className={styles.caseStudySoftBody}>
-                    {moduleData.meta.selectionRationale}
-                  </Typography>
-                </Sheet>
-              ) : null}
-
-              {sourceArticleCount > 0 || theorySources.length > 0 ? (
-                <details className={styles.sourceDisclosure}>
-                  <summary className={styles.sourceSummaryButton}>
-                    <div>
-                      <Typography className={styles.signalLabel}>Sources</Typography>
-                      <Typography className={styles.sourceSummaryText}>
-                        {sourceArticleCount} case + {theorySources.length} theory
+                  {moduleData?.caseStudy?.hook ? (
+                    <div className={styles.caseStudyLead}>
+                      <span className={styles.caseStudyLeadAccent} aria-hidden="true" />
+                      <Typography className={styles.caseStudyLeadText}>
+                        {moduleData.caseStudy.hook}
                       </Typography>
                     </div>
-                    <span className={styles.sourceSummaryAction}>Apri</span>
+                  ) : null}
+                </Sheet>
+              </Box>
+
+              <div className={styles.caseStudyNarrativePanel}>
+                <div className={styles.caseStudyColumnHeader}>
+                  <Typography className={styles.caseStudyColumnEyebrow}>
+                    Sequence
+                  </Typography>
+                </div>
+
+                {caseStudySections.length > 0 ? (
+                  <div className={styles.caseStudySectionGrid}>
+                    {caseStudySections.map((section, index) => (
+                      <Sheet
+                        key={section.key}
+                        className={`${styles.contentCard} ${styles.caseStudySectionCard}`}
+                        variant="plain"
+                      >
+                        <div className={styles.caseStudySectionHeader}>
+                          <span className={styles.caseStudySectionIndex}>
+                            {String(index + 1).padStart(2, "0")}
+                          </span>
+                          <Typography className={styles.caseStudySectionTitle}>
+                            {section.label}
+                          </Typography>
+                        </div>
+                        <Typography className={styles.cardParagraph}>
+                          {section.content}
+                        </Typography>
+                      </Sheet>
+                    ))}
+                  </div>
+                ) : (
+                  <Sheet className={styles.caseStudyFallback} variant="plain">
+                    <Typography className={styles.caseStudyFallbackText}>
+                      This lesson has been drafted, but the case narrative is still empty.
+                    </Typography>
+                  </Sheet>
+                )}
+              </div>
+            </Box>
+
+            <aside
+              className={`${styles.sideColumn} ${styles.caseStudyColumnPanel} ${styles.caseStudySideColumn}`}
+            >
+              <div className={styles.caseStudyCoverPanel}>
+                <div className={styles.caseStudyCoverFrame}>
+                  <Image
+                    src="/testcover.jpeg"
+                    alt={`Cover for ${moduleData?.title || "case study lesson"}`}
+                    fill
+                    priority
+                    sizes="(max-width: 640px) 100vw, (max-width: 1160px) 80vw, 32vw"
+                    className={styles.caseStudyCoverImage}
+                  />
+                </div>
+              </div>
+
+              {frameworkCards.length > 0 ? (
+                <div className={styles.caseStudyFrameworkGrid}>
+                  {frameworkCards.map((framework, index) => (
+                    <div
+                      key={`${framework.label}-${index}`}
+                      className={styles.caseStudyFrameworkItem}
+                    >
+                      <span className={styles.caseStudyFrameworkIndex}>
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
+                      <div className={styles.sourceCompactBody}>
+                        <Typography className={styles.caseStudyFrameworkTitle}>
+                          {framework.label}
+                        </Typography>
+                        <Typography className={styles.caseStudyFrameworkText}>
+                          {framework.explanation}
+                        </Typography>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : null}
+
+              {hasSources ? (
+                <details
+                  className={`${styles.sourceDisclosure} ${styles.caseStudySourceDisclosure}`}
+                >
+                  <summary className={styles.sourceSummaryButton}>
+                    <div>
+                      <Typography className={styles.caseStudySourceTitle}>
+                        Sources
+                      </Typography>
+                      <Typography className={styles.sourceSummaryText}>
+                        {sourceSummaryLabel}
+                      </Typography>
+                    </div>
+                    <span className={styles.sourceSummaryAction}>View</span>
                   </summary>
 
                   <div className={styles.sourceCompactGrid}>
