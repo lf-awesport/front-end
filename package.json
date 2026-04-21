@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@antv/infographic": "^0.2.16",
     "@emotion/react": "^11.13.0",
     "@emotion/styled": "^11.13.0",
     "@firebase/firestore": "^4.6.5",
@@ -28,7 +29,9 @@
     "dotenv": "^16.4.5",
     "eslint": "^9.39.2",
     "firebase": "^10.12.5",
+    "html2canvas": "^1.4.1",
     "js-file-download": "^0.4.12",
+    "jspdf": "^4.2.1",
     "lodash": "^4.17.21",
     "marked": "^15.0.8",
     "next": "^16.1.1",
