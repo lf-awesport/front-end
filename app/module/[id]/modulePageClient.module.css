@@ -1729,16 +1729,11 @@
     grid-template-columns: 1fr;
   }
 
-  .caseStudyColumnPanel {
-    gap: var(--case-study-gap);
-    padding: var(--case-study-panel-padding);
-    border-radius: var(--case-study-radius);
-  }
-
   .caseStudyMainColumn {
     gap: var(--case-study-gap);
   }
 
+  .caseStudyColumnPanel,
   .caseStudyNarrativePanel {
     gap: var(--case-study-gap);
     padding: var(--case-study-panel-padding);
@@ -1746,11 +1741,7 @@
   }
 
   .caseStudyLead,
-  .caseStudySectionCard {
-    padding: 16px 18px;
-    border-radius: var(--case-study-inner-radius);
-  }
-
+  .caseStudySectionCard,
   .caseStudyFallback,
   .caseStudyFrameworkItem {
     padding: 16px 18px;

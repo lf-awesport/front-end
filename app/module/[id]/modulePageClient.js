@@ -159,6 +159,22 @@ function SourceCompactItem({ badge, badgeClassName, title, meta, href }) {
   )
 }
 
+function getAnswerStateMessage(answer, correctAnswer, isLastCard) {
+  if (!answer) {
+    return ""
+  }
+
+  if (answer !== correctAnswer) {
+    return "Risposta errata. Rileggi la card e riprova."
+  }
+
+  if (isLastCard) {
+    return "Risposta corretta. Hai completato l'ultima card."
+  }
+
+  return "Risposta corretta. Avanzo automaticamente alla prossima card."
+}
+
 function CaseStudyLessonView({ moduleData, isPreview, onHome, onExportPdf, isExportingPdf }) {
   const frameworkCards = getCaseStudyFrameworks(moduleData)
   const theorySources = getCaseStudyTheorySources(moduleData)
@@ -971,11 +987,11 @@ export default function ModulePageClient() {
                                 : "#c2410c"
                           }}
                         >
-                          {answers[cardIndex] === currentCard?.quiz?.correctAnswer
-                            ? cardIndex === cards.length - 1
-                              ? "Risposta corretta. Hai completato l'ultima card."
-                              : "Risposta corretta. Avanzo automaticamente alla prossima card."
-                            : "Risposta errata. Rileggi la card e riprova."}
+                          {getAnswerStateMessage(
+                            answers[cardIndex],
+                            currentCard?.quiz?.correctAnswer,
+                            cardIndex === cards.length - 1
+                          )}
                         </Typography>
                       ) : null}
                     </Sheet>
