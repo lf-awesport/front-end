@@ -135,6 +135,30 @@ function ExportActionButton({ isBusy, onExport }) {
   )
 }
 
+function SourceCompactItem({ badge, badgeClassName, title, meta, href }) {
+  return (
+    <div className={styles.sourceCompactItem}>
+      <span className={badgeClassName}>{badge}</span>
+      <div className={styles.sourceCompactBody}>
+        {href ? (
+          <a
+            className={styles.sourceCompactLink}
+            href={href}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            {title}
+          </a>
+        ) : (
+          <Typography className={styles.sourceCompactTitle}>{title}</Typography>
+        )}
+
+        {meta ? <Typography className={styles.sourceCompactMeta}>{meta}</Typography> : null}
+      </div>
+    </div>
+  )
+}
+
 function CaseStudyLessonView({ moduleData, isPreview, onHome, onExportPdf, isExportingPdf }) {
   const frameworkCards = getCaseStudyFrameworks(moduleData)
   const theorySources = getCaseStudyTheorySources(moduleData)
@@ -320,46 +344,24 @@ function CaseStudyLessonView({ moduleData, isPreview, onHome, onExportPdf, isExp
 
                   <div className={styles.sourceCompactGrid}>
                     {theorySources.map((source) => (
-                      <div key={source.sourceId} className={styles.sourceCompactItem}>
-                        <span className={styles.sourceTypeBadge}>Theory</span>
-                        <div className={styles.sourceCompactBody}>
-                          <Typography className={styles.sourceCompactTitle}>
-                            {source.lensTitle || source.lessonTitle}
-                          </Typography>
-                          <Typography className={styles.sourceCompactMeta}>
-                            {[source.subjectName, source.lessonTitle]
-                              .filter(Boolean)
-                              .join(" · ")}
-                          </Typography>
-                        </div>
-                      </div>
+                      <SourceCompactItem
+                        key={source.sourceId}
+                        badge="Theory"
+                        badgeClassName={styles.sourceTypeBadge}
+                        title={source.lensTitle || source.lessonTitle}
+                        meta={[source.subjectName, source.lessonTitle].filter(Boolean).join(" · ")}
+                      />
                     ))}
 
                     {sourceArticles.map((source) => (
-                      <div key={source.sourceId} className={styles.sourceCompactItem}>
-                        <span className={styles.sourceTypeBadgeNews}>Case</span>
-                        <div className={styles.sourceCompactBody}>
-                          {source.url ? (
-                            <a
-                              className={styles.sourceCompactLink}
-                              href={source.url}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              {source.title || "News source"}
-                            </a>
-                          ) : (
-                            <Typography className={styles.sourceCompactTitle}>
-                              {source.title || "News source"}
-                            </Typography>
-                          )}
-                          {source.date ? (
-                            <Typography className={styles.sourceCompactMeta}>
-                              {formatLessonDate(source.date)}
-                            </Typography>
-                          ) : null}
-                        </div>
-                      </div>
+                      <SourceCompactItem
+                        key={source.sourceId}
+                        badge="Case"
+                        badgeClassName={styles.sourceTypeBadgeNews}
+                        title={source.title || "News source"}
+                        meta={source.date ? formatLessonDate(source.date) : ""}
+                        href={source.url}
+                      />
                     ))}
                   </div>
                 </details>
@@ -878,44 +880,24 @@ export default function ModulePageClient() {
 
                             <div className={styles.sourceCompactGrid}>
                               {sourceGroups.theory.map((source) => (
-                                <div key={source.sourceId} className={styles.sourceCompactItem}>
-                                  <span className={styles.sourceTypeBadge}>Theory</span>
-                                  <div className={styles.sourceCompactBody}>
-                                    <Typography className={styles.sourceCompactTitle}>
-                                      {source.subjectName}
-                                    </Typography>
-                                    <Typography className={styles.sourceCompactMeta}>
-                                      {[source.lessonCode, source.title].filter(Boolean).join(" · ")}
-                                    </Typography>
-                                  </div>
-                                </div>
+                                <SourceCompactItem
+                                  key={source.sourceId}
+                                  badge="Theory"
+                                  badgeClassName={styles.sourceTypeBadge}
+                                  title={source.subjectName}
+                                  meta={[source.lessonCode, source.title].filter(Boolean).join(" · ")}
+                                />
                               ))}
 
                               {sourceGroups.news.map((source) => (
-                                <div key={source.sourceId} className={styles.sourceCompactItem}>
-                                  <span className={styles.sourceTypeBadgeNews}>Case</span>
-                                  <div className={styles.sourceCompactBody}>
-                                    {source.url ? (
-                                      <a
-                                        className={styles.sourceCompactLink}
-                                        href={source.url}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                      >
-                                        {source.title || "News source"}
-                                      </a>
-                                    ) : (
-                                      <Typography className={styles.sourceCompactTitle}>
-                                        {source.title || "News source"}
-                                      </Typography>
-                                    )}
-                                    {source.date ? (
-                                      <Typography className={styles.sourceCompactMeta}>
-                                        {formatLessonDate(source.date)}
-                                      </Typography>
-                                    ) : null}
-                                  </div>
-                                </div>
+                                <SourceCompactItem
+                                  key={source.sourceId}
+                                  badge="Case"
+                                  badgeClassName={styles.sourceTypeBadgeNews}
+                                  title={source.title || "News source"}
+                                  meta={source.date ? formatLessonDate(source.date) : ""}
+                                  href={source.url}
+                                />
                               ))}
                             </div>
                           </details>
