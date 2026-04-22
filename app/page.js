@@ -141,7 +141,9 @@ function Posts() {
               }}
             >
               {modules.map((mod) => {
-                const coverSrc = mod.cover || "/testcover.jpeg"
+                const coverSrc = mod.coverImage?.url || mod.cover || "/testcover.jpeg"
+                const coverAlt =
+                  mod.coverImage?.alt || mod.topic || mod.title || "Lesson cover"
                 return (
                   <Card
                     key={mod.id}
@@ -177,7 +179,7 @@ function Posts() {
                       >
                         <img
                           src={coverSrc}
-                          alt={mod.topic || "Lesson cover"}
+                          alt={coverAlt}
                           style={{
                             width: "100%",
                             height: "100%",

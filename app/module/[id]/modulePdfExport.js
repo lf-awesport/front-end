@@ -2,6 +2,8 @@ import styles from "./modulePageClient.module.css"
 import {
   getArrayOrEmpty,
   getCardDisplayModel,
+  getCaseStudyCoverImageAlt,
+  getCaseStudyCoverImageExportUrl,
   getCaseStudyFrameworks,
   getCaseStudySections,
   getCaseStudyTheorySources,
@@ -84,6 +86,8 @@ function CaseStudyPdfDocument({ moduleData }) {
   const frameworkCards = getCaseStudyFrameworks(moduleData)
   const theorySources = getCaseStudyTheorySources(moduleData)
   const sourceArticles = getArrayOrEmpty(moduleData?.sourceArticles)
+  const coverImageUrl = getCaseStudyCoverImageExportUrl(moduleData)
+  const coverImageAlt = getCaseStudyCoverImageAlt(moduleData)
   const lessonDateLabel = formatLessonDate(moduleData?.lessonDate)
   const caseStudySections = getCaseStudySections(moduleData)
 
@@ -114,8 +118,8 @@ function CaseStudyPdfDocument({ moduleData }) {
       <section className={styles.exportCard}>
         <div className={styles.exportCaseStudyCover}>
           <img
-            src="/testcover.jpeg"
-            alt={`Cover for ${moduleData?.title || "case study lesson"}`}
+            src={coverImageUrl}
+            alt={coverImageAlt}
             className={styles.exportCoverImage}
           />
         </div>

@@ -77,6 +77,30 @@ export function getCaseStudySections(moduleData) {
     .filter((section) => section.content)
 }
 
+export function getCaseStudyCoverImageUrl(moduleData) {
+  const coverImageUrl = moduleData?.coverImage?.url
+  return typeof coverImageUrl === "string" && coverImageUrl.trim()
+    ? coverImageUrl
+    : "/testcover.jpeg"
+}
+
+export function getCaseStudyCoverImageExportUrl(moduleData) {
+  const coverImageUrl = getCaseStudyCoverImageUrl(moduleData)
+
+  if (!/^https?:\/\//i.test(coverImageUrl)) {
+    return coverImageUrl
+  }
+
+  return `/_next/image?url=${encodeURIComponent(coverImageUrl)}&w=2048&q=75`
+}
+
+export function getCaseStudyCoverImageAlt(moduleData) {
+  const coverImageAlt = moduleData?.coverImage?.alt
+  return typeof coverImageAlt === "string" && coverImageAlt.trim()
+    ? coverImageAlt
+    : `Cover for ${moduleData?.title || "case study lesson"}`
+}
+
 export function formatLessonDate(dateString) {
   if (!dateString) return ""
 

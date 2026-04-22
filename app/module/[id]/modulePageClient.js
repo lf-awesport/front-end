@@ -12,6 +12,8 @@ import ModulePdfExport from "./modulePdfExport"
 import {
   getArrayOrEmpty,
   getCardDisplayModel,
+  getCaseStudyCoverImageAlt,
+  getCaseStudyCoverImageUrl,
   getCaseStudyFrameworkCountLabel,
   getCaseStudyFrameworks,
   getCaseStudySections,
@@ -179,6 +181,8 @@ function CaseStudyLessonView({ moduleData, isPreview, onHome, onExportPdf, isExp
   const frameworkCards = getCaseStudyFrameworks(moduleData)
   const theorySources = getCaseStudyTheorySources(moduleData)
   const sourceArticles = getArrayOrEmpty(moduleData?.sourceArticles)
+  const coverImageUrl = getCaseStudyCoverImageUrl(moduleData)
+  const coverImageAlt = getCaseStudyCoverImageAlt(moduleData)
   const lessonDateLabel = formatLessonDate(moduleData?.lessonDate)
   const frameworkCountLabel = getCaseStudyFrameworkCountLabel(frameworkCards)
   const sourceArticleCount = sourceArticles.length
@@ -309,8 +313,8 @@ function CaseStudyLessonView({ moduleData, isPreview, onHome, onExportPdf, isExp
               <div className={styles.caseStudyCoverPanel}>
                 <div className={styles.caseStudyCoverFrame}>
                   <Image
-                    src="/testcover.jpeg"
-                    alt={`Cover for ${moduleData?.title || "case study lesson"}`}
+                    src={coverImageUrl}
+                    alt={coverImageAlt}
                     fill
                     priority
                     sizes="(max-width: 640px) 100vw, (max-width: 1160px) 80vw, 32vw"
