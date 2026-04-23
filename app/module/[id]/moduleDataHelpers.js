@@ -21,6 +21,28 @@ function splitParagraphs(content) {
     .filter(Boolean)
 }
 
+function getModuleCards(moduleData) {
+  if (Array.isArray(moduleData?.cards)) {
+    return moduleData.cards
+  }
+
+  return moduleData?.levels?.easy?.cards || []
+}
+
+function compactFeedbackTargetLabel(value, fallback) {
+  const normalizedValue = (value || "").replace(/\s+/g, " ").trim()
+
+  if (!normalizedValue) {
+    return fallback
+  }
+
+  if (normalizedValue.length <= 64) {
+    return normalizedValue
+  }
+
+  return `${normalizedValue.slice(0, 61).trimEnd()}...`
+}
+
 export function getLessonTitle(moduleData) {
   return (
     moduleData?.title ||
@@ -75,6 +97,26 @@ export function getCaseStudySections(moduleData) {
       content: moduleData?.caseStudy?.[key] || ""
     }))
     .filter((section) => section.content)
+}
+
+export function getModuleFeedbackTargets(moduleData) {
+  if (moduleData?.type === "case-study-lesson") {
+    return getCaseStudySections(moduleData).map((section) => ({
+      targetKey: section.key,
+      label: section.label,
+      targetType: "case-study-section"
+    }))
+  }
+
+  return getModuleCards(moduleData).map((card, index) => ({
+    targetKey: `card-${index}`,
+    label: compactFeedbackTargetLabel(
+      card?.hook || card?.quiz?.question || card?.learningObjective,
+      `Card ${index + 1}`
+    ),
+    targetType: "lesson-card",
+    cardIndex: index
+  }))
 }
 
 export function getCaseStudyCoverImageUrl(moduleData) {

@@ -1,0 +1,47 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function userEmail() {
+      return isSignedIn() && request.auth.token.email != null
+        ? lower(request.auth.token.email)
+        : null;
+    }
+
+    function isFeedbackEditor() {
+      return userEmail() in [
+        // FEEDBACK_EDITOR_EMAILS_START
+        "editor1@example.com",
+        "editor2@example.com"
+        // FEEDBACK_EDITOR_EMAILS_END
+      ];
+    }
+
+    function isFeedbackOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    match /learningModules/{materia}/{collectionName}/{moduleId}/feedback/{userId} {
+      allow get: if isFeedbackOwner(userId) || isFeedbackEditor();
+      allow list: if isFeedbackEditor();
+
+      allow create, update: if isFeedbackOwner(userId)
+        && request.resource.data.moduleId == moduleId
+        && request.resource.data.collectionName == collectionName
+        && request.resource.data.materia == materia
+        && request.resource.data.submittedBy.uid == request.auth.uid
+        && request.resource.data.submittedBy.email == request.auth.token.email
+        && request.resource.data.overallRating is int
+        && request.resource.data.overallRating >= 1
+        && request.resource.data.overallRating <= 5
+        && request.resource.data.overallSuggestion is string
+        && request.resource.data.sectionFeedback is list;
+
+      allow delete: if false;
+    }
+  }
+}

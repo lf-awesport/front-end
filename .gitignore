@@ -27,6 +27,7 @@ yarn-error.log*
 
 # local env files
 .env.local
+firestore.feedback.generated.rules
 
 # vercel
 .vercel

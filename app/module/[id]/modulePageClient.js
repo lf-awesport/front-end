@@ -10,6 +10,10 @@ import db from "@/utils/firestore"
 import { buildPdfFileName, exportElementAsPdf } from "@/utils/pdfExport"
 import ModulePdfExport from "./modulePdfExport"
 import {
+  listenToLessonFeedback,
+  upsertLessonFeedback
+} from "@/utils/api"
+import {
   getArrayOrEmpty,
   getCardDisplayModel,
   getCaseStudyCoverImageAlt,
@@ -23,6 +27,7 @@ import {
   getLessonModeLabel,
   getLessonSubtitle,
   getLessonTitle,
+  getModuleFeedbackTargets,
   getSourceCountLabel,
   getSourceGroups,
   formatLessonDate
@@ -39,7 +44,10 @@ import {
   Box,
   LinearProgress,
   Button,
-  Chip
+  Chip,
+  Option,
+  Select,
+  Textarea
 } from "@mui/joy"
 import styles from "./modulePageClient.module.css"
 import HomeIcon from "@mui/icons-material/Home"
@@ -66,6 +74,10 @@ const INTERACTIVE_SELECTOR = [
   "[role='button']"
 ].join(",")
 
+function isPreviewGuestUser(user) {
+  return user?.uid === PREVIEW_USER.uid
+}
+
 function createEmptyProgress() {
   return {
     answers: { 1: {}, 2: {}, 3: {} },
@@ -90,7 +102,11 @@ async function getModuleData(moduleId) {
     const moduleSnap = await getDoc(getLearningModuleRef(moduleId, collectionName))
 
     if (moduleSnap.exists()) {
-      return moduleSnap.data()
+      return {
+        id: moduleSnap.id,
+        collectionName,
+        ...moduleSnap.data()
+      }
     }
   }
 
@@ -177,7 +193,240 @@ function getAnswerStateMessage(answer, correctAnswer, isLastCard) {
   return "Risposta corretta. Avanzo automaticamente alla prossima card."
 }
 
-function CaseStudyLessonView({ moduleData, isPreview, onHome, onExportPdf, isExportingPdf }) {
+function createEmptyFeedbackDraft() {
+  return {
+    overallRating: "",
+    overallSuggestion: "",
+    sectionFeedback: []
+  }
+}
+
+function createSectionFeedbackEntry(target = null) {
+  return {
+    targetKey: target?.targetKey || "",
+    targetType: target?.targetType || "",
+    label: target?.label || "",
+    suggestion: ""
+  }
+}
+
+function buildFeedbackDraft(feedbackDoc, feedbackTargets) {
+  if (!feedbackDoc) {
+    return createEmptyFeedbackDraft()
+  }
+
+  const targetsByKey = new Map(
+    feedbackTargets.map((target) => [target.targetKey, target])
+  )
+
+  return {
+    overallRating: feedbackDoc?.overallRating ? String(feedbackDoc.overallRating) : "",
+    overallSuggestion:
+      typeof feedbackDoc?.overallSuggestion === "string"
+        ? feedbackDoc.overallSuggestion
+        : "",
+    sectionFeedback: Array.isArray(feedbackDoc?.sectionFeedback)
+      ? feedbackDoc.sectionFeedback
+          .map((entry) => {
+            const target = targetsByKey.get(entry.targetKey)
+
+            return {
+              targetKey: entry.targetKey || "",
+              targetType: target?.targetType || entry.targetType || "",
+              label: target?.label || entry.label || "",
+              suggestion: typeof entry.suggestion === "string" ? entry.suggestion : ""
+            }
+          })
+          .filter((entry) => entry.targetKey && entry.label)
+      : []
+  }
+}
+
+function getAvailableFeedbackTargets(feedbackTargets, sectionFeedback, currentTargetKey = "") {
+  const usedTargets = new Set(
+    sectionFeedback
+      .filter((entry) => entry.targetKey && entry.targetKey !== currentTargetKey)
+      .map((entry) => entry.targetKey)
+  )
+
+  return feedbackTargets.filter(
+    (target) => !usedTargets.has(target.targetKey) || target.targetKey === currentTargetKey
+  )
+}
+
+function LessonFeedbackPanel({
+  className,
+  isPreview,
+  canSaveFeedback,
+  feedbackDraft,
+  feedbackTargets,
+  isSaving,
+  feedbackError,
+  feedbackSavedMessage,
+  onRatingChange,
+  onOverallSuggestionChange,
+  onAddSectionFeedback,
+  onSectionTargetChange,
+  onSectionSuggestionChange,
+  onRemoveSectionFeedback,
+  onSave
+}) {
+  const sectionFeedback = feedbackDraft?.sectionFeedback || []
+  const canAddSectionFeedback = feedbackTargets.some(
+    (target) => !sectionFeedback.some((entry) => entry.targetKey === target.targetKey)
+  )
+  const isSaveDisabled =
+    !canSaveFeedback ||
+    isSaving ||
+    !feedbackDraft?.overallRating ||
+    !feedbackDraft?.overallSuggestion?.trim()
+
+  return (
+    <Sheet className={`${styles.feedbackPanel} ${className || ""}`.trim()} variant="plain">
+      <Typography className={styles.feedbackEyebrow}>Feedback interno</Typography>
+      <Typography level="title-md" className={styles.feedbackTitle}>
+        Valuta questa lezione e lascia suggerimenti
+      </Typography>
+      <Typography className={styles.feedbackDescription}>
+        Le tue note vengono salvate sul tuo account e aiutano a migliorare le prossime iterazioni della lezione.
+      </Typography>
+
+      {!canSaveFeedback ? (
+        <Typography className={styles.feedbackPreviewNote}>
+          {isPreview
+            ? "In anteprima il feedback viene salvato solo se sei autenticato. Accedi con il tuo account e riapri la lezione per inviarlo."
+            : "Accedi con un account valido per inviare il feedback."}
+        </Typography>
+      ) : (
+        <>
+          <div className={styles.feedbackRatingRow}>
+            {[1, 2, 3, 4, 5].map((value) => {
+              const isActive = feedbackDraft?.overallRating === String(value)
+
+              return (
+                <Button
+                  key={value}
+                  size="sm"
+                  variant={isActive ? "solid" : "soft"}
+                  color={isActive ? "primary" : "neutral"}
+                  onClick={() => onRatingChange(String(value))}
+                  sx={{ borderRadius: 999, minWidth: 44 }}
+                >
+                  {value}
+                </Button>
+              )
+            })}
+          </div>
+
+          <Textarea
+            minRows={4}
+            value={feedbackDraft?.overallSuggestion || ""}
+            onChange={(event) => onOverallSuggestionChange(event.target.value)}
+            placeholder="Cosa miglioreresti in questa lezione?"
+            sx={{ mt: 1.5, borderRadius: "18px" }}
+          />
+
+          {feedbackTargets.length > 0 ? (
+            <div className={styles.feedbackSectionList}>
+              <div className={styles.feedbackSectionHeader}>
+                <Typography className={styles.feedbackSectionTitle}>
+                  Suggerimenti puntuali per sezione
+                </Typography>
+                <Typography className={styles.feedbackSectionHint}>
+                  Opzionale, ma utile quando il problema riguarda una sezione specifica.
+                </Typography>
+              </div>
+
+              {sectionFeedback.map((entry, index) => (
+                <div key={`${entry.targetKey || "target"}-${index}`} className={styles.feedbackSectionCard}>
+                  <Select
+                    value={entry.targetKey || null}
+                    onChange={(_, value) => onSectionTargetChange(index, value || "")}
+                    placeholder="Seleziona una sezione della lezione"
+                    sx={{ borderRadius: "16px" }}
+                  >
+                    {getAvailableFeedbackTargets(
+                      feedbackTargets,
+                      sectionFeedback,
+                      entry.targetKey
+                    ).map((target) => (
+                      <Option key={target.targetKey} value={target.targetKey}>
+                        {target.label}
+                      </Option>
+                    ))}
+                  </Select>
+
+                  <Textarea
+                    minRows={3}
+                    value={entry.suggestion}
+                    onChange={(event) =>
+                      onSectionSuggestionChange(index, event.target.value)
+                    }
+                    placeholder="Cosa cambieresti in questa sezione?"
+                    sx={{ borderRadius: "16px" }}
+                  />
+
+                  <div className={styles.feedbackSectionActions}>
+                    <Button
+                      size="sm"
+                      variant="plain"
+                      color="danger"
+                      onClick={() => onRemoveSectionFeedback(index)}
+                    >
+                      Rimuovi
+                    </Button>
+                  </div>
+                </div>
+              ))}
+
+              <Button
+                size="sm"
+                variant="soft"
+                color="neutral"
+                disabled={!canAddSectionFeedback}
+                onClick={onAddSectionFeedback}
+                sx={{ alignSelf: "flex-start", borderRadius: 999 }}
+              >
+                Aggiungi nota su una sezione
+              </Button>
+            </div>
+          ) : null}
+
+          {feedbackError ? (
+            <Typography className={styles.feedbackStatusError}>{feedbackError}</Typography>
+          ) : null}
+
+          {!feedbackError && feedbackSavedMessage ? (
+            <Typography className={styles.feedbackStatusSuccess}>
+              {feedbackSavedMessage}
+            </Typography>
+          ) : null}
+
+          <div className={styles.feedbackActions}>
+            <Button
+              variant="solid"
+              color="primary"
+              onClick={onSave}
+              disabled={isSaveDisabled}
+              sx={{ borderRadius: 999 }}
+            >
+              {isSaving ? "Salvataggio feedback..." : "Salva feedback"}
+            </Button>
+          </div>
+        </>
+      )}
+    </Sheet>
+  )
+}
+
+function CaseStudyLessonView({
+  moduleData,
+  isPreview,
+  onHome,
+  onExportPdf,
+  isExportingPdf,
+  feedbackPanel
+}) {
   const frameworkCards = getCaseStudyFrameworks(moduleData)
   const theorySources = getCaseStudyTheorySources(moduleData)
   const sourceArticles = getArrayOrEmpty(moduleData?.sourceArticles)
@@ -386,6 +635,8 @@ function CaseStudyLessonView({ moduleData, isPreview, onHome, onExportPdf, isExp
                   </div>
                 </details>
               ) : null}
+
+              {feedbackPanel}
             </aside>
           </div>
         </Box>
@@ -409,24 +660,45 @@ export default function ModulePageClient() {
   const [isDragging, setIsDragging] = useState(false)
   const [isCardTransitioning, setIsCardTransitioning] = useState(false)
   const [isExportingPdf, setIsExportingPdf] = useState(false)
+  const [feedbackDoc, setFeedbackDoc] = useState(null)
+  const [feedbackDraft, setFeedbackDraft] = useState(createEmptyFeedbackDraft())
+  const [isSavingFeedback, setIsSavingFeedback] = useState(false)
+  const [feedbackError, setFeedbackError] = useState("")
+  const [feedbackSavedMessage, setFeedbackSavedMessage] = useState("")
   const touchStartXRef = useRef(null)
   const pointerStartXRef = useRef(null)
   const dragPointerIdRef = useRef(null)
   const autoAdvanceTimeoutRef = useRef(null)
   const animationTimeoutRef = useRef(null)
   const exportContentRef = useRef(null)
+  const canSaveFeedback = Boolean(
+    user &&
+      !isPreviewGuestUser(user) &&
+      moduleData?.collectionName &&
+      moduleData?.id
+  )
+
+  const clearFeedbackStatus = () => {
+    setFeedbackError("")
+    setFeedbackSavedMessage("")
+  }
 
   // Gestione autenticazione
   useEffect(() => {
-    if (isPreview) {
-      setUser(PREVIEW_USER)
-      return undefined
-    }
-
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      if (!currentUser) return router.push("/login")
+      if (!currentUser) {
+        if (isPreview) {
+          setUser(PREVIEW_USER)
+          return
+        }
+
+        router.push("/login")
+        return
+      }
+
       setUser(currentUser)
     })
+
     return () => unsubscribe()
   }, [isPreview, router])
 
@@ -466,6 +738,35 @@ export default function ModulePageClient() {
       unsubscribe()
     }
   }, [user, id, isPreview])
+
+  useEffect(() => {
+    setFeedbackDoc(null)
+    clearFeedbackStatus()
+
+    if (!canSaveFeedback) {
+      return undefined
+    }
+
+    return listenToLessonFeedback(
+      {
+        collectionName: moduleData.collectionName,
+        moduleId: moduleData.id,
+        userId: user.uid
+      },
+      setFeedbackDoc
+    )
+  }, [canSaveFeedback, moduleData?.collectionName, moduleData?.id, user?.uid])
+
+  useEffect(() => {
+    if (!moduleData) {
+      setFeedbackDraft(createEmptyFeedbackDraft())
+      return
+    }
+
+    setFeedbackDraft(
+      buildFeedbackDraft(feedbackDoc, getModuleFeedbackTargets(moduleData))
+    )
+  }, [feedbackDoc, moduleData])
 
   useEffect(() => {
     return () => {
@@ -543,8 +844,159 @@ export default function ModulePageClient() {
     }
   }
 
+  const handleFeedbackRatingChange = (nextValue) => {
+    clearFeedbackStatus()
+    setFeedbackDraft((current) => ({
+      ...current,
+      overallRating: nextValue
+    }))
+  }
+
+  const handleOverallSuggestionChange = (nextValue) => {
+    clearFeedbackStatus()
+    setFeedbackDraft((current) => ({
+      ...current,
+      overallSuggestion: nextValue
+    }))
+  }
+
+  const handleAddSectionFeedback = () => {
+    const feedbackTargets = moduleData ? getModuleFeedbackTargets(moduleData) : []
+    const nextTarget = feedbackTargets.find(
+      (target) =>
+        !feedbackDraft.sectionFeedback.some(
+          (entry) => entry.targetKey === target.targetKey
+        )
+    )
+
+    if (!nextTarget) {
+      return
+    }
+
+    clearFeedbackStatus()
+    setFeedbackDraft((current) => ({
+      ...current,
+      sectionFeedback: [
+        ...current.sectionFeedback,
+        createSectionFeedbackEntry(nextTarget)
+      ]
+    }))
+  }
+
+  const handleSectionTargetChange = (index, nextTargetKey) => {
+    const feedbackTargets = moduleData ? getModuleFeedbackTargets(moduleData) : []
+    const nextTarget = feedbackTargets.find(
+      (target) => target.targetKey === nextTargetKey
+    )
+
+    clearFeedbackStatus()
+    setFeedbackDraft((current) => ({
+      ...current,
+      sectionFeedback: current.sectionFeedback.map((entry, entryIndex) =>
+        entryIndex === index
+          ? {
+              ...entry,
+              targetKey: nextTarget?.targetKey || "",
+              targetType: nextTarget?.targetType || "",
+              label: nextTarget?.label || ""
+            }
+          : entry
+      )
+    }))
+  }
+
+  const handleSectionSuggestionChange = (index, nextSuggestion) => {
+    clearFeedbackStatus()
+    setFeedbackDraft((current) => ({
+      ...current,
+      sectionFeedback: current.sectionFeedback.map((entry, entryIndex) =>
+        entryIndex === index
+          ? { ...entry, suggestion: nextSuggestion }
+          : entry
+      )
+    }))
+  }
+
+  const handleRemoveSectionFeedback = (index) => {
+    clearFeedbackStatus()
+    setFeedbackDraft((current) => ({
+      ...current,
+      sectionFeedback: current.sectionFeedback.filter(
+        (_, entryIndex) => entryIndex !== index
+      )
+    }))
+  }
+
+  const handleSaveFeedback = async () => {
+    if (!canSaveFeedback) {
+      setFeedbackError(
+        isPreview
+          ? "Accedi con il tuo account per salvare il feedback anche in anteprima."
+          : "Non riesco a identificare un account valido per salvare il feedback."
+      )
+      return
+    }
+
+    if (!feedbackDraft.overallRating) {
+      setFeedbackError("Seleziona una valutazione complessiva prima di salvare il feedback.")
+      return
+    }
+
+    if (!feedbackDraft.overallSuggestion.trim()) {
+      setFeedbackError("Inserisci almeno un suggerimento generale prima di salvare.")
+      return
+    }
+
+    setIsSavingFeedback(true)
+    clearFeedbackStatus()
+
+    try {
+      await upsertLessonFeedback({
+        collectionName: moduleData.collectionName,
+        moduleId: moduleData.id,
+        user,
+        moduleData,
+        overallRating: Number(feedbackDraft.overallRating),
+        overallSuggestion: feedbackDraft.overallSuggestion,
+        sectionFeedback: feedbackDraft.sectionFeedback
+      })
+
+      setFeedbackSavedMessage("Feedback salvato. Puoi aggiornarlo di nuovo in qualsiasi momento.")
+    } catch (error) {
+      console.error("Unable to save lesson feedback", error)
+      setFeedbackError("Non sono riuscito a salvare il feedback. Riprova tra qualche secondo.")
+    } finally {
+      setIsSavingFeedback(false)
+    }
+  }
+
   if ((!user && !isPreview) || !moduleData || !progress)
     return <Loading message="Caricamento modulo..." />
+
+  const feedbackTargets = getModuleFeedbackTargets(moduleData)
+  const feedbackPanel = (
+    <LessonFeedbackPanel
+      className={
+        moduleData?.type === "case-study-lesson"
+          ? styles.feedbackPanelAside
+          : styles.feedbackPanelStandalone
+      }
+      isPreview={isPreview}
+      canSaveFeedback={canSaveFeedback}
+      feedbackDraft={feedbackDraft}
+      feedbackTargets={feedbackTargets}
+      isSaving={isSavingFeedback}
+      feedbackError={feedbackError}
+      feedbackSavedMessage={feedbackSavedMessage}
+      onRatingChange={handleFeedbackRatingChange}
+      onOverallSuggestionChange={handleOverallSuggestionChange}
+      onAddSectionFeedback={handleAddSectionFeedback}
+      onSectionTargetChange={handleSectionTargetChange}
+      onSectionSuggestionChange={handleSectionSuggestionChange}
+      onRemoveSectionFeedback={handleRemoveSectionFeedback}
+      onSave={handleSaveFeedback}
+    />
+  )
 
   if (moduleData?.type === "case-study-lesson") {
     return (
@@ -555,6 +1007,7 @@ export default function ModulePageClient() {
           onHome={handleHome}
           onExportPdf={handleExportPdf}
           isExportingPdf={isExportingPdf}
+          feedbackPanel={feedbackPanel}
         />
 
         <div ref={exportContentRef} className={styles.exportRoot} aria-hidden="true">
@@ -1038,6 +1491,8 @@ export default function ModulePageClient() {
                   Successiva
                 </Button>
               </Box>
+
+              {feedbackPanel}
             </Box>
           )}
         </Box>

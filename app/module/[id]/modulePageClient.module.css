@@ -226,6 +226,101 @@
   gap: 16px;
 }
 
+.feedbackPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 18px;
+  border-radius: 24px;
+  border: 1px solid rgba(19, 53, 145, 0.1);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.92), rgba(244, 248, 255, 0.96));
+  box-shadow: 0 16px 40px rgba(10, 47, 143, 0.08);
+}
+
+.feedbackPanelStandalone {
+  margin-top: 8px;
+}
+
+.feedbackPanelAside {
+  margin-top: 4px;
+}
+
+.feedbackEyebrow {
+  font-size: 0.76rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #0a63b3;
+}
+
+.feedbackTitle {
+  color: #0f2b73;
+}
+
+.feedbackDescription,
+.feedbackPreviewNote,
+.feedbackSectionHint {
+  font-size: 0.94rem;
+  line-height: 1.55;
+  color: rgba(17, 34, 83, 0.72);
+}
+
+.feedbackRatingRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.feedbackSectionList {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.feedbackSectionHeader {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.feedbackSectionTitle {
+  font-size: 0.86rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #0f2b73;
+}
+
+.feedbackSectionCard {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(19, 53, 145, 0.08);
+  background: rgba(255, 255, 255, 0.72);
+}
+
+.feedbackSectionActions,
+.feedbackActions {
+  display: flex;
+  justify-content: flex-start;
+}
+
+.feedbackStatusError,
+.feedbackStatusSuccess {
+  font-size: 0.92rem;
+  line-height: 1.5;
+}
+
+.feedbackStatusError {
+  color: #c2410c;
+}
+
+.feedbackStatusSuccess {
+  color: #0b8f5a;
+}
+
 .deckMeta {
   display: flex;
   align-items: center;

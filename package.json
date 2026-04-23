@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "feedback:rules:build": "node scripts/build-feedback-rules.mjs",
+    "feedback:rules:deploy": "npm run feedback:rules:build && npx firebase-tools deploy --only firestore:rules --config firebase.feedback.json --project dashboard-480ed"
   },
   "dependencies": {
     "@antv/infographic": "^0.2.16",

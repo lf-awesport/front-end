@@ -1,18 +1,24 @@
 import {
   collection,
+  collectionGroup,
   getDoc,
   getDocs,
   doc,
   query,
   limit,
   orderBy,
-  startAfter
+  startAfter,
+  onSnapshot,
+  serverTimestamp,
+  setDoc
 } from "firebase/firestore"
 import db from "./firestore"
 
 const MODULE_COLLECTIONS = ["lessons", "caseStudyLessons"]
 const LEARNING_MODULES_COLLECTION = "learningModules"
 const MODULE_FETCH_LIMIT = 50
+const MODULE_FEEDBACK_SUBCOLLECTION = "feedback"
+const DEFAULT_MATERIA = "Sport Management"
 
 function getCreatedAtValue(value) {
   if (!value) return 0
@@ -31,6 +37,108 @@ function getCreatedAtValue(value) {
 
 function getModuleCollectionRef(materia, collectionName) {
   return collection(db, LEARNING_MODULES_COLLECTION, materia, collectionName)
+}
+
+export function getLessonFeedbackDocRef({
+  materia = DEFAULT_MATERIA,
+  collectionName,
+  moduleId,
+  userId
+}) {
+  return doc(
+    db,
+    LEARNING_MODULES_COLLECTION,
+    materia,
+    collectionName,
+    moduleId,
+    MODULE_FEEDBACK_SUBCOLLECTION,
+    userId
+  )
+}
+
+export function listenToLessonFeedback(input, onValue) {
+  const feedbackRef = getLessonFeedbackDocRef(input)
+
+  return onSnapshot(feedbackRef, (snapshot) => {
+    onValue(
+      snapshot.exists()
+        ? { id: snapshot.id, ...snapshot.data() }
+        : null
+    )
+  })
+}
+
+export async function upsertLessonFeedback({
+  materia = DEFAULT_MATERIA,
+  collectionName,
+  moduleId,
+  user,
+  moduleData,
+  overallRating,
+  overallSuggestion,
+  sectionFeedback = []
+}) {
+  const feedbackRef = getLessonFeedbackDocRef({
+    materia,
+    collectionName,
+    moduleId,
+    userId: user.uid
+  })
+  const existingSnapshot = await getDoc(feedbackRef)
+  const existingData = existingSnapshot.exists() ? existingSnapshot.data() : null
+
+  const nextSectionFeedback = sectionFeedback
+    .map((entry) => ({
+      targetKey: entry.targetKey,
+      targetType: entry.targetType,
+      label: entry.label,
+      suggestion: typeof entry.suggestion === "string" ? entry.suggestion.trim() : ""
+    }))
+    .filter((entry) => entry.targetKey && entry.label && entry.suggestion)
+
+  await setDoc(
+    feedbackRef,
+    {
+      moduleId,
+      collectionName,
+      materia,
+      lessonType: moduleData?.type || "lesson",
+      title: moduleData?.title || moduleData?.topic || "Untitled lesson",
+      lessonDate: moduleData?.lessonDate || null,
+      submittedBy: {
+        uid: user.uid,
+        email: user.email || null
+      },
+      overallRating,
+      overallSuggestion: typeof overallSuggestion === "string" ? overallSuggestion.trim() : "",
+      sectionFeedback: nextSectionFeedback,
+      createdAt: existingData?.createdAt || serverTimestamp(),
+      updatedAt: serverTimestamp(),
+      editorMeta: existingData?.editorMeta || null
+    },
+    { merge: true }
+  )
+}
+
+export async function getLessonFeedbackEntries({
+  materia = DEFAULT_MATERIA,
+  limitCount = 200
+} = {}) {
+  const feedbackQuery = query(collectionGroup(db, MODULE_FEEDBACK_SUBCOLLECTION))
+  const snapshot = await getDocs(feedbackQuery)
+
+  return snapshot.docs
+    .map((docSnapshot) => ({
+      id: docSnapshot.id,
+      ...docSnapshot.data()
+    }))
+    .filter((entry) => entry.materia === materia)
+    .sort(
+      (left, right) =>
+        getCreatedAtValue(right.updatedAt || right.createdAt) -
+        getCreatedAtValue(left.updatedAt || left.createdAt)
+    )
+    .slice(0, limitCount)
 }
 
 function getModuleSnapshot(materia, collectionName, queryConstraints = []) {

@@ -16,6 +16,8 @@ import {
 } from "@mui/joy"
 import { getCategoryDetails } from "@/utils/helpers"
 import { getPosts, getModulesFromFirestore } from "@/utils/api"
+import { useAuth } from "@/utils/authContext"
+import { isFeedbackEditor } from "@/utils/editorAccess"
 import Loading from "@/components/loading"
 import ProtectedRoute from "@/components/protectedRoute"
 import { ArticleChat } from "@/components/articleChat"
@@ -41,10 +43,12 @@ export default function PostsWrapper() {
 }
 
 function Posts() {
+  const { user } = useAuth()
   const [data, setData] = useState(null)
   const [isLoading, setLoading] = useState(true)
   const [tabValue, setTabValue] = useState(1)
   const [modules, setModules] = useState([])
+  const canReviewFeedback = isFeedbackEditor(user)
 
   const loadPosts = async () => {
     setLoading(true)
@@ -127,6 +131,37 @@ function Posts() {
           </TabPanel>
 
           <TabPanel value={1}>
+            {canReviewFeedback ? (
+              <Sheet
+                sx={{
+                  mb: 2,
+                  p: 2,
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  gap: 2,
+                  flexWrap: "wrap",
+                  borderRadius: "22px",
+                  background:
+                    "linear-gradient(180deg, rgba(236, 244, 255, 0.96), rgba(248, 251, 255, 0.94))"
+                }}
+              >
+                <div>
+                  <Typography level="title-md">Revisione feedback</Typography>
+                  <Typography level="body-sm">
+                    Apri la vista interna di revisione per leggere il feedback dei colleghi e
+                    tornare rapidamente alle lezioni da migliorare.
+                  </Typography>
+                </div>
+
+                <a href="/feedback" style={{ textDecoration: "none" }}>
+                  <Button color="primary" sx={{ borderRadius: 999 }}>
+                    Apri revisione feedback
+                  </Button>
+                </a>
+              </Sheet>
+            ) : null}
+
             <Sheet
               sx={{
                 mb: 4,
