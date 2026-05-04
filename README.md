@@ -25,12 +25,9 @@ This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-opti
 The Firestore feedback rules generator uses a comma-separated editor allowlist in `.env.local`:
 
 ```bash
-FEEDBACK_EDITOR_EMAILS=editor.one@example.com,editor.two@example.com
-```
+The admin feedback review UI now uses the backend admin access policy instead of a client-side email allowlist.
 
-This allowlist is only used to build Firestore rules for editor-wide feedback reads. The admin feedback review UI now uses the backend admin access policy instead of a client-side email allowlist.
-
-To build a deploy-ready Firestore rules file for the current allowlist:
+To build a deploy-ready Firestore rules file:
 
 ```bash
 npm run feedback:rules:build

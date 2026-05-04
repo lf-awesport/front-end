@@ -6,21 +6,6 @@ service cloud.firestore {
       return request.auth != null;
     }
 
-    function userEmail() {
-      return isSignedIn() && request.auth.token.email != null
-        ? lower(request.auth.token.email)
-        : null;
-    }
-
-    function isFeedbackEditor() {
-      return userEmail() in [
-        // FEEDBACK_EDITOR_EMAILS_START
-        "editor1@example.com",
-        "editor2@example.com"
-        // FEEDBACK_EDITOR_EMAILS_END
-      ];
-    }
-
     function isFeedbackOwner(userId) {
       return isSignedIn() && request.auth.uid == userId;
     }
@@ -48,8 +33,8 @@ service cloud.firestore {
       allow create, update, delete: if false;
 
       match /feedback/{userId} {
-        allow get: if isFeedbackOwner(userId) || isFeedbackEditor();
-        allow list: if isFeedbackEditor();
+        allow get: if isFeedbackOwner(userId);
+        allow list: if false;
 
         allow create, update: if isFeedbackOwner(userId)
           && request.resource.data.moduleId == moduleId

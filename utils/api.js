@@ -344,6 +344,33 @@ export async function listFeedbackReviewEntries() {
   return payload.entries || []
 }
 
+export async function listAdminUsers() {
+  const response = await fetchWithAuth(`${API_URL}/admin/users`)
+  const payload = await readApiResponse(
+    response,
+    "Non riesco a caricare gli utenti admin"
+  )
+
+  return payload.users || []
+}
+
+export async function updateAdminUserRole(userId, role) {
+  const response = await fetchWithAuth(`${API_URL}/admin/users/${userId}/role`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ role })
+  })
+
+  const payload = await readApiResponse(
+    response,
+    "Non riesco ad aggiornare i permessi admin"
+  )
+
+  return payload.user
+}
+
 export const getPosts = async (route, cursor) => {
   let posts = []
   let res = { posts: [], lastVisible: null }

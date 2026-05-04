@@ -21,6 +21,12 @@ const ADMIN_SECTIONS = [
     eyebrow: "Access",
     title: "Inviti",
     description: "Crea, copia e revoca inviti per il flusso di accesso riservato."
+  },
+  {
+    href: "/admin/users",
+    eyebrow: "Roles",
+    title: "Utenti admin",
+    description: "Promuovi o revoca i permessi admin direttamente dai profili utente." 
   }
 ]
 

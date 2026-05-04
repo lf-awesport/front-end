@@ -28,7 +28,6 @@
     "date-fns": "^4.1.0",
     "dayjs": "^1.11.13",
     "deep-chat-react": "^2.1.1",
-    "dotenv": "^16.4.5",
     "eslint": "^9.39.2",
     "firebase": "^10.12.5",
     "html2canvas": "^1.4.1",
