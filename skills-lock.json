@@ -26,6 +26,12 @@
       "sourceType": "github",
       "computedHash": "2074b8fa089e7ac633689b7202965513a5fd069fd1baf2ea49a928bb85bb4c9c"
     },
+    "impeccable": {
+      "source": "pbakaus/impeccable",
+      "sourceType": "github",
+      "skillPath": ".agents/skills/impeccable/SKILL.md",
+      "computedHash": "18257101114a8828fecefc41967dd03e297682424242477ac3e74c3588857c89"
+    },
     "next-best-practices": {
       "source": "vercel-labs/next-skills",
       "sourceType": "github",
