@@ -17,10 +17,9 @@ import {
 import { getCategoryDetails } from "@/utils/helpers"
 import { getPosts, getModulesFromFirestore } from "@/utils/api"
 import { useAuth } from "@/utils/authContext"
-import { isFeedbackEditor } from "@/utils/editorAccess"
+import { AdminQuickLinks } from "@/components/adminQuickLinks"
 import Loading from "@/components/loading"
 import ProtectedRoute from "@/components/protectedRoute"
-import { ArticleChat } from "@/components/articleChat"
 
 const LESSON_SUBJECT = "Sport Management"
 const TAB_STYLES = {
@@ -37,18 +36,20 @@ const TAB_STYLES = {
 export default function PostsWrapper() {
   return (
     <Suspense fallback={<Loading />}>
-      <Posts />
+      <ProtectedRoute>
+        <PostsContent />
+      </ProtectedRoute>
     </Suspense>
   )
 }
 
-function Posts() {
-  const { user } = useAuth()
+function PostsContent() {
+  const { viewer } = useAuth()
   const [data, setData] = useState(null)
   const [isLoading, setLoading] = useState(true)
-  const [tabValue, setTabValue] = useState(1)
+  const [tabValue, setTabValue] = useState(0)
   const [modules, setModules] = useState([])
-  const canReviewFeedback = isFeedbackEditor(user)
+  const canViewAdmin = Boolean(viewer?.isAdmin)
 
   const loadPosts = async () => {
     setLoading(true)
@@ -69,7 +70,7 @@ function Posts() {
   }, [])
 
   useEffect(() => {
-    if (tabValue !== 1 || modules.length > 0) {
+    if (tabValue !== 0 || modules.length > 0) {
       return
     }
 
@@ -78,202 +79,155 @@ function Posts() {
       .catch(console.error)
   }, [modules.length, tabValue])
 
+  useEffect(() => {
+    if (!canViewAdmin && tabValue !== 0) {
+      setTabValue(0)
+    }
+  }, [canViewAdmin, tabValue])
+
   if (isLoading || !data) return <Loading />
 
   return (
-    <ProtectedRoute>
-      <main
-        className={styles.main}
-        style={{
+    <main
+      className={styles.main}
+      style={{
+        width: "100%",
+        maxWidth: "1300px",
+        margin: "0 auto",
+        backgroundColor: "#fff"
+      }}
+    >
+      <Tabs
+        aria-label="Tabs"
+        value={tabValue}
+        onChange={(e, val) => setTabValue(val)}
+        sx={{
           width: "100%",
-          maxWidth: "1300px",
-          margin: "0 auto",
-          backgroundColor: "#fff"
+          boxShadow:
+            "0 4px 24px 0 rgba(0, 51, 154, 0.18), 0 1.5px 6px 0 rgba(0,0,0,0.08)",
+          minHeight: "88vh",
+          padding: 1,
+          flex: 1,
+          boxSizing: "border-box"
         }}
       >
-        <Tabs
-          aria-label="Tabs"
-          value={tabValue}
-          onChange={(e, val) => setTabValue(val)}
-          sx={{
-            width: "100%",
-            boxShadow:
-              "0 4px 24px 0 rgba(0, 51, 154, 0.18), 0 1.5px 6px 0 rgba(0,0,0,0.08)",
-            minHeight: "88vh",
-            padding: 1,
-            flex: 1,
-            boxSizing: "border-box"
-          }}
-        >
-          <TabList>
-            <Tab sx={TAB_STYLES} color="primary">
-              Chat
+        <TabList>
+          <Tab value={0} sx={TAB_STYLES} color="primary">
+            Lezioni
+          </Tab>
+          {canViewAdmin ? (
+            <Tab value={1} sx={TAB_STYLES} color="primary">
+              Admin
             </Tab>
-            <Tab sx={TAB_STYLES} color="primary">
-              Lezioni
-            </Tab>
-          </TabList>
+          ) : null}
+        </TabList>
 
-          <TabPanel value={0} sx={{ padding: 0, display: "flex", flex: 1 }}>
-            <Sheet
-              sx={{
-                mb: 0,
-                display: "flex",
-                flexWrap: "wrap",
-                gap: 2,
-                alignItems: "center",
-                flex: 1,
-                backgroundColor: "white"
-              }}
-            >
-              <ArticleChat data={data} />
-            </Sheet>
-          </TabPanel>
-
-          <TabPanel value={1}>
-            {canReviewFeedback ? (
-              <Sheet
-                sx={{
-                  mb: 2,
-                  p: 2,
-                  display: "flex",
-                  justifyContent: "space-between",
-                  alignItems: "center",
-                  gap: 2,
-                  flexWrap: "wrap",
-                  borderRadius: "22px",
-                  background:
-                    "linear-gradient(180deg, rgba(236, 244, 255, 0.96), rgba(248, 251, 255, 0.94))"
-                }}
-              >
-                <div>
-                  <Typography level="title-md">Revisione feedback</Typography>
-                  <Typography level="body-sm">
-                    Apri la vista interna di revisione per leggere il feedback dei colleghi e
-                    tornare rapidamente alle lezioni da migliorare.
-                  </Typography>
-                </div>
-
-                <a href="/feedback" style={{ textDecoration: "none" }}>
-                  <Button color="primary" sx={{ borderRadius: 999 }}>
-                    Apri revisione feedback
-                  </Button>
-                </a>
-              </Sheet>
-            ) : null}
-
-            <Sheet
-              sx={{
-                mb: 4,
-                p: 0,
-                display: "grid",
-                gridTemplateColumns: {
-                  xs: "1fr",
-                  sm: "1fr 1fr",
-                  md: "1fr 1fr 1fr"
-                },
-                gap: 2
-              }}
-            >
-              {modules.map((mod) => {
-                const coverSrc = mod.coverImage?.url || mod.cover || "/testcover.jpeg"
-                const coverAlt =
-                  mod.coverImage?.alt || mod.topic || mod.title || "Lesson cover"
-                return (
-                  <Card
-                    key={mod.id}
-                    variant="outlined"
-                    sx={{
-                      width: "100%",
-                      boxSizing: "border-box",
-                      boxShadow:
-                        "0 4px 24px 0 rgba(0, 51, 154, 0.18), 0 1.5px 6px 0 rgba(0,0,0,0.08)",
-                      border: "none",
-                      overflow: "hidden"
+        <TabPanel value={0}>
+          <Sheet
+            sx={{
+              mb: 4,
+              p: 0,
+              display: "grid",
+              gridTemplateColumns: {
+                xs: "1fr",
+                sm: "1fr 1fr",
+                md: "1fr 1fr 1fr"
+              },
+              gap: 2
+            }}
+          >
+            {modules.map((mod) => {
+              const coverSrc = mod.coverImage?.url || mod.cover || "/testcover.jpeg"
+              const coverAlt =
+                mod.coverImage?.alt || mod.topic || mod.title || "Lesson cover"
+              return (
+                <Card
+                  key={mod.id}
+                  variant="outlined"
+                  sx={{
+                    width: "100%",
+                    boxSizing: "border-box",
+                    boxShadow:
+                      "0 4px 24px 0 rgba(0, 51, 154, 0.18), 0 1.5px 6px 0 rgba(0,0,0,0.08)",
+                    border: "none",
+                    overflow: "hidden"
+                  }}
+                >
+                  <a
+                    href={`/module/${mod.id}`}
+                    style={{
+                      display: "block",
+                      textDecoration: "none",
+                      background:
+                        "linear-gradient(180deg, rgba(237, 244, 255, 0.98), rgba(230, 239, 255, 0.92))"
                     }}
                   >
-                    <a
-                      href={`/module/${mod.id}`}
+                    <div
                       style={{
-                        display: "block",
-                        textDecoration: "none",
-                        background:
-                          "linear-gradient(180deg, rgba(237, 244, 255, 0.98), rgba(230, 239, 255, 0.92))"
+                        width: "100%",
+                        height: "300px",
+                        padding: "12px",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        boxSizing: "border-box"
                       }}
                     >
-                      <div
+                      <img
+                        src={coverSrc}
+                        alt={coverAlt}
                         style={{
                           width: "100%",
-                          height: "300px",
-                          padding: "12px",
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          boxSizing: "border-box"
-                        }}
-                      >
-                        <img
-                          src={coverSrc}
-                          alt={coverAlt}
-                          style={{
-                            width: "100%",
-                            height: "100%",
+                          height: "100%",
                             borderTopLeftRadius: "8px",
                             borderTopRightRadius: "8px",
                             borderBottomLeftRadius: "8px",
                             borderBottomRightRadius: "8px",
                             objectFit: "contain",
-                            objectPosition: "center top",
-                            display: "block",
-                            filter: "drop-shadow(0 16px 28px rgba(10, 47, 143, 0.14))"
-                          }}
-                        />
-                      </div>
+                          objectFit: "contain",
+                          display: "block"
+                        }}
+                      />
+                    </div>
+                  </a>
+
+                  <CardContent sx={{ pb: 0 }}>
+                    <Typography level="title-lg">
+                      <a
+                        href={`/module/${mod.id}`}
+                        style={{ color: "inherit", textDecoration: "none" }}
+                      >
+                        {mod.topic || mod.title || mod.id}
+                      </a>
+                    </Typography>
+
+                    <Typography level="body-sm" sx={{ mt: 1, color: "rgba(18, 36, 85, 0.66)" }}>
+                      {mod.materia || LESSON_SUBJECT}
+                    </Typography>
+                  </CardContent>
+
+                  <CardActions sx={{ pt: 0, px: 2, pb: 2 }}>
+                    <a href={`/module/${mod.id}`} style={{ textDecoration: "none", width: "100%" }}>
+                      <Button fullWidth color="primary" sx={{ borderRadius: 999 }}>
+                        Apri modulo
+                      </Button>
                     </a>
-                    <CardContent>
-                      <Typography level="title-lg">
-                        <a href={`/module/${mod.id}`}>{mod.topic}</a>
-                      </Typography>
-                      <Typography level="body-sm" sx={{ mb: 1 }}>
-                        {mod.materia}
-                      </Typography>
-                    </CardContent>
-                    <CardActions
-                      sx={{
-                        justifyContent: "flex-start",
-                        flexWrap: "wrap",
-                        p: 0
-                      }}
-                    >
-                      {mod.tags?.map((tag) => {
-                        const cat = getCategoryDetails(tag)
-                        return (
-                          <Button
-                            key={`${tag}-${mod.id}`}
-                            size="sm"
-                            sx={{
-                              mr: 1,
-                              mb: 1,
-                              background: cat.color,
-                              color: "#fff",
-                              pointerEvents: "none",
-                              width: "auto",
-                              minWidth: "fit-content",
-                              maxWidth: "50px"
-                            }}
-                          >
-                            {cat.acronym}
-                          </Button>
-                        )
-                      })}
-                    </CardActions>
-                  </Card>
-                )
-              })}
-            </Sheet>
+                  </CardActions>
+                </Card>
+              )
+            })}
+          </Sheet>
+        </TabPanel>
+
+        {canViewAdmin ? (
+          <TabPanel value={1}>
+            <AdminQuickLinks
+              title="Strumenti admin"
+              description="Accedi rapidamente alle superfici riservate di chat, feedback e gestione inviti."
+            />
           </TabPanel>
-        </Tabs>
-      </main>
-    </ProtectedRoute>
+        ) : null}
+      </Tabs>
+    </main>
   )
 }

@@ -22,8 +22,9 @@ import {
 } from "@mui/joy"
 import { getPost } from "@/utils/api"
 import { getCategoryDetails } from "@/utils/helpers"
+import ProtectedRoute from "@/components/protectedRoute"
 
-export default function Post({ params }) {
+function PostContent({ params }) {
   const [data, setData] = useState(null)
   const [isLoading, setLoading] = useState(true)
   const [tabValue, setTabValue] = useState(1)
@@ -38,7 +39,7 @@ export default function Post({ params }) {
       setData(res)
       setLoading(false)
     })
-  }, [])
+  }, [postId])
 
   if (isLoading) return <Loading />
   if (!data) return <Loading />
@@ -214,5 +215,13 @@ export default function Post({ params }) {
         </TabPanel>
       </Tabs>
     </main>
+  )
+}
+
+export default function Post(props) {
+  return (
+    <ProtectedRoute>
+      <PostContent {...props} />
+    </ProtectedRoute>
   )
 }

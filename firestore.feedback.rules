@@ -25,23 +25,64 @@ service cloud.firestore {
       return isSignedIn() && request.auth.uid == userId;
     }
 
-    match /learningModules/{materia}/{collectionName}/{moduleId}/feedback/{userId} {
-      allow get: if isFeedbackOwner(userId) || isFeedbackEditor();
-      allow list: if isFeedbackEditor();
+    function isProgressOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
 
-      allow create, update: if isFeedbackOwner(userId)
-        && request.resource.data.moduleId == moduleId
-        && request.resource.data.collectionName == collectionName
-        && request.resource.data.materia == materia
-        && request.resource.data.submittedBy.uid == request.auth.uid
-        && request.resource.data.submittedBy.email == request.auth.token.email
-        && request.resource.data.overallRating is int
-        && request.resource.data.overallRating >= 1
-        && request.resource.data.overallRating <= 5
-        && request.resource.data.overallSuggestion is string
-        && request.resource.data.sectionFeedback is list;
+    function isLearningModuleCollection(collectionName) {
+      return collectionName in ["lessons", "caseStudyLessons"];
+    }
 
+    match /daily/{postId} {
+      allow get, list: if isSignedIn();
+      allow create, update, delete: if false;
+    }
+
+    match /crosswords/{postId} {
+      allow get, list: if isSignedIn();
+      allow create, update, delete: if false;
+    }
+
+    match /learningModules/{materia}/{collectionName}/{moduleId} {
+      allow get, list: if isSignedIn() && isLearningModuleCollection(collectionName);
+      allow create, update, delete: if false;
+
+      match /feedback/{userId} {
+        allow get: if isFeedbackOwner(userId) || isFeedbackEditor();
+        allow list: if isFeedbackEditor();
+
+        allow create, update: if isFeedbackOwner(userId)
+          && request.resource.data.moduleId == moduleId
+          && request.resource.data.collectionName == collectionName
+          && request.resource.data.materia == materia
+          && request.resource.data.submittedBy.uid == request.auth.uid
+          && request.resource.data.submittedBy.email == request.auth.token.email
+          && request.resource.data.overallRating is int
+          && request.resource.data.overallRating >= 1
+          && request.resource.data.overallRating <= 5
+          && request.resource.data.overallSuggestion is string
+          && request.resource.data.sectionFeedback is list;
+
+        allow delete: if false;
+      }
+    }
+
+    match /learningProgress/{userId}/modules/{moduleId} {
+      allow get, list: if isProgressOwner(userId);
+      allow create, update: if isProgressOwner(userId);
       allow delete: if false;
+    }
+
+    match /users/{userId} {
+      allow read, write: if false;
+    }
+
+    match /invites/{inviteId} {
+      allow read, write: if false;
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }

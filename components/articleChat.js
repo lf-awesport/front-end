@@ -147,7 +147,7 @@ export function ArticleChat() {
         }}
         textInput={{ placeholder: { text: "Scrivi la tua domanda qui..." } }}
         connect={{
-          url: `${API_URL}/askAgent/stream`,
+          url: `${API_URL}/admin/chat/stream`,
           method: "POST",
           stream: { partialRender: true }
         }}

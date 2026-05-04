@@ -28,11 +28,11 @@ function formatEditorEmailBlock(emails) {
 }
 
 async function run() {
-  const editorEmails = parseEditorEmails(process.env.NEXT_PUBLIC_FEEDBACK_EDITOR_EMAILS)
+  const editorEmails = parseEditorEmails(process.env.FEEDBACK_EDITOR_EMAILS)
 
   if (editorEmails.length === 0) {
     throw new Error(
-      "Set NEXT_PUBLIC_FEEDBACK_EDITOR_EMAILS in front-end/.env.local before building feedback rules."
+      "Set FEEDBACK_EDITOR_EMAILS in front-end/.env.local before building Firestore rules."
     )
   }
 
@@ -51,7 +51,7 @@ async function run() {
   await fs.writeFile(outputPath, nextRules, "utf8")
 
   console.log(
-    `Generated ${path.basename(outputPath)} for ${editorEmails.length} editor email(s).`
+    `Generated ${path.basename(outputPath)} for ${editorEmails.length} feedback editor email(s).`
   )
 }
 

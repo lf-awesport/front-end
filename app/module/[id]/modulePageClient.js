@@ -61,7 +61,6 @@ const EXIT_ANIMATION_MS = 220
 const LESSON_COLLECTION = "lessons"
 const CASE_STUDY_LESSON_COLLECTION = "caseStudyLessons"
 const MODULE_COLLECTIONS = [LESSON_COLLECTION, CASE_STUDY_LESSON_COLLECTION]
-const PREVIEW_USER = { uid: "preview-user" }
 const DRAG_HANDLE_SELECTOR = "[data-drag-handle='true']"
 const INTERACTIVE_SELECTOR = [
   "button",
@@ -73,10 +72,6 @@ const INTERACTIVE_SELECTOR = [
   "[role='radio']",
   "[role='button']"
 ].join(",")
-
-function isPreviewGuestUser(user) {
-  return user?.uid === PREVIEW_USER.uid
-}
 
 function createEmptyProgress() {
   return {
@@ -671,12 +666,7 @@ export default function ModulePageClient() {
   const autoAdvanceTimeoutRef = useRef(null)
   const animationTimeoutRef = useRef(null)
   const exportContentRef = useRef(null)
-  const canSaveFeedback = Boolean(
-    user &&
-      !isPreviewGuestUser(user) &&
-      moduleData?.collectionName &&
-      moduleData?.id
-  )
+  const canSaveFeedback = Boolean(user && moduleData?.collectionName && moduleData?.id)
 
   const clearFeedbackStatus = () => {
     setFeedbackError("")
@@ -687,11 +677,6 @@ export default function ModulePageClient() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
       if (!currentUser) {
-        if (isPreview) {
-          setUser(PREVIEW_USER)
-          return
-        }
-
         router.push("/login")
         return
       }
@@ -704,7 +689,7 @@ export default function ModulePageClient() {
 
   // Caricamento dati modulo + progresso
   useEffect(() => {
-    if ((!user && !isPreview) || !id) return
+    if (!user || !id) return
 
     let isMounted = true
 

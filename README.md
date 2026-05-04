@@ -20,18 +20,15 @@ You can start editing the page by modifying `app/page.js`. The page auto-updates
 
 This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
 
-## Lesson Feedback Setup
+## Firestore Feedback Rules
 
-The lesson feedback review surface is controlled by a comma-separated editor allowlist in `.env.local`:
+The Firestore feedback rules generator uses a comma-separated editor allowlist in `.env.local`:
 
 ```bash
-NEXT_PUBLIC_FEEDBACK_EDITOR_EMAILS=editor.one@example.com,editor.two@example.com
+FEEDBACK_EDITOR_EMAILS=editor.one@example.com,editor.two@example.com
 ```
 
-The same env var is used for both:
-
-- frontend gating in `utils/editorAccess.js`
-- Firestore rules generation for editor-wide feedback reads
+This allowlist is only used to build Firestore rules for editor-wide feedback reads. The admin feedback review UI now uses the backend admin access policy instead of a client-side email allowlist.
 
 To build a deploy-ready Firestore rules file for the current allowlist:
 
@@ -47,7 +44,7 @@ To deploy those rules to the current Firebase project (`dashboard-480ed`):
 npm run feedback:rules:deploy
 ```
 
-If you only want to inspect the generated rules before deploying, open `firestore.feedback.generated.rules` after the build step. Restart the Next.js dev server after editing `.env.local` so the frontend picks up the updated editor allowlist.
+If you only want to inspect the generated rules before deploying, open `firestore.feedback.generated.rules` after the build step.
 
 ## Learn More
 

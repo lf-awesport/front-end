@@ -16,11 +16,13 @@ import {
 } from "@mui/joy"
 import Link from "next/link"
 import styles from "../posts.module.css"
+import { useAuth } from "@/utils/authContext"
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [error, setError] = useState("")
+  const { sessionError } = useAuth()
   const router = useRouter()
 
   useEffect(() => {
@@ -31,6 +33,8 @@ export default function LoginPage() {
   }, [router])
 
   const handleLogin = async () => {
+    setError("")
+
     try {
       await signInWithEmailAndPassword(auth, email, password)
       router.push("/")
@@ -66,6 +70,7 @@ export default function LoginPage() {
           <Typography level="h3" gutterBottom>
             Login
           </Typography>
+          {sessionError && <Typography color="warning">{sessionError}</Typography>}
           {error && <Typography color="danger">{error}</Typography>}
 
           <FormControl sx={{ my: 2 }}>
@@ -87,7 +92,7 @@ export default function LoginPage() {
 
           <Box mt={2}>
             <JoyLink component={Link} href="/signup">
-              Non hai un account? Registrati
+              Hai ricevuto un invito? Completa la registrazione
             </JoyLink>
           </Box>
         </Box>

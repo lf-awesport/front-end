@@ -1,25 +1,20 @@
 "use client"
 
 import { useEffect, useState, Suspense } from "react"
-import { onAuthStateChanged, signOut } from "firebase/auth"
+import { signOut } from "firebase/auth"
 import { auth } from "@/utils/firebaseConfig"
+import { useAuth } from "@/utils/authContext"
 import Link from "next/link"
 
 export default function ClientHeaderRight() {
-  const [user, setUser] = useState(null)
-  const [loading, setLoading] = useState(true)
   const [hasMounted, setHasMounted] = useState(false)
+  const { user, viewer, isAuthReady, isSessionLoading } = useAuth()
 
   useEffect(() => {
     setHasMounted(true)
-    const unsub = onAuthStateChanged(auth, (u) => {
-      setUser(u)
-      setLoading(false)
-    })
-    return () => unsub()
   }, [])
 
-  if (!hasMounted || loading) return null
+  if (!hasMounted || !isAuthReady || (user && isSessionLoading)) return null
 
   const buttonStyle = {
     color: "#FFF",
@@ -38,7 +33,8 @@ export default function ClientHeaderRight() {
         style={{
           display: "flex",
           flexDirection: "column",
-          alignItems: "center"
+          alignItems: "center",
+          gap: "4px"
         }}
       >
         <span
@@ -55,12 +51,19 @@ export default function ClientHeaderRight() {
         ></span>
 
         {user ? (
-          <button onClick={() => signOut(auth)} style={buttonStyle}>
-            Logout
-          </button>
+          <>
+            {viewer?.isAdmin ? (
+              <Link href="/admin" style={buttonStyle}>
+                Admin
+              </Link>
+            ) : null}
+            <button onClick={() => signOut(auth)} style={buttonStyle}>
+              Logout
+            </button>
+          </>
         ) : (
-          <Link href="/login" legacyBehavior>
-            <a style={buttonStyle}>Login</a>
+          <Link href="/login" style={buttonStyle}>
+            Login
           </Link>
         )}
       </div>

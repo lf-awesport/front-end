@@ -15,3 +15,54 @@ export const getCategoryDetails = (category) => {
 
   return categoryDetails[category] || { color: "#000000", acronym: "UNK" } // Default to black and "UNK" for unknown categories
 }
+
+const DEFAULT_DATE_TIME_OPTIONS = {
+  day: "numeric",
+  month: "short",
+  year: "numeric",
+  hour: "2-digit",
+  minute: "2-digit"
+}
+
+export function getTimestampMillis(value) {
+  if (!value) {
+    return 0
+  }
+
+  if (typeof value.toMillis === "function") {
+    return value.toMillis()
+  }
+
+  if (typeof value.seconds === "number") {
+    return value.seconds * 1000
+  }
+
+  if (typeof value._seconds === "number") {
+    return value._seconds * 1000
+  }
+
+  const timestamp = new Date(value).getTime()
+  return Number.isNaN(timestamp) ? 0 : timestamp
+}
+
+export function toDateValue(value) {
+  const timestamp = getTimestampMillis(value)
+  return timestamp ? new Date(timestamp) : null
+}
+
+export function formatDateTime(
+  value,
+  {
+    fallback = "-",
+    locale = "it-IT",
+    options = DEFAULT_DATE_TIME_OPTIONS
+  } = {}
+) {
+  const date = toDateValue(value)
+
+  if (!date) {
+    return fallback
+  }
+
+  return new Intl.DateTimeFormat(locale, options).format(date)
+}

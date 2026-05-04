@@ -12,28 +12,15 @@ import {
   serverTimestamp,
   setDoc
 } from "firebase/firestore"
+import { getAuth } from "firebase/auth"
 import db from "./firestore"
+import { getTimestampMillis } from "./helpers"
 
 const MODULE_COLLECTIONS = ["lessons", "caseStudyLessons"]
 const LEARNING_MODULES_COLLECTION = "learningModules"
 const MODULE_FETCH_LIMIT = 50
 const MODULE_FEEDBACK_SUBCOLLECTION = "feedback"
 const DEFAULT_MATERIA = "Sport Management"
-
-function getCreatedAtValue(value) {
-  if (!value) return 0
-
-  if (typeof value.toMillis === "function") {
-    return value.toMillis()
-  }
-
-  if (typeof value.seconds === "number") {
-    return value.seconds * 1000
-  }
-
-  const timestamp = new Date(value).getTime()
-  return Number.isNaN(timestamp) ? 0 : timestamp
-}
 
 function getModuleCollectionRef(materia, collectionName) {
   return collection(db, LEARNING_MODULES_COLLECTION, materia, collectionName)
@@ -135,8 +122,8 @@ export async function getLessonFeedbackEntries({
     .filter((entry) => entry.materia === materia)
     .sort(
       (left, right) =>
-        getCreatedAtValue(right.updatedAt || right.createdAt) -
-        getCreatedAtValue(left.updatedAt || left.createdAt)
+          getTimestampMillis(right.updatedAt || right.createdAt) -
+          getTimestampMillis(left.updatedAt || left.createdAt)
     )
     .slice(0, limitCount)
 }
@@ -209,7 +196,7 @@ export async function getModulesFromFirestore(materia) {
       )
       .sort(
         (left, right) =>
-          getCreatedAtValue(right.createdAt) - getCreatedAtValue(left.createdAt)
+          getTimestampMillis(right.createdAt) - getTimestampMillis(left.createdAt)
     )
       .slice(0, MODULE_FETCH_LIMIT)
 
@@ -222,6 +209,140 @@ export async function getModulesFromFirestore(materia) {
 
 export const API_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000"
+
+async function readApiResponse(response, fallbackMessage) {
+  const payload = await response.json().catch(() => null)
+
+  if (!response.ok) {
+    throw new Error(payload?.error?.message || fallbackMessage)
+  }
+
+  return payload
+}
+
+export async function fetchWithAuth(url, options = {}) {
+  const auth = getAuth()
+  const user = auth.currentUser
+  const forceRefresh = options.forceRefresh === true
+
+  const { forceRefresh: _ignoredForceRefresh, ...fetchOptions } = options
+
+  if (!user) {
+    throw new Error("Devi effettuare l'accesso per completare questa operazione")
+  }
+
+  const token = await user.getIdToken(forceRefresh)
+  const headers = {
+    ...fetchOptions.headers,
+    Authorization: `Bearer ${token}`
+  }
+
+  return fetch(url, {
+    ...fetchOptions,
+    headers
+  })
+}
+
+export async function previewInvite(token) {
+  const response = await fetch(`${API_URL}/auth/invite/preview`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ token })
+  })
+
+  const payload = await readApiResponse(
+    response,
+    "Non riesco a verificare questo invito"
+  )
+
+  return payload.invite
+}
+
+export async function registerWithInvite({ token, password }) {
+  const response = await fetch(`${API_URL}/auth/register`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ token, password })
+  })
+
+  const payload = await readApiResponse(
+    response,
+    "Non riesco a completare la registrazione"
+  )
+
+  return payload
+}
+
+export async function listAdminInvites() {
+  const response = await fetchWithAuth(`${API_URL}/admin/invites`)
+  const payload = await readApiResponse(
+    response,
+    "Non riesco a caricare gli inviti"
+  )
+
+  return payload.invites || []
+}
+
+export async function createAdminInvite({ email, expiresInHours }) {
+  const response = await fetchWithAuth(`${API_URL}/admin/invites`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ email, expiresInHours })
+  })
+
+  return readApiResponse(response, "Non riesco a creare l'invito")
+}
+
+export async function revokeAdminInvite(inviteId) {
+  const response = await fetchWithAuth(`${API_URL}/admin/invites/${inviteId}/revoke`, {
+    method: "POST"
+  })
+
+  const payload = await readApiResponse(
+    response,
+    "Non riesco a revocare questo invito"
+  )
+
+  return payload.invite
+}
+
+export async function getViewerSession() {
+  const response = await fetchWithAuth(`${API_URL}/auth/session`)
+  const payload = await readApiResponse(
+    response,
+    "Non riesco a verificare l'accesso del tuo account"
+  )
+
+  return payload.viewer
+}
+
+export async function refreshViewerSession() {
+  const response = await fetchWithAuth(`${API_URL}/auth/session`, {
+    forceRefresh: true
+  })
+  const payload = await readApiResponse(
+    response,
+    "Non riesco a verificare l'accesso del tuo account"
+  )
+
+  return payload.viewer
+}
+
+export async function listFeedbackReviewEntries() {
+  const response = await fetchWithAuth(`${API_URL}/admin/feedback`)
+  const payload = await readApiResponse(
+    response,
+    "Non riesco a caricare i feedback"
+  )
+
+  return payload.entries || []
+}
 
 export const getPosts = async (route, cursor) => {
   let posts = []
@@ -263,7 +384,7 @@ export const getPost = (id, callback) => {
 }
 
 export async function fetchSearchResults(params) {
-  const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/search`, {
+  const response = await fetch(`${API_URL}/search`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(params)
