@@ -11,15 +11,22 @@ import { useRouter, useSearchParams } from "next/navigation"
 import {
   Box,
   Button,
+  Chip,
   Input,
   FormControl,
   FormLabel,
   Typography,
-  Link as JoyLink,
   Sheet
 } from "@mui/joy"
-import Link from "next/link"
-import styles from "../posts.module.css"
+import Loading from "@/components/loading"
+import { AuthLink, AuthMessage, AuthShell } from "@/components/authShell"
+import { colors, radii } from "@/utils/designTokens"
+
+const fieldSx = {
+  borderRadius: radii.md,
+  minHeight: 52,
+  backgroundColor: "rgba(247,250,255,0.9)"
+}
 
 function SignupPageContent() {
   const [inviteToken, setInviteToken] = useState("")
@@ -49,6 +56,7 @@ function SignupPageContent() {
     setInviteToken(inviteFromQuery)
     setError("")
     setInfo("")
+    setIsCheckingInvite(true)
 
     previewInvite(inviteFromQuery)
       .then((preview) => {
@@ -59,6 +67,7 @@ function SignupPageContent() {
         setInvite(null)
         setError(err.message)
       })
+      .finally(() => setIsCheckingInvite(false))
   }, [inviteToken, searchParams])
 
   const handlePreviewInvite = async () => {
@@ -110,98 +119,94 @@ function SignupPageContent() {
   }
 
   return (
-    <main
-      className={styles.main}
-      style={{
-        width: "100%",
-        maxWidth: "1300px",
-        margin: "0 auto"
-      }}
+    <AuthShell
+      eyebrow="AWE"
+      title="Attiva il tuo account"
+      description="Inserisci il token e completa l'accesso."
+      footer={<AuthLink href="/login">Hai gia un account? Accedi</AuthLink>}
     >
-      <Sheet
-        sx={{
-          width: "100%",
-          boxShadow: "0px 4px 8px rgba(92, 201, 250, 0.5)",
-          border: "1px solid #5cc9fa",
-          borderRadius: "8px",
-          boxSizing: "border-box",
-          padding: 1,
-          display: "flex",
-          alignItems: "flex-start",
-          justifyContent: "center",
-          flex: 1
-        }}
+      <Typography level="h2">Completa la registrazione</Typography>
+      <Typography sx={{ mt: 1, color: colors.inkMuted, lineHeight: 1.7 }}>
+        Incolla il token ricevuto.
+      </Typography>
+
+      <AuthMessage tone="danger">{error}</AuthMessage>
+      <AuthMessage tone="success">{info}</AuthMessage>
+
+      <Box sx={{ display: "grid", gap: 2.2, mt: 3 }}>
+        <FormControl>
+          <FormLabel sx={{ color: colors.ink, fontWeight: 600 }}>Token invito</FormLabel>
+          <Input
+            value={inviteToken}
+            onChange={(e) => {
+              setInviteToken(e.target.value)
+              setInvite(null)
+              setError("")
+              setInfo("")
+            }}
+            placeholder="Incolla qui il token ricevuto"
+            sx={fieldSx}
+          />
+        </FormControl>
+
+        <Button
+          fullWidth
+          variant="soft"
+          loading={isCheckingInvite}
+          onClick={handlePreviewInvite}
+          sx={{ borderRadius: radii.pill }}
+        >
+          Verifica invito
+        </Button>
+
+        <Sheet
+          variant="soft"
+          sx={{
+            p: 2.2,
+            borderRadius: radii.lg,
+            background: invite ? "var(--app-success-bg)" : "rgba(239,245,255,0.92)",
+            border: invite
+              ? "1px solid rgba(var(--app-success-rgb), 0.18)"
+              : "1px solid rgba(var(--app-primary-rgb), 0.08)"
+          }}
+        >
+          <Typography level="title-sm">
+            {invite ? "Email confermata" : "Email collegata"}
+          </Typography>
+          <Typography sx={{ mt: 0.6, color: colors.inkMuted }}>
+            {invite?.email || "Verifica il token per vedere l'email collegata."}
+          </Typography>
+        </Sheet>
+
+        <FormControl>
+          <FormLabel sx={{ color: colors.ink, fontWeight: 600 }}>Password</FormLabel>
+          <Input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Scegli una password"
+            sx={fieldSx}
+          />
+        </FormControl>
+      </Box>
+
+      <Button
+        fullWidth
+        size="lg"
+        loading={isSubmitting}
+        disabled={!invite || !password}
+        onClick={handleSignup}
+        sx={{ mt: 3, borderRadius: radii.pill }}
       >
-        <Box sx={{ maxWidth: 400, margin: "auto", background: "#fff" }}>
-          <Typography level="h3" gutterBottom>
-            Registrazione su invito
-          </Typography>
-          <Typography sx={{ mb: 1.5 }}>
-            Completa la registrazione usando il link o il token ricevuto dal team.
-          </Typography>
-          {error && <Typography color="danger">{error}</Typography>}
-          {info && <Typography color="success">{info}</Typography>}
-
-          <FormControl sx={{ my: 2 }}>
-            <FormLabel>Token invito</FormLabel>
-            <Input
-              value={inviteToken}
-              onChange={(e) => {
-                setInviteToken(e.target.value)
-                setInvite(null)
-                setError("")
-                setInfo("")
-              }}
-            />
-          </FormControl>
-
-          <Button
-            fullWidth
-            variant="soft"
-            loading={isCheckingInvite}
-            onClick={handlePreviewInvite}
-          >
-            Verifica invito
-          </Button>
-
-          <FormControl sx={{ my: 2 }}>
-            <FormLabel>Email invitata</FormLabel>
-            <Input type="email" value={invite?.email || ""} readOnly />
-          </FormControl>
-
-          <FormControl sx={{ my: 2 }}>
-            <FormLabel>Password</FormLabel>
-            <Input
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="Almeno 10 caratteri con lettere e numeri"
-            />
-          </FormControl>
-
-          <Button
-            fullWidth
-            loading={isSubmitting}
-            disabled={!invite || !password}
-            onClick={handleSignup}
-          >
-            Crea account
-          </Button>
-
-          <Box mt={2}>
-            <JoyLink component={Link} href="/login">
-              Hai già un account? Accedi
-            </JoyLink>
-          </Box>
-        </Box>
-      </Sheet>
-    </main>
+        Crea account
+      </Button>
+    </AuthShell>
   )
 }
 
 export default function SignupPage() {
   return (
-    <Suspense fallback={null}>
+    <Suspense fallback={<Loading />}>
       <SignupPageContent />
     </Suspense>
   )

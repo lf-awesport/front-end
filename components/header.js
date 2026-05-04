@@ -1,22 +1,17 @@
-"use client"
-
-import styles from "./carousel.module.css"
+import Link from "next/link"
 import Image from "next/image"
-import dynamic from "next/dynamic"
+import styles from "./header.module.css"
+import Menu from "./menu"
 
-const Menu = dynamic(() => import("./menu"), { ssr: false })
-
-export function Header({ children }) {
+export function Header() {
   return (
-    <div className={styles.header}>
-      <div className={styles.headerLeftColumn}></div>
-      <div className={styles.headerCenterColumn}>
-        <a href="/">
-          <div className={styles.centerColumn}>
+    <header className={styles.header}>
+      <div className={styles.inner}>
+        <Link href="/" className={styles.brandLink}>
+          <div className={styles.brandMark}>
             <Image
               src="/EDDY.png"
               alt="awe Logo"
-              className={styles.aweLogo}
               width={50}
               height={50}
               style={{ marginRight: "-10px" }}
@@ -25,17 +20,17 @@ export function Header({ children }) {
             <Image
               src="/eddy-logo.png"
               alt="awe Logo"
-              className={styles.aweLogo}
               width={75}
               height={50}
               priority
             />
           </div>
-        </a>
+        </Link>
+
+        <div className={styles.menuSlot}>
+          <Menu />
+        </div>
       </div>
-      <div className={styles.headerRightColumn}>
-        <Menu />
-      </div>
-    </div>
+    </header>
   )
 }

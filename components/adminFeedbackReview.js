@@ -1,9 +1,19 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
+import Link from "next/link"
 import { listFeedbackReviewEntries } from "@/utils/api"
 import { formatDateTime } from "@/utils/helpers"
 import { Button, Card, CardContent, Chip, Input, Option, Select, Sheet, Typography } from "@mui/joy"
+import { AdminPageShell } from "@/components/adminPageShell"
+import { PageSection, PageStatusBanner } from "@/components/pageShell"
+import { colors, radii, shadows } from "@/utils/designTokens"
+
+const fieldSx = {
+  borderRadius: radii.md,
+  minHeight: 52,
+  backgroundColor: "rgba(247,250,255,0.9)"
+}
 
 function getLessonTypeLabel(entry) {
   return entry.collectionName === "caseStudyLessons" ? "Caso studio" : "Lezione"
@@ -45,109 +55,73 @@ export function AdminFeedbackReview() {
     })
   }, [collectionFilter, entries, searchTerm])
 
+  const caseStudyCount = entries.filter(
+    (entry) => entry.collectionName === "caseStudyLessons"
+  ).length
+  const lessonCount = entries.filter((entry) => entry.collectionName === "lessons").length
+
   return (
-    <main
-      style={{
-        width: "min(1200px, calc(100% - 32px))",
-        margin: "0 auto",
-        padding: "32px 0 64px"
-      }}
+    <AdminPageShell
+      title="Revisione feedback lezioni"
+      description="Rivedi i feedback sulle lezioni."
+      stats={[
+        { label: `${filteredEntries.length} feedback`, color: "primary" },
+        { label: `${caseStudyCount} casi studio`, color: "neutral" },
+        { label: `${lessonCount} lezioni`, color: "neutral" }
+      ]}
     >
-      <Sheet
-        sx={{
-          p: 3,
-          borderRadius: "28px",
-          background:
-            "linear-gradient(180deg, rgba(255,255,255,0.95), rgba(238,244,255,0.98))",
-          boxShadow: "0 22px 60px rgba(10, 47, 143, 0.1)"
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            gap: "16px",
-            flexWrap: "wrap",
-            alignItems: "center"
-          }}
-        >
-          <div>
-            <Typography level="body-sm" sx={{ letterSpacing: "0.14em", textTransform: "uppercase", color: "#0a63b3" }}>
-              Admin
-            </Typography>
-            <Typography level="h1" sx={{ mt: 0.5 }}>
-              Revisione feedback lezioni
-            </Typography>
-            <Typography sx={{ mt: 1.5, maxWidth: 720 }}>
-              Consulta i feedback interni raccolti sulle lezioni e riapri rapidamente i moduli da migliorare.
-            </Typography>
-          </div>
-
-          <a href="/admin" style={{ textDecoration: "none" }}>
-            <Button variant="soft" color="primary" sx={{ borderRadius: 999 }}>
-              Torna ad admin
-            </Button>
-          </a>
-        </div>
-
+      <PageSection>
         <div
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
             gap: "12px",
-            marginTop: "24px"
+            marginTop: 0
           }}
         >
           <Input
             value={searchTerm}
             onChange={(event) => setSearchTerm(event.target.value)}
             placeholder="Cerca per lezione, id o autore del feedback"
-            sx={{ borderRadius: "16px" }}
+            sx={fieldSx}
           />
 
           <Select
             value={collectionFilter}
             onChange={(_, value) => setCollectionFilter(value || "all")}
-            sx={{ borderRadius: "16px" }}
+            sx={fieldSx}
           >
             <Option value="all">Tutti i tipi di lezione</Option>
             <Option value="lessons">Lezioni</Option>
             <Option value="caseStudyLessons">Casi studio</Option>
           </Select>
         </div>
-
-        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap", marginTop: "16px" }}>
-          <Chip variant="soft" color="primary" sx={{ borderRadius: 999 }}>
-            {filteredEntries.length} feedback
-          </Chip>
-          <Chip variant="soft" color="neutral" sx={{ borderRadius: 999 }}>
-            {entries.filter((entry) => entry.collectionName === "caseStudyLessons").length} casi studio
-          </Chip>
-          <Chip variant="soft" color="neutral" sx={{ borderRadius: 999 }}>
-            {entries.filter((entry) => entry.collectionName === "lessons").length} lezioni
-          </Chip>
-        </div>
-      </Sheet>
+      </PageSection>
 
       {isLoading ? (
-        <Sheet sx={{ mt: 3, p: 3, borderRadius: "24px", background: "rgba(255,255,255,0.9)" }}>
+        <PageSection>
           <Typography>Caricamento feedback...</Typography>
-        </Sheet>
+        </PageSection>
       ) : loadError ? (
-        <Sheet sx={{ mt: 3, p: 3, borderRadius: "24px", background: "rgba(255,255,255,0.9)" }}>
-          <Typography sx={{ color: "#c2410c" }}>{loadError}</Typography>
-        </Sheet>
+        <PageStatusBanner tone="danger" sx={{ mt: 3 }}>
+          {loadError}
+        </PageStatusBanner>
       ) : filteredEntries.length === 0 ? (
-        <Sheet sx={{ mt: 3, p: 3, borderRadius: "24px", background: "rgba(255,255,255,0.9)" }}>
+        <PageSection>
           <Typography>Nessun feedback corrisponde ai filtri correnti.</Typography>
-        </Sheet>
+        </PageSection>
       ) : (
         <div style={{ display: "grid", gap: "16px", marginTop: "24px" }}>
           {filteredEntries.map((entry) => (
             <Card
               key={`${entry.collectionName}-${entry.moduleId}-${entry.id}`}
               variant="outlined"
-              sx={{ borderRadius: "24px", boxShadow: "0 14px 32px rgba(10, 47, 143, 0.08)" }}
+              sx={{
+                borderRadius: radii.lg,
+                boxShadow: shadows.card,
+                border: "1px solid rgba(var(--app-primary-rgb), 0.08)",
+                background: "rgba(255,255,255,0.86)"
+              }}
             >
               <CardContent>
                 <div
@@ -160,41 +134,43 @@ export function AdminFeedbackReview() {
                 >
                   <div style={{ maxWidth: "760px" }}>
                     <div style={{ display: "flex", gap: "8px", flexWrap: "wrap", marginBottom: "10px" }}>
-                      <Chip variant="soft" color="primary" sx={{ borderRadius: 999 }}>
+                      <Chip variant="soft" color="primary" sx={{ borderRadius: radii.pill }}>
                         {getLessonTypeLabel(entry)}
                       </Chip>
                       {entry.lessonDate ? (
-                        <Chip variant="soft" color="neutral" sx={{ borderRadius: 999 }}>
+                        <Chip variant="soft" color="neutral" sx={{ borderRadius: radii.pill }}>
                           {entry.lessonDate}
                         </Chip>
                       ) : null}
-                      <Chip variant="soft" color="warning" sx={{ borderRadius: 999 }}>
+                      <Chip variant="soft" color="warning" sx={{ borderRadius: radii.pill }}>
                         Valutazione {entry.overallRating || "-"}/5
                       </Chip>
                     </div>
 
-                    <Typography level="title-lg">{entry.title || entry.moduleId}</Typography>
+                    <Typography level="title-lg" sx={{ color: colors.ink }}>
+                      {entry.title || entry.moduleId}
+                    </Typography>
 
-                    <Typography sx={{ mt: 1, color: "rgba(18, 36, 85, 0.68)" }}>
+                    <Typography sx={{ mt: 1, color: colors.inkMuted }}>
                       {entry.submittedBy?.email || "Autore sconosciuto"}
                       {entry.updatedAt ? ` · Aggiornato ${formatDateTime(entry.updatedAt, { fallback: "" })}` : ""}
                     </Typography>
                   </div>
 
                   <div style={{ display: "flex", alignItems: "flex-start" }}>
-                    <a href={`/module/${entry.moduleId}`} style={{ textDecoration: "none" }}>
-                      <Button variant="soft" color="primary" sx={{ borderRadius: 999 }}>
-                        Apri lezione
+                    <Link href={`/module/${entry.moduleId}`} style={{ textDecoration: "none" }}>
+                      <Button variant="soft" color="primary" sx={{ borderRadius: radii.pill }}>
+                        Apri
                       </Button>
-                    </a>
+                    </Link>
                   </div>
                 </div>
 
                 <Sheet
                   variant="soft"
-                  sx={{ mt: 2, p: 2, borderRadius: "18px", background: "rgba(239, 245, 255, 0.92)" }}
+                  sx={{ mt: 2, p: 2, borderRadius: radii.md, background: "rgba(239, 245, 255, 0.92)" }}
                 >
-                  <Typography level="body-sm" sx={{ letterSpacing: "0.12em", textTransform: "uppercase", color: "#0a63b3" }}>
+                  <Typography level="body-sm" sx={{ letterSpacing: "0.12em", textTransform: "uppercase", color: colors.accent }}>
                     Suggerimento generale
                   </Typography>
                   <Typography sx={{ mt: 1.2, whiteSpace: "pre-wrap" }}>
@@ -210,7 +186,7 @@ export function AdminFeedbackReview() {
                         variant="plain"
                         sx={{
                           p: 2,
-                          borderRadius: "18px",
+                          borderRadius: radii.md,
                           border: "1px solid rgba(19, 53, 145, 0.1)",
                           background: "rgba(255,255,255,0.86)"
                         }}
@@ -230,6 +206,6 @@ export function AdminFeedbackReview() {
           ))}
         </div>
       )}
-    </main>
+    </AdminPageShell>
   )
 }

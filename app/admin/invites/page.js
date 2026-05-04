@@ -20,6 +20,15 @@ import {
   Table,
   Typography
 } from "@mui/joy"
+import { AdminPageShell } from "@/components/adminPageShell"
+import { PageSection, PageStatusBanner } from "@/components/pageShell"
+import { colors, radii } from "@/utils/designTokens"
+
+const fieldSx = {
+  borderRadius: radii.md,
+  minHeight: 52,
+  backgroundColor: "rgba(247,250,255,0.9)"
+}
 
 function getStatusColor(invite) {
   if (invite.status === "used") {
@@ -50,7 +59,6 @@ function getStatusLabel(invite) {
 }
 
 function AdminInvitesPageContent() {
-  const { viewer } = useAuth()
   const [invites, setInvites] = useState([])
   const [email, setEmail] = useState("")
   const [expiresInHours, setExpiresInHours] = useState("168")
@@ -105,6 +113,7 @@ function AdminInvitesPageContent() {
     setRevokingId(inviteId)
     setLoadError("")
     setSuccessMessage("")
+    setLatestInviteUrl("")
 
     try {
       const updatedInvite = await revokeAdminInvite(inviteId)
@@ -113,6 +122,7 @@ function AdminInvitesPageContent() {
           invite.id === inviteId ? updatedInvite : invite
         )
       )
+      setSuccessMessage(`Invito revocato per ${updatedInvite.email}`)
     } catch (error) {
       setLoadError(error.message)
     } finally {
@@ -121,108 +131,94 @@ function AdminInvitesPageContent() {
   }
 
   return (
-    <main
-      style={{
-        width: "min(1200px, calc(100% - 32px))",
-        margin: "0 auto",
-        padding: "32px 0 64px"
-      }}
+    <AdminPageShell
+      title="Gestione inviti"
+      description="Crea e revoca inviti."
+      stats={[
+        { label: `${invites.length} inviti`, color: "primary" }
+      ]}
     >
-      <Sheet
-        sx={{
-          p: 3,
-          borderRadius: "28px",
-          background:
-            "linear-gradient(180deg, rgba(255,255,255,0.95), rgba(238,244,255,0.98))",
-          boxShadow: "0 22px 60px rgba(10, 47, 143, 0.1)"
-        }}
-      >
-        <Typography level="body-sm" sx={{ letterSpacing: "0.14em", textTransform: "uppercase", color: "#0a63b3" }}>
-          Admin
-        </Typography>
-        <Typography level="h1" sx={{ mt: 0.5 }}>
-          Gestione inviti
-        </Typography>
-        <Typography sx={{ mt: 1.5, maxWidth: 760 }}>
-          Crea inviti monouso legati a una email specifica e revoca quelli ancora attivi.
-        </Typography>
-
+      <PageSection>
         <Box
           sx={{
             display: "grid",
             gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-            gap: 1.5,
-            mt: 3
+            gap: 1.5
           }}
         >
           <FormControl>
-            <FormLabel>Email invitata</FormLabel>
+            <FormLabel sx={{ color: colors.ink, fontWeight: 600 }}>Email invitata</FormLabel>
             <Input
               type="email"
               value={email}
               onChange={(event) => setEmail(event.target.value)}
               placeholder="nome@azienda.com"
+              sx={fieldSx}
             />
           </FormControl>
 
           <FormControl>
-            <FormLabel>Scadenza in ore</FormLabel>
+            <FormLabel sx={{ color: colors.ink, fontWeight: 600 }}>Scadenza in ore</FormLabel>
             <Input
               type="number"
               value={expiresInHours}
               onChange={(event) => setExpiresInHours(event.target.value)}
+              sx={fieldSx}
             />
           </FormControl>
         </Box>
 
         <Box sx={{ display: "flex", gap: 1.5, flexWrap: "wrap", mt: 2.5 }}>
-          <Button loading={isSubmitting} onClick={handleCreateInvite}>
+          <Button
+            loading={isSubmitting}
+            onClick={handleCreateInvite}
+            disabled={!email}
+            sx={{ borderRadius: radii.pill }}
+          >
             Crea invito
           </Button>
-          <Button variant="soft" onClick={loadInvites} disabled={isLoading}>
+          <Button
+            variant="soft"
+            onClick={loadInvites}
+            disabled={isLoading}
+            sx={{ borderRadius: radii.pill }}
+          >
             Aggiorna elenco
           </Button>
         </Box>
 
         {successMessage ? (
-          <Sheet sx={{ mt: 2.5, p: 2, borderRadius: "18px", background: "rgba(220, 252, 231, 0.6)" }}>
-            <Typography level="title-sm">{successMessage}</Typography>
+          <PageStatusBanner tone="success" title={successMessage}>
             {latestInviteUrl ? (
-              <Input sx={{ mt: 1.5 }} value={latestInviteUrl} readOnly />
+              <Input sx={{ mt: 1.5, ...fieldSx }} value={latestInviteUrl} readOnly />
             ) : null}
-          </Sheet>
+          </PageStatusBanner>
         ) : null}
 
         {loadError && loadError !== "Admin access required" ? (
-          <Typography sx={{ mt: 2, color: "#c2410c" }}>{loadError}</Typography>
+          <PageStatusBanner tone="danger">{loadError}</PageStatusBanner>
         ) : null}
-      </Sheet>
+      </PageSection>
 
-      <Sheet
+      <PageSection
         sx={{
-          mt: 3,
-          p: 3,
-          borderRadius: "24px",
-          background: "rgba(255,255,255,0.92)",
-          boxShadow: "0 16px 36px rgba(10, 47, 143, 0.08)",
           overflowX: "auto"
         }}
       >
-        <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", mb: 2 }}>
-          <Chip variant="soft" color="primary" sx={{ borderRadius: 999 }}>
-            {invites.length} inviti
-          </Chip>
-          <Chip variant="soft" color="neutral" sx={{ borderRadius: 999 }}>
-            {viewer?.email || "Admin"}
-          </Chip>
-        </Box>
-
         {isLoading ? (
           <Typography>Caricamento inviti...</Typography>
         ) : invites.length === 0 ? (
           <Typography>Nessun invito creato finora.</Typography>
         ) : (
-          <Table borderAxis="xBetween" hoverRow stickyHeader>
+          <Table
+            borderAxis="xBetween"
+            hoverRow
+            stickyHeader
+            sx={{
+              minWidth: 760,
+              '--TableCell-headBackground': 'rgba(237, 244, 255, 0.98)'
+            }}
+          >
             <thead>
               <tr>
                 <th>Email</th>
@@ -238,7 +234,7 @@ function AdminInvitesPageContent() {
                 <tr key={invite.id}>
                   <td>{invite.email}</td>
                   <td>
-                    <Chip color={getStatusColor(invite)} variant="soft" sx={{ borderRadius: 999 }}>
+                    <Chip color={getStatusColor(invite)} variant="soft" sx={{ borderRadius: radii.pill }}>
                       {getStatusLabel(invite)}
                     </Chip>
                   </td>
@@ -257,6 +253,7 @@ function AdminInvitesPageContent() {
                       }
                       loading={revokingId === invite.id}
                       onClick={() => handleRevokeInvite(invite.id)}
+                      sx={{ borderRadius: radii.pill }}
                     >
                       Revoca
                     </Button>
@@ -266,8 +263,8 @@ function AdminInvitesPageContent() {
             </tbody>
           </Table>
         )}
-      </Sheet>
-    </main>
+      </PageSection>
+    </AdminPageShell>
   )
 }
 

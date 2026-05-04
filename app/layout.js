@@ -1,4 +1,6 @@
+import "./globals.css"
 import { AuthProvider } from "../utils/authContext"
+import { colors, gradients } from "@/utils/designTokens"
 
 export const metadata = {
   title: "AWE EDDY",
@@ -10,10 +12,18 @@ import { Header } from "@/components/header"
 export default function RootLayout({ children }) {
   return (
     <html lang="it">
-      <body style={{ margin: "0 auto", backgroundColor: "#E3EFFF" }}>
+      <body>
         <AuthProvider>
-          <Header />
-          {children}
+          <div
+            style={{
+              minHeight: "100vh",
+              background: gradients.canvas,
+              color: colors.ink
+            }}
+          >
+            <Header />
+            {children}
+          </div>
         </AuthProvider>
       </body>
     </html>

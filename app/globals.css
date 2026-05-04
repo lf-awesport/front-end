@@ -1,52 +1,101 @@
 :root {
-  --max-width: 1100px;
-  --border-radius: 12px;
+  --app-page-width: min(1200px, calc(100% - 32px));
+  --app-auth-width: min(1120px, calc(100% - 32px));
+  --app-page-padding: 32px 0 64px;
+  --app-radius-xl: 32px;
+  --app-radius-lg: 24px;
+  --app-radius-md: 18px;
+  --app-radius-pill: 999px;
+  --app-canvas: #e8efff;
+  --app-canvas-deep: #d3e0ff;
+  --app-surface: rgba(245, 248, 255, 0.88);
+  --app-surface-strong: rgba(255, 255, 255, 0.95);
+  --app-ink: #0f2452;
+  --app-ink-muted: rgba(15, 36, 82, 0.68);
+  --app-primary: #00339a;
+  --app-primary-strong: #00256f;
+  --app-accent: #00c2ff;
+  --app-accent-soft: #ddf7ff;
+  --app-on-primary: #ffffff;
+  --app-success-bg: #e7f8ef;
+  --app-success-text: #14532d;
+  --app-warning-bg: #fff4e8;
+  --app-warning-text: #9a3412;
+  --app-danger-bg: #feeceb;
+  --app-danger-text: #991b1b;
+  --app-primary-rgb: 0, 51, 154;
+  --app-accent-rgb: 0, 194, 255;
+  --app-success-rgb: 20, 83, 45;
+  --app-warning-rgb: 154, 52, 18;
+  --app-danger-rgb: 153, 27, 27;
 }
 
 * {
   box-sizing: border-box;
   padding: 0;
   margin: 0;
-  font-family: "Inter";
+  font-family: "Inter", "Segoe UI", sans-serif;
 }
 
 html,
 body {
   max-width: 100vw;
   overflow-x: hidden;
-  background-color: #00339a !important;
+  background: var(--app-canvas);
+  color: var(--app-ink);
+}
+
+body {
+  min-height: 100vh;
+  background-image:
+    radial-gradient(circle at top left, rgba(var(--app-primary-rgb), 0.18), rgba(255, 255, 255, 0) 32%),
+    radial-gradient(circle at top right, rgba(var(--app-accent-rgb), 0.18), rgba(255, 255, 255, 0) 24%),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.36), rgba(255, 255, 255, 0) 26%),
+    linear-gradient(180deg, var(--app-canvas), var(--app-canvas-deep));
 }
 
 a {
-  color: #00ccff;
-  text-decoration: underline;
+  color: inherit;
+  text-decoration: none;
 }
 
 @media (prefers-color-scheme: dark) {
   html {
-    color-scheme: dark;
+    color-scheme: light;
   }
 }
 
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
 textarea {
-  border: none;
+  border: 1px solid rgba(var(--app-primary-rgb), 0.18);
   overflow: auto;
   outline: none;
-  border: 5px solid rgb(15, 27, 69);
-  color: rgb(15, 27, 69) !important;
+  color: var(--app-ink);
   width: 100%;
-  min-height: 450px;
-  -webkit-box-shadow: none;
-  -moz-box-shadow: none;
-  box-shadow: none;
+  min-height: 280px;
+  padding: 16px 18px;
+  background: rgba(248, 250, 255, 0.94);
+  border-radius: var(--app-radius-md);
+  box-shadow: inset 0 1px 2px rgba(var(--app-primary-rgb), 0.04);
   white-space: pre-line;
-  resize: none; /*remove the resize handle on the bottom right*/
+  resize: vertical;
+}
+
+textarea:focus {
+  border-color: var(--app-primary);
+  box-shadow: 0 0 0 4px rgba(var(--app-primary-rgb), 0.12);
 }
 
 th,
 td {
-  padding: 5px !important;
-  text-align: center;
+  padding: 10px 12px !important;
+  text-align: left;
 }
 
 .clues {

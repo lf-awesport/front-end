@@ -10,13 +10,30 @@ import {
   Input,
   FormControl,
   FormLabel,
-  Typography,
-  Sheet,
-  Link as JoyLink
+  Typography
 } from "@mui/joy"
-import Link from "next/link"
-import styles from "../posts.module.css"
 import { useAuth } from "@/utils/authContext"
+import { AuthLink, AuthMessage, AuthShell } from "@/components/authShell"
+import { colors, radii } from "@/utils/designTokens"
+
+const fieldSx = {
+  borderRadius: radii.md,
+  minHeight: 52,
+  backgroundColor: "rgba(247,250,255,0.9)"
+}
+
+function getLoginErrorMessage(error) {
+  switch (error?.code) {
+    case "auth/invalid-credential":
+    case "auth/wrong-password":
+    case "auth/user-not-found":
+      return "Email o password non corretti."
+    case "auth/too-many-requests":
+      return "Troppi tentativi di accesso. Riprova tra qualche minuto."
+    default:
+      return error?.message || "Non riesco a completare il login in questo momento."
+  }
+}
 
 export default function LoginPage() {
   const [email, setEmail] = useState("")
@@ -39,64 +56,62 @@ export default function LoginPage() {
       await signInWithEmailAndPassword(auth, email, password)
       router.push("/")
     } catch (err) {
-      setError(err.message)
+      setError(getLoginErrorMessage(err))
     }
   }
 
   return (
-    <main
-      className={styles.main}
-      style={{
-        width: "100%",
-        maxWidth: "1300px",
-        margin: "0 auto"
-      }}
+    <AuthShell
+      eyebrow="AWE"
+      title="Accedi al tuo workspace"
+      description="Entra e riprendi da dove avevi lasciato."
+      footer={
+        <AuthLink href="/signup">
+          Hai un invito? Attiva l'account
+        </AuthLink>
+      }
     >
-      <Sheet
-        sx={{
-          width: "100%",
-          boxShadow: "0px 4px 8px rgba(92, 201, 250, 0.5)",
-          border: "1px solid #5cc9fa",
-          borderRadius: "8px",
-          boxSizing: "border-box",
-          padding: 1,
-          display: "flex",
-          alignItems: "flex-start",
-          justifyContent: "center",
-          flex: 1
-        }}
+      <Typography level="h2">Accedi</Typography>
+      <Typography sx={{ mt: 1, color: colors.inkMuted, lineHeight: 1.7 }}>
+        Usa email e password.
+      </Typography>
+
+      <AuthMessage tone="warning">{sessionError}</AuthMessage>
+      <AuthMessage tone="danger">{error}</AuthMessage>
+
+      <Box sx={{ display: "grid", gap: 2.2, mt: 3 }}>
+        <FormControl>
+          <FormLabel sx={{ color: colors.ink, fontWeight: 600 }}>Email</FormLabel>
+          <Input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="nome@azienda.com"
+            sx={fieldSx}
+          />
+        </FormControl>
+
+        <FormControl>
+          <FormLabel sx={{ color: colors.ink, fontWeight: 600 }}>Password</FormLabel>
+          <Input
+            type="password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Inserisci la tua password"
+            sx={fieldSx}
+          />
+        </FormControl>
+      </Box>
+
+      <Button
+        fullWidth
+        size="lg"
+        disabled={!email || !password}
+        onClick={handleLogin}
+        sx={{ mt: 3, borderRadius: radii.pill }}
       >
-        <Box sx={{ maxWidth: 400, margin: "auto" }}>
-          <Typography level="h3" gutterBottom>
-            Login
-          </Typography>
-          {sessionError && <Typography color="warning">{sessionError}</Typography>}
-          {error && <Typography color="danger">{error}</Typography>}
-
-          <FormControl sx={{ my: 2 }}>
-            <FormLabel>Email</FormLabel>
-            <Input type="email" onChange={(e) => setEmail(e.target.value)} />
-          </FormControl>
-
-          <FormControl sx={{ my: 2 }}>
-            <FormLabel>Password</FormLabel>
-            <Input
-              type="password"
-              onChange={(e) => setPassword(e.target.value)}
-            />
-          </FormControl>
-
-          <Button fullWidth onClick={handleLogin}>
-            Accedi
-          </Button>
-
-          <Box mt={2}>
-            <JoyLink component={Link} href="/signup">
-              Hai ricevuto un invito? Completa la registrazione
-            </JoyLink>
-          </Box>
-        </Box>
-      </Sheet>
-    </main>
+        Accedi
+      </Button>
+    </AuthShell>
   )
 }

@@ -1,105 +1,111 @@
 "use client"
 
 import Link from "next/link"
-import { Box, Button, Card, CardContent, Sheet, Typography } from "@mui/joy"
+import { Box, Card, CardContent, Sheet, Typography } from "@mui/joy"
+import { colors, radii, shadows } from "@/utils/designTokens"
+import { PageHero } from "@/components/pageShell"
 
 const ADMIN_SECTIONS = [
   {
     href: "/admin/chat",
     eyebrow: "AI",
     title: "Chat admin",
-    description: "Accedi alla chat interna riservata al team admin."
+    description: "Chat interna."
   },
   {
     href: "/admin/feedback",
     eyebrow: "Review",
     title: "Feedback",
-    description: "Consulta tutti i feedback interni e riapri rapidamente le lezioni da rivedere."
+    description: "Rivedi i feedback."
   },
   {
     href: "/admin/invites",
     eyebrow: "Access",
     title: "Inviti",
-    description: "Crea, copia e revoca inviti per il flusso di accesso riservato."
+    description: "Crea e revoca inviti."
   },
   {
     href: "/admin/users",
     eyebrow: "Roles",
     title: "Utenti admin",
-    description: "Promuovi o revoca i permessi admin direttamente dai profili utente." 
+    description: "Gestisci i ruoli."
   }
 ]
 
 export function AdminQuickLinks({
   title = "Area admin",
-  description = "Gestisci le superfici riservate ad amministrazione, review interna e tooling AI.",
+  description = "Strumenti interni.",
   showHeading = true
 } = {}) {
-  return (
-    <Sheet
+  const content = (
+    <Box
       sx={{
-        p: 3,
-        borderRadius: "28px",
-        background:
-          "linear-gradient(180deg, rgba(255,255,255,0.95), rgba(238,244,255,0.98))",
-        boxShadow: "0 22px 60px rgba(10, 47, 143, 0.1)"
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
+        gap: 2,
+        mt: showHeading ? 0 : 0
       }}
     >
-      {showHeading ? (
-        <>
-          <Typography
-            level="body-sm"
-            sx={{ letterSpacing: "0.14em", textTransform: "uppercase", color: "#0a63b3" }}
-          >
-            Admin
-          </Typography>
-          <Typography level="h1" sx={{ mt: 0.5 }}>
-            {title}
-          </Typography>
-          <Typography sx={{ mt: 1.5, maxWidth: 760 }}>{description}</Typography>
-        </>
-      ) : null}
-
-      <Box
-        sx={{
-          display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))",
-          gap: 2,
-          mt: showHeading ? 3 : 0
-        }}
-      >
-        {ADMIN_SECTIONS.map((section) => (
+      {ADMIN_SECTIONS.map((section) => (
+        <Link key={section.href} href={section.href} style={{ display: "block", textDecoration: "none" }}>
           <Card
-            key={section.href}
             variant="outlined"
             sx={{
-              borderRadius: "24px",
-              border: "1px solid rgba(12, 63, 172, 0.08)",
-              boxShadow: "0 14px 32px rgba(10, 47, 143, 0.08)"
+              borderRadius: radii.lg,
+              border: "1px solid rgba(var(--app-primary-rgb), 0.12)",
+              boxShadow: shadows.soft,
+              background: "rgba(247,250,255,0.84)",
+              transition: "transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease",
+              cursor: "pointer",
+              '&:hover': {
+                transform: "translateY(-3px)",
+                boxShadow: shadows.card,
+                borderColor: "rgba(var(--app-primary-rgb), 0.24)"
+              }
             }}
           >
             <CardContent>
               <Typography
                 level="body-xs"
-                sx={{ letterSpacing: "0.12em", textTransform: "uppercase", color: "#0a63b3" }}
+                sx={{ letterSpacing: "0.14em", textTransform: "uppercase", color: colors.accent }}
               >
                 {section.eyebrow}
               </Typography>
-              <Typography level="title-lg" sx={{ mt: 0.8 }}>
+              <Typography level="title-lg" sx={{ mt: 0.8, color: colors.ink }}>
                 {section.title}
               </Typography>
-              <Typography sx={{ mt: 1.2, color: "rgba(18, 36, 85, 0.72)" }}>
+              <Typography sx={{ mt: 0.9, color: colors.inkMuted, lineHeight: 1.6 }}>
                 {section.description}
               </Typography>
-              <Link href={section.href} style={{ textDecoration: "none" }}>
-                <Button sx={{ mt: 2, borderRadius: 999 }} color="primary">
-                  Apri {section.title.toLowerCase()}
-                </Button>
-              </Link>
             </CardContent>
           </Card>
-        ))}
-      </Box>
-    </Sheet>
+        </Link>
+      ))}
+    </Box>
+  )
+
+  if (!showHeading) {
+    return (
+      <Sheet
+        sx={{
+          p: 0,
+          background: "transparent",
+          boxShadow: "none"
+        }}
+      >
+        {content}
+      </Sheet>
+    )
+  }
+
+  return (
+    <PageHero
+      eyebrow="Admin"
+      title={title}
+      description={description}
+      sx={{ p: { xs: 2.5, sm: 3.5 } }}
+    >
+      {content}
+    </PageHero>
   )
 }

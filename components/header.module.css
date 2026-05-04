@@ -1,0 +1,51 @@
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  padding: 16px 0;
+  background: #00339a;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(18px);
+  box-shadow: 0 16px 36px rgba(0, 51, 154, 0.24);
+}
+
+.inner {
+  width: var(--app-page-width);
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.brandLink {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+}
+
+.brandMark {
+  display: flex;
+  align-items: center;
+}
+
+.menuSlot {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-height: 48px;
+}
+
+.menuPlaceholder {
+  width: 168px;
+  height: 40px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+@media (max-width: 720px) {
+  .header {
+    padding: 12px 0;
+  }
+}

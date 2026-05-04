@@ -1,6 +1,5 @@
 "use client"
 
-import Link from "next/link"
 import { useEffect, useState } from "react"
 import { listAdminUsers, updateAdminUserRole } from "@/utils/api"
 import { useAuth } from "@/utils/authContext"
@@ -10,10 +9,18 @@ import {
   Button,
   Chip,
   Input,
-  Sheet,
   Table,
   Typography
 } from "@mui/joy"
+import { AdminPageShell } from "@/components/adminPageShell"
+import { PageSection, PageStatusBanner } from "@/components/pageShell"
+import { colors, radii } from "@/utils/designTokens"
+
+const searchFieldSx = {
+  borderRadius: radii.md,
+  minHeight: 52,
+  backgroundColor: "rgba(247,250,255,0.9)"
+}
 
 function getRoleChipColor(user) {
   return user.isAdmin ? "primary" : "neutral"
@@ -91,59 +98,20 @@ export function AdminUsersManagement() {
   }
 
   return (
-    <main
-      style={{
-        width: "min(1200px, calc(100% - 32px))",
-        margin: "0 auto",
-        padding: "32px 0 64px"
-      }}
+    <AdminPageShell
+      title="Gestione utenti admin"
+      description="Gestisci i ruoli admin."
+      stats={[
+        { label: `${adminCount} admin`, color: "primary" },
+        { label: `${memberCount} member`, color: "neutral" }
+      ]}
     >
-      <Sheet
-        sx={{
-          p: 3,
-          borderRadius: "28px",
-          background:
-            "linear-gradient(180deg, rgba(255,255,255,0.95), rgba(238,244,255,0.98))",
-          boxShadow: "0 22px 60px rgba(10, 47, 143, 0.1)"
-        }}
-      >
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "space-between",
-            gap: "16px",
-            flexWrap: "wrap",
-            alignItems: "center"
-          }}
-        >
-          <div>
-            <Typography
-              level="body-sm"
-              sx={{ letterSpacing: "0.14em", textTransform: "uppercase", color: "#0a63b3" }}
-            >
-              Admin
-            </Typography>
-            <Typography level="h1" sx={{ mt: 0.5 }}>
-              Gestione utenti admin
-            </Typography>
-            <Typography sx={{ mt: 1.5, maxWidth: 760 }}>
-              Promuovi o revoca i permessi admin dai profili utente gia registrati. La revoca dell&apos;ultimo admin e la tua auto-revoca da questo pannello sono bloccate.
-            </Typography>
-          </div>
-
-          <Link href="/admin" style={{ textDecoration: "none" }}>
-            <Button variant="soft" color="primary" sx={{ borderRadius: 999 }}>
-              Torna ad admin
-            </Button>
-          </Link>
-        </div>
-
+      <PageSection>
         <Box
           sx={{
             display: "grid",
             gridTemplateColumns: "minmax(260px, 1fr) auto",
             gap: 1.5,
-            mt: 3,
             alignItems: "center",
             "@media (max-width: 720px)": {
               gridTemplateColumns: "1fr"
@@ -154,42 +122,30 @@ export function AdminUsersManagement() {
             value={searchTerm}
             onChange={(event) => setSearchTerm(event.target.value)}
             placeholder="Cerca per email, uid o ruolo"
-            sx={{ borderRadius: "16px" }}
+            sx={searchFieldSx}
           />
 
-          <Button variant="soft" onClick={loadUsers} disabled={isLoading} sx={{ borderRadius: 999 }}>
+          <Button
+            variant="soft"
+            onClick={loadUsers}
+            disabled={isLoading}
+            sx={{ borderRadius: radii.pill }}
+          >
             Aggiorna elenco
           </Button>
         </Box>
 
-        <Box sx={{ display: "flex", gap: 1, flexWrap: "wrap", mt: 2 }}>
-          <Chip variant="soft" color="primary" sx={{ borderRadius: 999 }}>
-            {adminCount} admin
-          </Chip>
-          <Chip variant="soft" color="neutral" sx={{ borderRadius: 999 }}>
-            {memberCount} member
-          </Chip>
-          <Chip variant="soft" color="neutral" sx={{ borderRadius: 999 }}>
-            {viewer?.email || "Admin corrente"}
-          </Chip>
-        </Box>
-
         {successMessage ? (
-          <Typography sx={{ mt: 2, color: "#166534" }}>{successMessage}</Typography>
+          <PageStatusBanner tone="success">{successMessage}</PageStatusBanner>
         ) : null}
 
         {loadError ? (
-          <Typography sx={{ mt: 2, color: "#c2410c" }}>{loadError}</Typography>
+          <PageStatusBanner tone="danger">{loadError}</PageStatusBanner>
         ) : null}
-      </Sheet>
+      </PageSection>
 
-      <Sheet
+      <PageSection
         sx={{
-          mt: 3,
-          p: 3,
-          borderRadius: "24px",
-          background: "rgba(255,255,255,0.92)",
-          boxShadow: "0 16px 36px rgba(10, 47, 143, 0.08)",
           overflowX: "auto"
         }}
       >
@@ -198,7 +154,15 @@ export function AdminUsersManagement() {
         ) : filteredUsers.length === 0 ? (
           <Typography>Nessun utente corrisponde ai filtri correnti.</Typography>
         ) : (
-          <Table borderAxis="xBetween" hoverRow stickyHeader>
+          <Table
+            borderAxis="xBetween"
+            hoverRow
+            stickyHeader
+            sx={{
+              minWidth: 900,
+              '--TableCell-headBackground': 'rgba(237, 244, 255, 0.98)'
+            }}
+          >
             <thead>
               <tr>
                 <th>Email</th>
@@ -219,18 +183,18 @@ export function AdminUsersManagement() {
                     <td>
                       <div>
                         <Typography level="title-sm">{user.email || user.uid}</Typography>
-                        <Typography level="body-xs" sx={{ color: "rgba(18, 36, 85, 0.65)" }}>
+                        <Typography level="body-xs" sx={{ color: colors.inkMuted }}>
                           {user.uid}
                         </Typography>
                       </div>
                     </td>
                     <td>
-                      <Chip color={getRoleChipColor(user)} variant="soft" sx={{ borderRadius: 999 }}>
+                      <Chip color={getRoleChipColor(user)} variant="soft" sx={{ borderRadius: radii.pill }}>
                         {user.isAdmin ? "Admin" : "Member"}
                       </Chip>
                     </td>
                     <td>
-                      <Chip color={getStatusChipColor(user)} variant="soft" sx={{ borderRadius: 999 }}>
+                      <Chip color={getStatusChipColor(user)} variant="soft" sx={{ borderRadius: radii.pill }}>
                         {user.status || "active"}
                       </Chip>
                     </td>
@@ -246,7 +210,7 @@ export function AdminUsersManagement() {
                             loading={isPending}
                             disabled={isPending || isSelfAdmin}
                             onClick={() => handleRoleChange(user, "member")}
-                            sx={{ borderRadius: 999 }}
+                            sx={{ borderRadius: radii.pill }}
                           >
                             Revoca admin
                           </Button>
@@ -258,13 +222,13 @@ export function AdminUsersManagement() {
                             loading={isPending}
                             disabled={isPending}
                             onClick={() => handleRoleChange(user, "admin")}
-                            sx={{ borderRadius: 999 }}
+                            sx={{ borderRadius: radii.pill }}
                           >
                             Rendi admin
                           </Button>
                         )}
                         {isSelfAdmin ? (
-                          <Chip variant="soft" color="neutral" sx={{ borderRadius: 999 }}>
+                          <Chip variant="soft" color="neutral" sx={{ borderRadius: radii.pill }}>
                             Account corrente
                           </Chip>
                         ) : null}
@@ -276,7 +240,7 @@ export function AdminUsersManagement() {
             </tbody>
           </Table>
         )}
-      </Sheet>
-    </main>
+      </PageSection>
+    </AdminPageShell>
   )
 }

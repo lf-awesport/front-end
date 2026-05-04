@@ -1,13 +1,17 @@
 "use client"
 
-import { useEffect, useState, Suspense } from "react"
+import { useEffect, useState } from "react"
+import { usePathname } from "next/navigation"
 import { signOut } from "firebase/auth"
 import { auth } from "@/utils/firebaseConfig"
 import { useAuth } from "@/utils/authContext"
 import Link from "next/link"
+import { Box, Button } from "@mui/joy"
+import { colors, radii } from "@/utils/designTokens"
 
 export default function ClientHeaderRight() {
   const [hasMounted, setHasMounted] = useState(false)
+  const pathname = usePathname()
   const { user, viewer, isAuthReady, isSessionLoading } = useAuth()
 
   useEffect(() => {
@@ -16,57 +20,65 @@ export default function ClientHeaderRight() {
 
   if (!hasMounted || !isAuthReady || (user && isSessionLoading)) return null
 
-  const buttonStyle = {
-    color: "#FFF",
-    fontFamily: "Inter",
-    fontWeight: 500,
-    fontSize: "14px",
-    cursor: "pointer",
-    background: "none",
-    border: "none",
-    padding: 0,
-    textDecoration: "underline"
-  }
-  return (
-    <Suspense fallback={null}>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          gap: "4px"
-        }}
-      >
-        <span
-          title={user ? "Online" : "Offline"}
-          style={{
-            backgroundColor: user ? "#28a745" : "#dc3545",
-            width: "14px",
-            height: "14px",
-            borderRadius: "50%",
-            border: "1px solid white",
-            display: "inline-block",
-            marginBottom: "4px"
-          }}
-        ></span>
+  const showLoginButton = !user && pathname !== "/login"
 
-        {user ? (
-          <>
-            {viewer?.isAdmin ? (
-              <Link href="/admin" style={buttonStyle}>
-                Admin
-              </Link>
-            ) : null}
-            <button onClick={() => signOut(auth)} style={buttonStyle}>
-              Logout
-            </button>
-          </>
-        ) : (
-          <Link href="/login" style={buttonStyle}>
-            Login
-          </Link>
-        )}
-      </div>
-    </Suspense>
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "flex-end",
+        gap: 1,
+        flexWrap: "wrap"
+      }}
+    >
+      {user && viewer?.isAdmin ? (
+        <Link href="/admin" style={{ textDecoration: "none" }}>
+          <Button
+            size="sm"
+            variant="soft"
+            sx={{
+              borderRadius: radii.pill,
+              bgcolor: "rgba(255,255,255,0.16)",
+              color: "#fff",
+              '&:hover': { bgcolor: "rgba(255,255,255,0.24)" }
+            }}
+          >
+            Area admin
+          </Button>
+        </Link>
+      ) : null}
+
+      {user ? (
+        <Button
+          size="sm"
+          variant="solid"
+          onClick={() => signOut(auth)}
+          sx={{
+            borderRadius: radii.pill,
+            bgcolor: "#fff",
+            color: colors.primary,
+            '&:hover': { bgcolor: "rgba(255,255,255,0.92)" }
+          }}
+        >
+          Esci
+        </Button>
+      ) : showLoginButton ? (
+        <Link href="/login" style={{ textDecoration: "none" }}>
+          <Button
+            size="sm"
+            variant="solid"
+            sx={{
+              borderRadius: radii.pill,
+              bgcolor: "#fff",
+              color: colors.primary,
+              '&:hover': { bgcolor: "rgba(255,255,255,0.92)" }
+            }}
+          >
+            Accedi
+          </Button>
+        </Link>
+      ) : null}
+    </Box>
   )
 }

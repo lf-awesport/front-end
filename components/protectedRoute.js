@@ -4,6 +4,9 @@
 import { useAuth } from "../utils/authContext"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
+import { Typography } from "@mui/joy"
+import { PageContainer, PageSection } from "@/components/pageShell"
+import { colors } from "@/utils/designTokens"
 
 const ProtectedRoute = ({ children, requireAdmin = false }) => {
   const {
@@ -62,41 +65,31 @@ const ProtectedRoute = ({ children, requireAdmin = false }) => {
 
   if (!viewer) {
     return (
-      <main
-        style={{
-          width: "min(720px, calc(100% - 32px))",
-          margin: "48px auto",
-          padding: "24px",
-          borderRadius: "24px",
-          background: "rgba(255,255,255,0.94)",
-          boxShadow: "0 18px 48px rgba(10, 47, 143, 0.1)"
-        }}
-      >
-        <p style={{ margin: 0, fontSize: "1rem", lineHeight: 1.6 }}>
-          {sessionError || "Sto verificando il tuo accesso..."}
-        </p>
-      </main>
+      <PageContainer width="min(720px, calc(100% - 32px))" padding="48px 0 0">
+        <PageSection mt={0}>
+          <Typography level="title-lg">Verifica accesso in corso</Typography>
+          <Typography sx={{ mt: 1.2, color: colors.inkMuted, lineHeight: 1.7 }}>
+            {sessionError || "Sto verificando la tua sessione per mostrarti i contenuti corretti."}
+          </Typography>
+        </PageSection>
+      </PageContainer>
     )
   }
 
   if (requireAdmin && !viewer.isAdmin) {
     return (
-      <main
-        style={{
-          width: "min(720px, calc(100% - 32px))",
-          margin: "48px auto",
-          padding: "24px",
-          borderRadius: "24px",
-          background: "rgba(255,255,255,0.94)",
-          boxShadow: "0 18px 48px rgba(10, 47, 143, 0.1)"
-        }}
-      >
-        <p style={{ margin: 0, fontSize: "1rem", lineHeight: 1.6 }}>
-          {hasRetriedAdminCheck
-            ? "Questa area e riservata agli admin autorizzati."
-            : "Sto verificando il tuo accesso admin..."}
-        </p>
-      </main>
+      <PageContainer width="min(720px, calc(100% - 32px))" padding="48px 0 0">
+        <PageSection mt={0}>
+          <Typography level="title-lg">
+            {hasRetriedAdminCheck ? "Area admin riservata" : "Verifica accesso admin in corso"}
+          </Typography>
+          <Typography sx={{ mt: 1.2, color: colors.inkMuted, lineHeight: 1.7 }}>
+            {hasRetriedAdminCheck
+              ? "Questa area e disponibile solo per gli account admin autorizzati. Se pensi sia un errore, contatta l'amministratore del workspace."
+              : "Sto verificando i tuoi permessi admin prima di mostrarti questa sezione."}
+          </Typography>
+        </PageSection>
+      </PageContainer>
     )
   }
 
