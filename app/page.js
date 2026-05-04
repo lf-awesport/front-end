@@ -14,8 +14,7 @@ import {
   CardContent,
   CardActions
 } from "@mui/joy"
-import { getCategoryDetails } from "@/utils/helpers"
-import { getPosts, getModulesFromFirestore } from "@/utils/api"
+import { getModulesFromFirestore } from "@/utils/api"
 import { useAuth } from "@/utils/authContext"
 import { AdminQuickLinks } from "@/components/adminQuickLinks"
 import Loading from "@/components/loading"
@@ -45,38 +44,22 @@ export default function PostsWrapper() {
 
 function PostsContent() {
   const { viewer } = useAuth()
-  const [data, setData] = useState(null)
   const [isLoading, setLoading] = useState(true)
   const [tabValue, setTabValue] = useState(0)
   const [modules, setModules] = useState([])
   const canViewAdmin = Boolean(viewer?.isAdmin)
-
-  const loadPosts = async () => {
-    setLoading(true)
-
-    try {
-      const res = await getPosts("daily", null)
-      setData(res.posts)
-    } catch (error) {
-      console.error(error)
-      setData([])
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  useEffect(() => {
-    loadPosts()
-  }, [])
 
   useEffect(() => {
     if (tabValue !== 0 || modules.length > 0) {
       return
     }
 
+    setLoading(true)
+
     getModulesFromFirestore(LESSON_SUBJECT)
       .then(setModules)
       .catch(console.error)
+      .finally(() => setLoading(false))
   }, [modules.length, tabValue])
 
   useEffect(() => {
@@ -85,7 +68,7 @@ function PostsContent() {
     }
   }, [canViewAdmin, tabValue])
 
-  if (isLoading || !data) return <Loading />
+  if (isLoading) return <Loading />
 
   return (
     <main
@@ -179,11 +162,7 @@ function PostsContent() {
                         style={{
                           width: "100%",
                           height: "100%",
-                            borderTopLeftRadius: "8px",
-                            borderTopRightRadius: "8px",
-                            borderBottomLeftRadius: "8px",
-                            borderBottomRightRadius: "8px",
-                            objectFit: "contain",
+                          borderRadius: "8px",
                           objectFit: "contain",
                           display: "block"
                         }}
